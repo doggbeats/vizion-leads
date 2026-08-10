@@ -1,0 +1,113 @@
+"use client";
+
+import Link from "next/link";
+import Image from "next/image";
+import { ShoppingCart, Eye } from "lucide-react";
+import type { Product } from "@/lib/types";
+import { getCategoryBySlug } from "@/lib/products";
+import { formatCurrency } from "@/lib/format";
+import { useCart } from "@/lib/cart";
+import { useToast } from "@/components/ui/toast";
+import { Badge } from "@/components/ui/Badge";
+
+type ProductCardProps = {
+  product: Product;
+};
+
+export function ProductCard({ product }: ProductCardProps) {
+  const { addItem } = useCart();
+  const { showToast } = useToast();
+
+  const category = getCategoryBySlug(product.category);
+  const hasPromotion =
+    product.promotionalPrice !== undefined &&
+    product.promotionalPrice < product.price;
+  const price = hasPromotion ? product.promotionalPrice! : product.price;
+  const soldOut = product.stock <= 0;
+  const lowStock = product.stock > 0 && product.stock <= 5;
+
+  const handleAddToCart = () => {
+    if (soldOut || product.sizes.length === 0) return;
+    addItem(product, product.sizes[0]);
+    showToast(`${product.name} adicionado ao carrinho`);
+  };
+
+  return (
+    <article className="group flex flex-col overflow-hidden rounded-2xl border border-graphite-border bg-graphite transition-all duration-300 hover:border-brand/60 hover:shadow-xl hover:shadow-black/40">
+      <Link
+        href={`/produto/${product.id}`}
+        className="relative block aspect-square overflow-hidden bg-graphite-light"
+        aria-label={product.name}
+      >
+        <Image
+          src={product.images[0]}
+          alt={product.name}
+          fill
+          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+          className="object-cover transition-transform duration-500 group-hover:scale-105"
+        />
+        {hasPromotion ? (
+          <Badge className="absolute left-3 top-3">Oferta</Badge>
+        ) : null}
+        {soldOut ? (
+          <span className="absolute right-3 top-3 rounded-full bg-ink/80 px-3 py-1 text-[11px] font-bold uppercase tracking-widest text-white backdrop-blur">
+            Esgotado
+          </span>
+        ) : null}
+      </Link>
+
+      <div className="flex flex-1 flex-col gap-1 p-4">
+        {category ? (
+          <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-neutral-500">
+            {category.name}
+          </p>
+        ) : null}
+        <h3 className="line-clamp-1 font-semibold text-white">
+          <Link
+            href={`/produto/${product.id}`}
+            className="transition-colors hover:text-brand"
+          >
+            {product.name}
+          </Link>
+        </h3>
+
+        <div className="mt-1 flex items-baseline gap-2">
+          <span className="text-lg font-bold text-brand">{formatCurrency(price)}</span>
+          {hasPromotion ? (
+            <span className="text-sm text-neutral-500 line-through">
+              {formatCurrency(product.price)}
+            </span>
+          ) : null}
+        </div>
+
+        <p
+          className={`mt-1 text-xs font-medium ${
+            soldOut ? "text-red-400" : lowStock ? "text-amber-400" : "text-neutral-500"
+          }`}
+        >
+          {soldOut ? "Sem estoque" : lowStock ? `Últimas unidades (${product.stock})` : "Em estoque"}
+        </p>
+
+        <div className="mt-4 flex gap-2">
+          <button
+            type="button"
+            onClick={handleAddToCart}
+            disabled={soldOut || product.sizes.length === 0}
+            aria-label={`Adicionar ${product.name} ao carrinho`}
+            className="flex h-10 flex-1 items-center justify-center gap-1.5 rounded-lg bg-graphite-light text-xs font-semibold uppercase tracking-wider text-white transition-all duration-300 hover:bg-brand hover:text-ink disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            <ShoppingCart size={15} />
+            Adicionar
+          </button>
+          <Link
+            href={`/produto/${product.id}`}
+            aria-label={`Ver ${product.name}`}
+            className="flex h-10 w-10 items-center justify-center rounded-lg border border-graphite-border text-neutral-400 transition-all duration-300 hover:border-brand hover:text-brand"
+          >
+            <Eye size={16} />
+          </Link>
+        </div>
+      </div>
+    </article>
+  );
+}

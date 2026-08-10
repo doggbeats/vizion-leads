@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" width="1600" height="900">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0a0a0a"/>
+      <stop offset="0.6" stop-color="#121212"/>
+      <stop offset="1" stop-color="#1d1d1d"/>
+    </linearGradient>
+    <linearGradient id="bar" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#b6ff00" stop-opacity="0.9"/>
+      <stop offset="1" stop-color="#b6ff00" stop-opacity="0.1"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.28" cy="0.5" r="0.45">
+      <stop offset="0" stop-color="#b6ff00" stop-opacity="0.14"/>
+      <stop offset="1" stop-color="#b6ff00" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1600" height="900" fill="url(#bg)"/>
+  <rect width="1600" height="900" fill="url(#glow)"/>
+  <rect x="1180" y="0" width="170" height="900" fill="url(#bar)" transform="skewX(-12)"/>
+  <circle cx="1420" cy="210" r="300" fill="none" stroke="#ffffff" stroke-opacity="0.05" stroke-width="2"/>
+  <circle cx="290" cy="740" r="210" fill="none" stroke="#ffffff" stroke-opacity="0.04" stroke-width="2"/>
+  <path d="M300 140 L780 760 L1260 140" fill="none" stroke="#ffffff" stroke-opacity="0.07" stroke-width="5"/>
+  <path d="M410 120 L800 760 L1190 120" fill="none" stroke="#b6ff00" stroke-opacity="0.06" stroke-width="2"/>
+  <g font-family="Arial, sans-serif" font-weight="900" fill="none" stroke="#b6ff00" stroke-opacity="0.28">
+    <text x="1150" y="790" font-size="640" text-anchor="middle">V</text>
+  </g>
+</svg>

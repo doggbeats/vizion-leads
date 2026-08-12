@@ -17,7 +17,7 @@ const heroContent = {
 
 export function Hero() {
   return (
-    <section className="relative flex min-h-[calc(100svh-5rem)] items-center overflow-hidden">
+    <section className="relative flex min-h-[calc(80svh-4rem)] items-center overflow-hidden lg:min-h-[calc(100svh-5rem)]">
       <Image
         src="/images/hero.svg"
         alt=""

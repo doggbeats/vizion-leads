@@ -6,8 +6,9 @@ export const siteConfig = {
   url: "https://vizionstore.com.br",
   whatsapp: "5561992890326",
   whatsappDisplay: "(61) 99289-0326",
-  instagram: "@vizionstore",
-  instagramUrl: "https://instagram.com/vizionstore",
+  instagram: "@vizionstore61",
+  instagramUrl: "https://instagram.com/vizionstore61",
   email: "contato@vizionstore.com.br",
-  address: "",
+  address: "VIZIONSTORE61",
+  mapsUrl: "https://www.google.com/maps/place/VIZIONSTORE61/@-15.8072998,-48.1484108,14z/data=!4m10!1m2!2m1!1sLOJA+VIZION!3m6!1s0x935bcd58d4777b2d:0x17ecf04a7e4dc647!8m2!3d-15.8067287!4d-48.1303421!15sCgtMT0pBIFZJWklPTpIBDmNsb3RoaW5nX3N0b3Jl4AEA!16s%2Fg%2F11z5b620hb?entry=ttu&g_ep=EgoyMDI2MDgwOS4wIKXMDSoASAFQAw%3D%3D",
 };

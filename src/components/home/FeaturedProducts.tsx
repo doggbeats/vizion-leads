@@ -1,13 +1,18 @@
+
+import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import { getFeaturedProducts } from "@/lib/products";
 import { Container } from "@/components/ui/Container";
 import { SectionHeading } from "@/components/ui/SectionHeading";
-import { ProductGrid } from "@/components/products/ProductGrid";
+
+const promoImages = [
+  { src: "/images/products/promo1.png", alt: "Promo 1" },
+  { src: "/images/products/promo%202.png", alt: "Promo 2" },
+  { src: "/images/products/promo3.png", alt: "Promo 3" },
+  { src: "/images/products/promo%204.png", alt: "Promo 4" },
+];
 
 export function FeaturedProducts() {
-  const products = getFeaturedProducts();
-
   return (
     <section className="border-t border-graphite-border bg-graphite py-20 sm:py-24">
       <Container>
@@ -25,8 +30,21 @@ export function FeaturedProducts() {
             <ArrowRight size={16} className="transition-transform duration-300 group-hover:translate-x-1" />
           </Link>
         </div>
-        <div className="mt-12">
-          <ProductGrid products={products} />
+        <div className="mt-12 grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-4">
+          {promoImages.map((image) => (
+            <div
+              key={image.src}
+              className="relative aspect-[2/3] overflow-hidden rounded-2xl border border-graphite-border bg-graphite-light"
+            >
+              <Image
+                src={image.src}
+                alt={image.alt}
+                fill
+                sizes="(max-width: 640px) 50vw, (max-width: 1024px) 25vw, 25vw"
+                className="object-cover transition-transform duration-500 hover:scale-105"
+              />
+            </div>
+          ))}
         </div>
       </Container>
     </section>

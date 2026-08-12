@@ -2,9 +2,12 @@ import type { Metadata } from "next";
 import { Bebas_Neue, Inter } from "next/font/google";
 import { siteConfig } from "@/lib/site";
 import { CartProvider } from "@/lib/cart";
+import { SessionProvider } from "@/lib/session";
 import { ToastProvider } from "@/components/ui/toast";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
+import { VLibras } from "@/components/accessibility/VLibras";
+import { AccessibilityWidget } from "@/components/accessibility/AccessibilityWidget";
 import "./globals.css";
 
 const bebas = Bebas_Neue({
@@ -50,11 +53,20 @@ export default function RootLayout({
   return (
     <html lang="pt-BR" className={`${bebas.variable} ${inter.variable}`}>
       <body className="min-h-screen flex flex-col">
+        <a href="#main-content" className="skip-link">
+          Pular para o conteúdo principal
+        </a>
         <CartProvider>
           <ToastProvider>
-            <Navbar />
-            <main className="flex-1">{children}</main>
-            <Footer />
+            <SessionProvider>
+              <Navbar />
+              <main id="main-content" className="flex-1">
+                {children}
+              </main>
+              <Footer />
+              <AccessibilityWidget />
+              <VLibras />
+            </SessionProvider>
           </ToastProvider>
         </CartProvider>
       </body>

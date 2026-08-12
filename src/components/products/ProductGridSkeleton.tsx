@@ -3,7 +3,7 @@ import { Skeleton } from "@/components/ui/Skeleton";
 export function ProductGridSkeleton({ count = 8 }: { count?: number }) {
   return (
     <div
-      className="grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-3 xl:grid-cols-4"
+      className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-5"
       aria-hidden="true"
     >
       {Array.from({ length: count }).map((_, index) => (

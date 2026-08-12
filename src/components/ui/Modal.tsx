@@ -7,10 +7,11 @@ type ModalProps = {
   open: boolean;
   onClose: () => void;
   title?: string;
+  className?: string;
   children: ReactNode;
 };
 
-export function Modal({ open, onClose, title, children }: ModalProps) {
+export function Modal({ open, onClose, title, className = "", children }: ModalProps) {
   useEffect(() => {
     if (!open) return;
     const onKeyDown = (event: KeyboardEvent) => {
@@ -35,7 +36,7 @@ export function Modal({ open, onClose, title, children }: ModalProps) {
       aria-label={title ?? "Janela"}
     >
       <div
-        className="animate-fade-up relative w-full max-w-lg rounded-2xl border border-graphite-border bg-graphite p-6 shadow-2xl"
+        className={`animate-fade-up relative max-h-[90vh] w-full overflow-y-auto rounded-2xl border border-graphite-border bg-graphite p-5 shadow-2xl ${className}`}
         onClick={(event) => event.stopPropagation()}
       >
         <div className="mb-4 flex items-center justify-between">

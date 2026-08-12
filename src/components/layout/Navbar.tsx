@@ -2,22 +2,41 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { ChevronDown, Menu, ShoppingBag, X } from "lucide-react";
-import { categories } from "@/lib/products";
+import { ChevronDown, LogOut, Menu, ShieldCheck, ShoppingBag, UserPlus, UserRound, X } from "lucide-react";
+import { categories } from "@/lib/catalog";
 import { useCart } from "@/lib/cart";
+import { useSession } from "@/lib/session";
 
 const navLinks = [
-  { label: "Início", href: "/" },
+  { label: "Inicio", href: "/" },
   { label: "Produtos", href: "/produtos" },
   { label: "Contato", href: "/contato" },
   { label: "Sobre", href: "/sobre" },
 ];
 
+const categoryOrder = [
+  "bermudas",
+  "calcas",
+  "camisetas",
+  "meias",
+  "cuecas",
+  "acessorios",
+  "agasalhos",
+  "regatas",
+];
+
+const navbarCategories = categoryOrder
+  .map((slug) => categories.find((category) => category.slug === slug))
+  .filter((category) => category !== undefined);
+
 export function Navbar() {
+  const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
   const [productsOpen, setProductsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const { user, refresh } = useSession();
   const { count } = useCart();
 
   useEffect(() => {
@@ -26,6 +45,12 @@ export function Navbar() {
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
+  async function handleLogout() {
+    await fetch("/api/logout", { method: "POST" });
+    refresh();
+    router.refresh();
+  }
 
   useEffect(() => {
     document.body.style.overflow = menuOpen ? "hidden" : "";
@@ -76,11 +101,11 @@ export function Navbar() {
                     >
                       Todos os produtos
                     </Link>
-                    {categories.map((category) => (
+                    {navbarCategories.map((category) => (
                       <Link
                         key={category.slug}
                         href={`/produtos/${category.slug}`}
-                        className="block rounded-lg px-4 py-2.5 text-sm text-neutral-300 transition-colors hover:bg-graphite-light hover:text-brand"
+                        className="block rounded-lg px-4 py-2.5 text-sm text-white transition-colors hover:bg-graphite-light hover:text-brand"
                       >
                         {category.name}
                       </Link>
@@ -102,6 +127,49 @@ export function Navbar() {
         </ul>
 
         <div className="flex items-center gap-2 sm:gap-3">
+        <div className="flex items-center gap-4">
+          {user ? (
+            <>
+              {user.role === "ADMIN" ? (
+                <Link
+                  href="/admin"
+                  className="flex items-center gap-2 text-sm font-semibold text-[#B6FF00] hover:text-white"
+                >
+                  <ShieldCheck size={18} />
+                  <span className="hidden sm:inline">Painel Admin</span>
+                </Link>
+              ) : null}
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="flex items-center gap-2 text-white hover:text-[#B6FF00]"
+              >
+                <LogOut size={18} />
+                <span className="hidden sm:inline">Sair</span>
+              </button>
+            </>
+          ) : (
+            <>
+              <Link
+                href="/login"
+                aria-label="Login"
+                className="flex items-center gap-2 text-white hover:text-[#B6FF00]"
+              >
+                <UserRound size={18} />
+                <span className="hidden lg:inline">Login</span>
+              </Link>
+
+              <Link
+                href="/cadastro"
+                aria-label="Cadastre-se"
+                className="flex items-center gap-2 text-white hover:text-[#B6FF00]"
+              >
+                <UserPlus size={18} />
+                <span className="hidden lg:inline">Cadastre-se</span>
+              </Link>
+            </>
+          )}
+        </div>
           <Link
             href="/carrinho"
             aria-label={`Carrinho, ${count} ${count === 1 ? "item" : "itens"}`}
@@ -159,12 +227,12 @@ export function Navbar() {
                           Todos os produtos
                         </Link>
                       </li>
-                      {categories.map((category) => (
+                      {navbarCategories.map((category) => (
                         <li key={category.slug}>
                           <Link
                             href={`/produtos/${category.slug}`}
                             onClick={() => setMenuOpen(false)}
-                            className="block rounded-lg px-3 py-2.5 text-sm text-neutral-300 transition-colors hover:bg-graphite-light hover:text-brand"
+                            className="block rounded-lg px-3 py-2.5 text-sm text-white transition-colors hover:bg-graphite-light hover:text-brand"
                           >
                             {category.name}
                           </Link>

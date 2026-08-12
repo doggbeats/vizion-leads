@@ -10,6 +10,7 @@
   --color-graphite: #161616;
   --color-graphite-light: #1f1f1f;
   --color-graphite-border: #2a2a2a;
+  --color-ice: #f0f5f9;
 
   --animate-fade-up: fade-up 0.5s ease-out both;
   --animate-fade-in: fade-in 0.4s ease-out both;
@@ -59,4 +60,59 @@ body {
 
 .no-scrollbar::-webkit-scrollbar {
   display: none;
+}
+
+html.a11y-font-m2 {
+  font-size: 87.5%;
+}
+
+html.a11y-font-m1 {
+  font-size: 93.75%;
+}
+
+html.a11y-font-1 {
+  font-size: 106.25%;
+}
+
+html.a11y-font-2 {
+  font-size: 112.5%;
+}
+
+html.a11y-high-contrast {
+  filter: contrast(1.35) saturate(1.15);
+}
+
+html.a11y-high-contrast img {
+  filter: contrast(1.1);
+}
+
+html.a11y-monochrome {
+  filter: grayscale(1);
+}
+
+html.a11y-highlight-links a {
+  text-decoration: underline !important;
+}
+
+html.a11y-highlight-links a:focus,
+html.a11y-highlight-links a:focus-visible {
+  outline: 3px solid var(--color-brand);
+  outline-offset: 2px;
+}
+
+.skip-link {
+  position: fixed;
+  top: -100%;
+  left: 1rem;
+  z-index: 100;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  background-color: var(--color-brand);
+  color: var(--color-ink);
+  font-weight: 600;
+  transition: top 0.15s ease-out;
+}
+
+.skip-link:focus {
+  top: 1rem;
 }

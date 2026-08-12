@@ -1,11 +1,17 @@
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight } from "lucide-react";
-import { categories } from "@/lib/products";
+import { categories } from "@/lib/catalog";
+import { getProducts } from "@/lib/products";
 import { Container } from "@/components/ui/Container";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 
-export function Categories() {
+export async function Categories() {
+  const products = await getProducts();
+  const activeSlugs = new Set(products.map((product) => product.category));
+  const activeCategories = categories.filter((category) =>
+    activeSlugs.has(category.slug),
+  );
   return (
     <section id="categorias" className="scroll-mt-20 bg-ink py-20 sm:py-24">
       <Container>
@@ -16,7 +22,7 @@ export function Categories() {
           align="center"
         />
         <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          {categories.map((category) => (
+          {activeCategories.map((category) => (
             <Link
               key={category.slug}
               href={`/produtos/${category.slug}`}

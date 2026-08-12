@@ -1,14 +1,17 @@
 "use client";
 
-import Link from "next/link";
+import { useState } from "react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { ShoppingCart, Eye } from "lucide-react";
 import type { Product } from "@/lib/types";
-import { getCategoryBySlug } from "@/lib/products";
+import { getCategoryBySlug } from "@/lib/catalog";
 import { formatCurrency } from "@/lib/format";
 import { useCart } from "@/lib/cart";
+import { useSession } from "@/lib/session";
 import { useToast } from "@/components/ui/toast";
 import { Badge } from "@/components/ui/Badge";
+import { QuickViewModal } from "./QuickViewModal";
 
 type ProductCardProps = {
   product: Product;
@@ -16,7 +19,10 @@ type ProductCardProps = {
 
 export function ProductCard({ product }: ProductCardProps) {
   const { addItem } = useCart();
+  const { user } = useSession();
   const { showToast } = useToast();
+  const router = useRouter();
+  const [quickViewOpen, setQuickViewOpen] = useState(false);
 
   const category = getCategoryBySlug(product.category);
   const hasPromotion =
@@ -26,18 +32,36 @@ export function ProductCard({ product }: ProductCardProps) {
   const soldOut = product.stock <= 0;
   const lowStock = product.stock > 0 && product.stock <= 5;
 
-  const handleAddToCart = () => {
+  const handleAddToCart = async () => {
     if (soldOut || product.sizes.length === 0) return;
+
+    let loggedUser = user;
+    if (!loggedUser) {
+      const response = await fetch("/api/auth/me");
+      const data = await response.json().catch(() => ({}));
+      loggedUser = data.user ?? null;
+    }
+
+    if (!loggedUser) {
+      const redirect = encodeURIComponent(
+        window.location.pathname + window.location.search,
+      );
+      showToast("Faça login ou cadastre-se para comprar");
+      router.push(`/login?redirect=${redirect}`);
+      return;
+    }
+
     addItem(product, product.sizes[0]);
     showToast(`${product.name} adicionado ao carrinho`);
   };
 
   return (
     <article className="group flex flex-col overflow-hidden rounded-2xl border border-graphite-border bg-graphite transition-all duration-300 hover:border-brand/60 hover:shadow-xl hover:shadow-black/40">
-      <Link
-        href={`/produto/${product.id}`}
-        className="relative block aspect-square overflow-hidden bg-graphite-light"
-        aria-label={product.name}
+      <button
+        type="button"
+        onClick={() => setQuickViewOpen(true)}
+        className="relative block aspect-square w-full overflow-hidden bg-graphite-light"
+        aria-label={`Ampliar foto de ${product.name}`}
       >
         <Image
           src={product.images[0]}
@@ -54,21 +78,21 @@ export function ProductCard({ product }: ProductCardProps) {
             Esgotado
           </span>
         ) : null}
-      </Link>
+        <span className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+          <span className="rounded-full bg-brand px-4 py-2 text-xs font-bold uppercase tracking-wider text-ink">
+            Ampliar foto
+          </span>
+        </span>
+      </button>
 
-      <div className="flex flex-1 flex-col gap-1 p-4">
+      <div className="flex flex-1 flex-col gap-1 p-3">
         {category ? (
           <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-neutral-500">
             {category.name}
           </p>
         ) : null}
         <h3 className="line-clamp-1 font-semibold text-white">
-          <Link
-            href={`/produto/${product.id}`}
-            className="transition-colors hover:text-brand"
-          >
-            {product.name}
-          </Link>
+          {product.name}
         </h3>
 
         <div className="mt-1 flex items-baseline gap-2">
@@ -99,15 +123,22 @@ export function ProductCard({ product }: ProductCardProps) {
             <ShoppingCart size={15} />
             Adicionar
           </button>
-          <Link
-            href={`/produto/${product.id}`}
+          <button
+            type="button"
+            onClick={() => setQuickViewOpen(true)}
             aria-label={`Ver ${product.name}`}
             className="flex h-10 w-10 items-center justify-center rounded-lg border border-graphite-border text-neutral-400 transition-all duration-300 hover:border-brand hover:text-brand"
           >
             <Eye size={16} />
-          </Link>
+          </button>
         </div>
       </div>
+
+      <QuickViewModal
+        product={product}
+        open={quickViewOpen}
+        onClose={() => setQuickViewOpen(false)}
+      />
     </article>
   );
 }

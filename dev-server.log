@@ -8740,3 +8740,218 @@ Unknown argument `userId`. Did you mean `user`? Available options are marked wit
 ⨯ The requested resource isn't a valid image for /images/products/camiseta3.jpg received null
  GET /carrinho 200 in 53ms (next.js: 18ms, application-code: 35ms)
  GET /carrinho 200 in 47ms (next.js: 9ms, application-code: 38ms)
+Erro ao criar pedido: Error [PrismaClientValidationError]: 
+Invalid `prisma.order.create()` invocation:
+
+{
+  data: {
+    userId: "cmsqj4qo40005jgv0zreo7k84",
+    ~~~~~~
+    customerName: "João gomes",
+    customerPhone: "61895623124578",
+    customerEmail: "jotagomes@gmail.com",
+    status: "PENDENTE",
+    cep: "72241-803",
+    documento: "02681545110",
+    documentoTipo: "CPF",
+    total: 559.6,
+    items: {
+      create: [
+        {
+          productId: "camiseta-street-capsule",
+          productName: "Camiseta Street Capsule",
+          price: 119.9,
+          quantity: 3,
+          size: "P"
+        },
+        {
+          productId: "jeans-regular-fit",
+          productName: "Jeans Regular Fit",
+          price: 199.9,
+          quantity: 1,
+          size: "38"
+        }
+      ]
+    },
+?   id?: String,
+?   notes?: String | Null,
+?   createdAt?: DateTime,
+?   updatedAt?: DateTime,
+?   user?: UserCreateNestedOneWithoutOrdersInput
+  },
+  include: {
+    items: true
+  }
+}
+
+Unknown argument `userId`. Did you mean `user`? Available options are marked with ?.
+    at async eval (src\app\api\orders\route.ts:133:23)
+    at async POST (src\app\api\orders\route.ts:132:19)
+  131 |   try {
+  132 |     const order = await db.$transaction(async (tx) => {
+> 133 |       const created = await tx.order.create({
+      |                       ^
+  134 |         data: {
+  135 |           userId: session.userId,
+  136 |           customerName, {
+  clientVersion: '7.9.1'
+}
+ POST /api/orders 500 in 1531ms (next.js: 4ms, application-code: 1526ms)
+ GET /carrinho 200 in 31ms (next.js: 7ms, application-code: 24ms)
+ GET /carrinho 200 in 146ms (next.js: 10ms, application-code: 136ms)
+[browser] Received `true` for a non-boolean attribute `vw-access-button`.
+
+If you want to write it to the DOM, pass a string instead: vw-access-button="true" or vw-access-button={value.toString()}. 
+[browser] Received `true` for a non-boolean attribute `vw-plugin-wrapper`.
+
+If you want to write it to the DOM, pass a string instead: vw-plugin-wrapper="true" or vw-plugin-wrapper={value.toString()}. 
+ GET /api/auth/me 200 in 2.5s (next.js: 6ms, application-code: 2.5s)
+ GET /api/auth/me 200 in 260ms (next.js: 5ms, application-code: 255ms)
+ GET / 200 in 336ms (next.js: 8ms, application-code: 328ms)
+[browser] Detected `scroll-behavior: smooth` on the `<html>` element. To disable smooth scrolling during route transitions, add `data-scroll-behavior="smooth"` to your <html> element. Learn more: https://nextjs.org/docs/messages/missing-data-scroll-behavior
+ GET /images/products/promo1.png 404 in 260ms (next.js: 30ms, application-code: 230ms)
+⨯ The requested resource isn't a valid image for /images/products/promo1.png received null
+ GET /images/products/promo%202.png 404 in 259ms (next.js: 58ms, application-code: 201ms)
+⨯ The requested resource isn't a valid image for /images/products/promo%202.png received null
+ GET /images/products/promo3.png 404 in 229ms (next.js: 22ms, application-code: 208ms)
+⨯ The requested resource isn't a valid image for /images/products/promo3.png received null
+ GET /images/products/promo%204.png 404 in 231ms (next.js: 74ms, application-code: 157ms)
+⨯ The requested resource isn't a valid image for /images/products/promo%204.png received null
+Error: The requested resource isn't a valid image.
+    at ignore-listed frames {
+  statusCode: 400
+}
+Error: The requested resource isn't a valid image.
+    at ignore-listed frames {
+  statusCode: 400
+}
+Error: The requested resource isn't a valid image.
+    at ignore-listed frames {
+  statusCode: 400
+}
+Error: The requested resource isn't a valid image.
+    at ignore-listed frames {
+  statusCode: 400
+}
+ GET /produtos/bermudas 200 in 1711ms (next.js: 8ms, generate-params: 10ms, application-code: 1693ms)
+ GET /produtos/calcas 200 in 280ms (next.js: 7ms, generate-params: 0.0ms, application-code: 273ms)
+ GET /produtos/bermudas 200 in 268ms (next.js: 7ms, generate-params: 0.0ms, application-code: 261ms)
+ GET /produtos/meias 200 in 264ms (next.js: 9ms, generate-params: 0.0ms, application-code: 255ms)
+ GET /produtos/cuecas 200 in 286ms (next.js: 10ms, generate-params: 0.0ms, application-code: 276ms)
+ GET /produtos/acessorios 200 in 255ms (next.js: 9ms, generate-params: 0.0ms, application-code: 246ms)
+ GET /produtos/agasalhos 200 in 255ms (next.js: 7ms, generate-params: 0.0ms, application-code: 247ms)
+ GET /produtos/regatas 200 in 269ms (next.js: 7ms, generate-params: 0.0ms, application-code: 262ms)
+ GET /produtos/calcas 200 in 250ms (next.js: 7ms, generate-params: 0.0ms, application-code: 243ms)
+ GET /carrinho 200 in 35ms (next.js: 6ms, application-code: 28ms)
+ GET /produtos 200 in 1834ms (next.js: 22ms, application-code: 1812ms)
+ GET /images/products/oversize.jpg 404 in 833ms (next.js: 51ms, application-code: 782ms)
+⨯ The requested resource isn't a valid image for /images/products/oversize.jpg received null
+ GET /images/products/camiseta3.jpg 404 in 832ms (next.js: 62ms, application-code: 770ms)
+⨯ The requested resource isn't a valid image for /images/products/camiseta3.jpg received null
+ GET /images/products/camisetaf.jpg 404 in 831ms (next.js: 73ms, application-code: 757ms)
+⨯ The requested resource isn't a valid image for /images/products/camisetaf.jpg received null
+ GET /images/products/camisetas%201.jpg 404 in 923ms (next.js: 235ms, application-code: 688ms)
+⨯ The requested resource isn't a valid image for /images/products/camisetas%201.jpg received null
+ GET /images/products/boss1.jpg 404 in 1010ms (next.js: 519ms, application-code: 491ms)
+⨯ The requested resource isn't a valid image for /images/products/boss1.jpg received null
+ GET /images/products/oversizep1.jpg 404 in 1010ms (next.js: 528ms, application-code: 481ms)
+⨯ The requested resource isn't a valid image for /images/products/oversizep1.jpg received null
+ GET /images/products/camiseta4.jpg 404 in 575ms (next.js: 328ms, application-code: 247ms)
+⨯ The requested resource isn't a valid image for /images/products/camiseta4.jpg received null
+ GET /images/products/camisetas2.jpg 404 in 449ms (next.js: 220ms, application-code: 229ms)
+⨯ The requested resource isn't a valid image for /images/products/camisetas2.jpg received null
+ GET /images/products/oversizeroxo.jpg 404 in 147ms (next.js: 26ms, application-code: 121ms)
+⨯ The requested resource isn't a valid image for /images/products/oversizeroxo.jpg received null
+Error: The requested resource isn't a valid image.
+    at ignore-listed frames {
+  statusCode: 400
+}
+Error: The requested resource isn't a valid image.
+    at ignore-listed frames {
+  statusCode: 400
+}
+Error: The requested resource isn't a valid image.
+    at ignore-listed frames {
+  statusCode: 400
+}
+Error: The requested resource isn't a valid image.
+    at ignore-listed frames {
+  statusCode: 400
+}
+Error: The requested resource isn't a valid image.
+    at ignore-listed frames {
+  statusCode: 400
+}
+Error: The requested resource isn't a valid image.
+    at ignore-listed frames {
+  statusCode: 400
+}
+ GET /images/products/camiseta3.jpg 404 in 254ms (next.js: 26ms, application-code: 228ms)
+⨯ The requested resource isn't a valid image for /images/products/camiseta3.jpg received null
+ GET /images/products/camiseta4.jpg 404 in 251ms (next.js: 34ms, application-code: 217ms)
+⨯ The requested resource isn't a valid image for /images/products/camiseta4.jpg received null
+Error: The requested resource isn't a valid image.
+    at ignore-listed frames {
+  statusCode: 400
+}
+Error: The requested resource isn't a valid image.
+    at ignore-listed frames {
+  statusCode: 400
+}
+Error: The requested resource isn't a valid image.
+    at ignore-listed frames {
+  statusCode: 400
+}
+ GET /carrinho 200 in 36ms (next.js: 8ms, application-code: 28ms)
+ GET /images/products/camiseta3.jpg 404 in 104ms (next.js: 14ms, application-code: 90ms)
+⨯ The requested resource isn't a valid image for /images/products/camiseta3.jpg received null
+Erro ao criar pedido: Error [PrismaClientValidationError]: 
+Invalid `prisma.order.create()` invocation:
+
+{
+  data: {
+    userId: "cmsqj4qo40005jgv0zreo7k84",
+    ~~~~~~
+    customerName: "João gomes",
+    customerPhone: "61895623124578",
+    customerEmail: "jotagomes@gmail.com",
+    status: "PENDENTE",
+    cep: "72241-803",
+    documento: "02681545110",
+    documentoTipo: "CPF",
+    total: 119.9,
+    items: {
+      create: [
+        {
+          productId: "camiseta-street-capsule",
+          productName: "Camiseta Street Capsule",
+          price: 119.9,
+          quantity: 1,
+          size: "P"
+        }
+      ]
+    },
+?   id?: String,
+?   notes?: String | Null,
+?   createdAt?: DateTime,
+?   updatedAt?: DateTime,
+?   user?: UserCreateNestedOneWithoutOrdersInput
+  },
+  include: {
+    items: true
+  }
+}
+
+Unknown argument `userId`. Did you mean `user`? Available options are marked with ?.
+    at async eval (src\app\api\orders\route.ts:133:23)
+    at async POST (src\app\api\orders\route.ts:132:19)
+  131 |   try {
+  132 |     const order = await db.$transaction(async (tx) => {
+> 133 |       const created = await tx.order.create({
+      |                       ^
+  134 |         data: {
+  135 |           userId: session.userId,
+  136 |           customerName, {
+  clientVersion: '7.9.1'
+}
+ POST /api/orders 500 in 2.0s (next.js: 7ms, application-code: 2.0s)

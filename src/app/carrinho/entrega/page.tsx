@@ -1,13 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import {
   ArrowLeft,
   ArrowRight,
-  CheckCircle2,
   MapPin,
   ShoppingBag,
 } from "lucide-react";
@@ -20,6 +19,7 @@ import { formatCurrency, formatCep } from "@/lib/format";
 import {
   clearCheckoutData,
   loadCheckoutData,
+  savePaymentData,
   type CheckoutData,
 } from "@/lib/checkout";
 
@@ -71,7 +71,8 @@ export default function EntregaPage() {
 
   const [carregando, setCarregando] = useState(false);
   const [erro, setErro] = useState("");
-  const [pedidoId, setPedidoId] = useState<string | null>(null);
+
+  const pedidoFinalizado = useRef(false);
 
   useEffect(() => {
     const data = loadCheckoutData();
@@ -82,11 +83,21 @@ export default function EntregaPage() {
   }, []);
 
   useEffect(() => {
+    if (checkout?.frete?.cep && !cep) {
+      setCep(formatCep(checkout.frete.cep));
+    }
+  }, [checkout, cep]);
+
+  useEffect(() => {
     if (!ready || !loaded) return;
+    if (pedidoFinalizado.current) return;
     if (items.length === 0 || !checkout) {
       router.replace("/carrinho");
     }
   }, [ready, loaded, items.length, checkout, router]);
+
+  const freteValor = checkout?.frete?.valor ?? 0;
+  const totalComFrete = subtotal + freteValor;
 
   async function handleConfirm(event: React.FormEvent) {
     event.preventDefault();
@@ -128,6 +139,7 @@ export default function EntregaPage() {
           estado,
           documentoTipo: checkout.documentoTipo,
           documento: checkout.documento,
+          frete: checkout.frete?.valor ?? 0,
           items: items.map((item) => ({
             productId: item.product.id,
             productName: item.product.name,
@@ -141,11 +153,31 @@ export default function EntregaPage() {
       const data = await response.json();
 
       if (response.ok) {
+        pedidoFinalizado.current = true;
+        savePaymentData({
+          orderId: data.order.id,
+          total: data.order.total,
+          frete: data.order.frete ?? 0,
+          items: data.order.items.map(
+            (item: { productName: string; price: number; quantity: number; size: string }) => ({
+              productName: item.productName,
+              price: item.price,
+              quantity: item.quantity,
+              size: item.size,
+            }),
+          ),
+        });
         clear();
         clearCheckoutData();
-        setPedidoId(data.order.id);
-        showToast("Pedido finalizado com sucesso!");
+        showToast("Pedido finalizado! Escolha a forma de pagamento.");
+        router.push(`/carrinho/pagamento?pedido=${data.order.id}`);
       } else {
+        if (response.status === 401) {
+          router.push(
+            `/login?redirect=${encodeURIComponent("/carrinho/entrega")}`,
+          );
+          return;
+        }
         setErro(data.error ?? "Erro ao finalizar o pedido.");
         showToast(data.error ?? "Erro ao finalizar o pedido.", "error");
       }
@@ -155,57 +187,6 @@ export default function EntregaPage() {
     } finally {
       setCarregando(false);
     }
-  }
-
-  if (pedidoId) {
-    const enderecoCompleto = [
-      endereco,
-      numero ? `Nº ${numero}` : "",
-      complemento,
-    ]
-      .filter(Boolean)
-      .join(", ");
-
-    return (
-      <section className="bg-ink py-16 sm:py-24">
-        <Container>
-          <div className="mx-auto max-w-lg rounded-2xl border border-graphite-border bg-graphite p-8 text-center sm:p-12">
-            <CheckCircle2 size={56} className="mx-auto text-brand" />
-            <h1 className="mt-6 font-display text-4xl tracking-wide text-white sm:text-5xl">
-              Pedido confirmado!
-            </h1>
-            <p className="mt-4 text-sm leading-relaxed text-neutral-400">
-              Obrigado pela compra. Seu pedido{" "}
-              <span className="font-semibold text-brand">#{pedidoId}</span> foi
-              registrado e você será contatado para a confirmação e entrega.
-            </p>
-            <div className="mt-6 rounded-xl border border-graphite-border bg-graphite-light p-5 text-left">
-              <p className="text-xs font-bold uppercase tracking-[0.3em] text-neutral-500">
-                Endereço de entrega
-              </p>
-              {enderecoCompleto ? (
-                <p className="mt-2 text-sm text-white">{enderecoCompleto}</p>
-              ) : null}
-              <p className="mt-1 text-sm text-neutral-400">
-                {bairro ? `${bairro}, ` : ""}
-                {cidade ? `${cidade} - ` : ""}
-                {estado ? `${estado}, ` : ""}
-                CEP {cep}
-              </p>
-            </div>
-            <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
-              <Link
-                href="/produtos"
-                className="inline-flex items-center justify-center gap-2 rounded-lg bg-brand px-6 py-3 text-sm font-bold uppercase tracking-wider text-ink transition-colors hover:bg-brand-dark"
-              >
-                Continuar comprando
-                <ArrowRight size={16} />
-              </Link>
-            </div>
-          </div>
-        </Container>
-      </section>
-    );
   }
 
   return (
@@ -259,16 +240,27 @@ export default function EntregaPage() {
                   </h2>
                 </div>
 
-                <Input
-                  label="CEP"
-                  inputMode="numeric"
-                  autoComplete="postal-code"
-                  value={cep}
-                  onChange={(e) => setCep(formatCep(e.target.value))}
-                  placeholder="00000-000"
-                  maxLength={9}
-                  required
-                />
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <Input
+                    label="CEP"
+                    inputMode="numeric"
+                    autoComplete="postal-code"
+                    value={cep}
+                    onChange={(e) => setCep(formatCep(e.target.value))}
+                    placeholder="00000-000"
+                    maxLength={9}
+                    required
+                  />
+                  <Input
+                    label="Número"
+                    inputMode="numeric"
+                    autoComplete="address-level2"
+                    value={numero}
+                    onChange={(e) => setNumero(e.target.value)}
+                    placeholder="Ex.: 123"
+                    required
+                  />
+                </div>
 
                 <Input
                   label="Endereço"
@@ -281,30 +273,20 @@ export default function EntregaPage() {
 
                 <div className="grid gap-4 sm:grid-cols-2">
                   <Input
-                    label="Número"
-                    inputMode="numeric"
-                    autoComplete="address-level2"
-                    value={numero}
-                    onChange={(e) => setNumero(e.target.value)}
-                    placeholder="Ex.: 123"
-                    required
-                  />
-                  <Input
                     label="Complemento"
                     value={complemento}
                     onChange={(e) => setComplemento(e.target.value)}
-                    placeholder="Apto, bloco, casa... (opcional)"
+                    placeholder="Apto, bloco... (opcional)"
+                  />
+                  <Input
+                    label="Bairro"
+                    autoComplete="address-level2"
+                    value={bairro}
+                    onChange={(e) => setBairro(e.target.value)}
+                    placeholder="Seu bairro"
+                    required
                   />
                 </div>
-
-                <Input
-                  label="Bairro"
-                  autoComplete="address-level2"
-                  value={bairro}
-                  onChange={(e) => setBairro(e.target.value)}
-                  placeholder="Seu bairro"
-                  required
-                />
 
                 <div className="grid gap-4 sm:grid-cols-2">
                   <Input
@@ -405,12 +387,18 @@ export default function EntregaPage() {
                 </div>
                 <div className="flex items-center justify-between">
                   <dt className="text-neutral-400">Frete</dt>
-                  <dd className="text-neutral-500">Calculado na entrega</dd>
+                  {checkout?.frete ? (
+                    <dd className="text-neutral-300">
+                      {formatCurrency(freteValor)}
+                    </dd>
+                  ) : (
+                    <dd className="text-neutral-500">Calculado na entrega</dd>
+                  )}
                 </div>
                 <div className="flex items-center justify-between border-t border-graphite-border pt-3">
                   <dt className="font-semibold text-white">Total</dt>
                   <dd className="text-xl font-bold text-brand">
-                    {formatCurrency(subtotal)}
+                    {formatCurrency(totalComFrete)}
                   </dd>
                 </div>
               </dl>

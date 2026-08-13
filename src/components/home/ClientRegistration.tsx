@@ -2,9 +2,11 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useSession } from "@/lib/session";
 
 export function ClientRegistration({ redirect }: { redirect?: string }) {
   const router = useRouter();
+  const { refresh } = useSession();
   const [form, setForm] = useState({
     nome: "",
     email: "",
@@ -42,7 +44,10 @@ export function ClientRegistration({ redirect }: { redirect?: string }) {
           senha: "",
         });
         setTimeout(
-          () => router.push(redirect && redirect.startsWith("/") ? redirect : "/"),
+          () => {
+            refresh();
+            router.push(redirect && redirect.startsWith("/") ? redirect : "/");
+          },
           1200,
         );
       } else {

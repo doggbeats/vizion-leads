@@ -52,6 +52,10 @@ model Product {
   images           String[]
   sizes            String[]
   stock            Int         @default(0)
+  weight           Float       @default(0.5)
+  width            Float       @default(30)
+  height           Float       @default(5)
+  length           Float       @default(30)
   featured         Boolean     @default(false)
   active           Boolean     @default(true)
   createdAt        DateTime    @default(now())
@@ -76,6 +80,7 @@ model Order {
   estado        String?
   documento     String?
   documentoTipo String?
+  frete         Float       @default(0)
   total         Float
   notes         String?
   createdAt     DateTime    @default(now())

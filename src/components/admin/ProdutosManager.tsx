@@ -2,7 +2,7 @@
 
 import { useState, type FormEvent } from "react";
 import Image from "next/image";
-import { Plus, Pencil, Trash2, Star } from "lucide-react";
+import { Plus, Pencil, Trash2, Star, ImagePlus } from "lucide-react";
 import { Modal } from "@/components/ui/Modal";
 import { formatCurrency } from "@/lib/format";
 
@@ -17,6 +17,10 @@ export type AdminProduct = {
   images: string[];
   sizes: string[];
   stock: number;
+  weight: number;
+  width: number;
+  height: number;
+  length: number;
   featured: boolean;
   active: boolean;
 };
@@ -34,6 +38,10 @@ type FormState = {
   images: string;
   sizes: string;
   stock: string;
+  weight: string;
+  width: string;
+  height: string;
+  length: string;
   featured: boolean;
   active: boolean;
 };
@@ -49,6 +57,10 @@ const emptyForm: FormState = {
   images: "",
   sizes: "",
   stock: "0",
+  weight: "0.5",
+  width: "30",
+  height: "5",
+  length: "30",
   featured: false,
   active: true,
 };
@@ -66,6 +78,8 @@ export function ProdutosManager({
   const [salvando, setSalvando] = useState(false);
   const [erro, setErro] = useState("");
   const [busyId, setBusyId] = useState<string | null>(null);
+  const [enviandoImagem, setEnviandoImagem] = useState(false);
+  const [erroImagem, setErroImagem] = useState("");
 
   function openNew() {
     setForm({ ...emptyForm, categorySlug: categories[0]?.slug ?? "" });
@@ -86,6 +100,10 @@ export function ProdutosManager({
       images: product.images.join(", "),
       sizes: product.sizes.join(", "),
       stock: String(product.stock),
+      weight: String(product.weight),
+      width: String(product.width),
+      height: String(product.height),
+      length: String(product.length),
       featured: product.featured,
       active: product.active,
     });
@@ -108,6 +126,10 @@ export function ProdutosManager({
       images: form.images,
       sizes: form.sizes,
       stock: form.stock,
+      weight: form.weight,
+      width: form.width,
+      height: form.height,
+      length: form.length,
       featured: form.featured,
       active: form.active,
     };
@@ -146,6 +168,52 @@ export function ProdutosManager({
     } finally {
       setSalvando(false);
     }
+  }
+
+  function formImageUrls(): string[] {
+    return form.images
+      .split(",")
+      .map((url) => url.trim())
+      .filter(Boolean);
+  }
+
+  function setFormImages(urls: string[]) {
+    setForm({ ...form, images: urls.join(", ") });
+  }
+
+  function removerImagem(url: string) {
+    setFormImages(formImageUrls().filter((item) => item !== url));
+  }
+
+  async function enviarImagens(files: File[]) {
+    if (files.length === 0) return;
+    setEnviandoImagem(true);
+    setErroImagem("");
+
+    const novasUrls: string[] = [];
+    for (const file of files) {
+      const formData = new FormData();
+      formData.append("file", file);
+      try {
+        const response = await fetch("/api/admin/upload", {
+          method: "POST",
+          body: formData,
+        });
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) {
+          setErroImagem(data.error ?? "Falha ao enviar imagem.");
+          continue;
+        }
+        novasUrls.push(data.url);
+      } catch {
+        setErroImagem("Erro de conexão ao enviar a imagem.");
+      }
+    }
+
+    if (novasUrls.length > 0) {
+      setFormImages([...formImageUrls(), ...novasUrls]);
+    }
+    setEnviandoImagem(false);
   }
 
   async function toggleAtivo(product: AdminProduct) {
@@ -493,6 +561,61 @@ export function ProdutosManager({
             </div>
           </div>
 
+          <div className="grid gap-4 sm:grid-cols-4">
+            <div>
+              <label className="mb-1.5 block text-sm font-medium text-neutral-300">
+                Peso (kg)
+              </label>
+              <input
+                value={form.weight}
+                onChange={(e) => setForm({ ...form, weight: e.target.value })}
+                type="number"
+                step="0.01"
+                min={0}
+                className={inputClass}
+              />
+            </div>
+            <div>
+              <label className="mb-1.5 block text-sm font-medium text-neutral-300">
+                Altura (cm)
+              </label>
+              <input
+                value={form.height}
+                onChange={(e) => setForm({ ...form, height: e.target.value })}
+                type="number"
+                step="0.1"
+                min={0}
+                className={inputClass}
+              />
+            </div>
+            <div>
+              <label className="mb-1.5 block text-sm font-medium text-neutral-300">
+                Largura (cm)
+              </label>
+              <input
+                value={form.width}
+                onChange={(e) => setForm({ ...form, width: e.target.value })}
+                type="number"
+                step="0.1"
+                min={0}
+                className={inputClass}
+              />
+            </div>
+            <div>
+              <label className="mb-1.5 block text-sm font-medium text-neutral-300">
+                Comprimento (cm)
+              </label>
+              <input
+                value={form.length}
+                onChange={(e) => setForm({ ...form, length: e.target.value })}
+                type="number"
+                step="0.1"
+                min={0}
+                className={inputClass}
+              />
+            </div>
+          </div>
+
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
               <label className="mb-1.5 block text-sm font-medium text-neutral-300">
@@ -530,13 +653,64 @@ export function ProdutosManager({
 
           <div>
             <label className="mb-1.5 block text-sm font-medium text-neutral-300">
-              Imagens (URLs separadas por vírgula)
+              Imagens
+            </label>
+
+            <div className="flex flex-wrap gap-3">
+              {formImageUrls().map((url) => (
+                <div key={url} className="relative">
+                  <Image
+                    src={url}
+                    alt=""
+                    width={80}
+                    height={80}
+                    className="h-20 w-20 rounded-lg border border-graphite-border bg-graphite object-cover"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => removerImagem(url)}
+                    aria-label={`Remover imagem ${url}`}
+                    className="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-white transition-colors hover:bg-red-600"
+                  >
+                    <Trash2 size={12} />
+                  </button>
+                </div>
+              ))}
+            </div>
+
+            <label className="mt-3 flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-graphite-border bg-graphite px-4 py-6 text-sm text-neutral-400 transition-colors hover:border-brand hover:text-brand">
+              <ImagePlus size={20} />
+              {enviandoImagem ? "Enviando imagens..." : "Clique para anexar imagens"}
+              <input
+                type="file"
+                accept="image/jpeg,image/png,image/webp,image/gif,image/avif"
+                multiple
+                disabled={enviandoImagem}
+                onChange={(e) => {
+                  const files = Array.from(e.target.files ?? []);
+                  e.target.value = "";
+                  enviarImagens(files);
+                }}
+                className="hidden"
+              />
+            </label>
+
+            {erroImagem ? (
+              <p className="mt-2 text-sm text-red-400">{erroImagem}</p>
+            ) : null}
+
+            <p className="mt-2 text-xs text-neutral-500">
+              JPG, PNG, WEBP, GIF ou AVIF — até 5 MB por imagem.
+            </p>
+
+            <label className="mt-3 block text-xs font-medium text-neutral-500">
+              Ou cole URLs (separadas por vírgula)
             </label>
             <input
               value={form.images}
               onChange={(e) => setForm({ ...form, images: e.target.value })}
-              placeholder="/images/products/camisetaf.jpg, /images/products/camisetac.jpg"
-              className={inputClass}
+              placeholder="/images/products/camisetaf.jpg"
+              className={`${inputClass} mt-1`}
               required
             />
           </div>

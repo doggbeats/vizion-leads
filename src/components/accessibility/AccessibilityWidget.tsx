@@ -7,6 +7,7 @@ import {
   Link2,
   Minus,
   Mountain,
+  MousePointerClick,
   Plus,
   RotateCcw,
   Volume2,
@@ -24,12 +25,85 @@ const STORAGE_KEY = "vizion-a11y";
 interface A11yState {
   fontLevel: number;
   options: A11yOption[];
+  readOnHover: boolean;
 }
 
 const DEFAULT_STATE: A11yState = {
   fontLevel: 0,
   options: [],
+  readOnHover: false,
 };
+
+const READABLE_TAGS = new Set([
+  "a",
+  "button",
+  "h1",
+  "h2",
+  "h3",
+  "h4",
+  "h5",
+  "h6",
+  "p",
+  "label",
+  "li",
+  "dt",
+  "dd",
+  "summary",
+  "figcaption",
+  "blockquote",
+  "th",
+  "td",
+]);
+
+function getHoverText(element: Element): string {
+  if (element.closest('[aria-hidden="true"]')) return "";
+  if (element.closest("[hidden]")) return "";
+
+  const tag = element.tagName.toLowerCase();
+  if (tag === "svg" || tag === "script" || tag === "style" || tag === "noscript") {
+    return "";
+  }
+
+  const label = element.getAttribute("aria-label");
+  if (label?.trim()) return label.trim();
+
+  if (tag === "img") {
+    const alt = (element as HTMLImageElement).alt?.trim();
+    return alt ? `Imagem: ${alt}` : "Imagem";
+  }
+
+  if (tag === "input" || tag === "select" || tag === "textarea") {
+    const input = element as
+      | HTMLInputElement
+      | HTMLSelectElement
+      | HTMLTextAreaElement;
+    const wrapperLabel = element.closest("label")?.textContent
+      ?.replace(/\s+/g, " ")
+      .trim();
+    const placeholder = input.getAttribute("placeholder");
+    const fallback =
+      wrapperLabel ||
+      placeholder ||
+      (tag === "input"
+        ? (input as HTMLInputElement).type
+        : tag === "select"
+          ? "seletor"
+          : "área de texto");
+    return `Campo: ${fallback}`;
+  }
+
+  if (!READABLE_TAGS.has(tag)) {
+    const parent = element.closest(
+      "a, button, h1, h2, h3, h4, h5, h6, p, label, li, dt, dd, summary, figcaption, [aria-label]",
+    );
+    if (parent && parent !== element) return getHoverText(parent);
+    return "";
+  }
+
+  const text = element.textContent?.replace(/\s+/g, " ").trim();
+  if (!text) return "";
+  return text.slice(0, 200);
+}
 
 function loadState(): A11yState {
   if (typeof window === "undefined") return DEFAULT_STATE;
@@ -40,6 +114,7 @@ function loadState(): A11yState {
     return {
       fontLevel: Math.max(-2, Math.min(2, parsed.fontLevel ?? 0)),
       options: Array.isArray(parsed.options) ? parsed.options : [],
+      readOnHover: parsed.readOnHover === true,
     };
   } catch {
     return DEFAULT_STATE;
@@ -108,6 +183,47 @@ export function AccessibilityWidget() {
     };
   }, []);
 
+  useEffect(() => {
+    if (!state.readOnHover) return;
+    if (!window.speechSynthesis) return;
+
+    let timer: number | undefined;
+    let lastSpoken: Element | null = null;
+
+    const speak = (element: Element) => {
+      if (element === lastSpoken) return;
+      const text = getHoverText(element);
+      if (!text) return;
+      lastSpoken = element;
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = "pt-BR";
+      utterance.rate = 1;
+      utterance.pitch = 1;
+      const voices = window.speechSynthesis.getVoices();
+      const ptVoice = voices.find((voice) =>
+        voice.lang.toLowerCase().startsWith("pt"),
+      );
+      if (ptVoice) utterance.voice = ptVoice;
+      window.speechSynthesis.speak(utterance);
+    };
+
+    const onMouseOver = (event: MouseEvent) => {
+      const target = event.target;
+      if (!(target instanceof Element)) return;
+      if (target.closest("[data-a11y-widget]")) return;
+      if (timer) window.clearTimeout(timer);
+      timer = window.setTimeout(() => speak(target), 350);
+    };
+
+    document.addEventListener("mouseover", onMouseOver, true);
+    return () => {
+      if (timer) window.clearTimeout(timer);
+      document.removeEventListener("mouseover", onMouseOver, true);
+      window.speechSynthesis.cancel();
+    };
+  }, [state.readOnHover]);
+
   function collectVisibleText(): string {
     const parts: string[] = [];
     const walker = document.createTreeWalker(
@@ -147,6 +263,10 @@ export function AccessibilityWidget() {
 
   function readPage() {
     if (!window.speechSynthesis) return;
+
+    if (state.readOnHover) {
+      setState((prev) => ({ ...prev, readOnHover: false }));
+    }
 
     if (reading) {
       window.speechSynthesis.cancel();
@@ -192,6 +312,15 @@ export function AccessibilityWidget() {
     speakNext();
   }
 
+  function toggleReadOnHover() {
+    const next = !state.readOnHover;
+    if (next) {
+      setReading(false);
+      window.speechSynthesis?.cancel();
+    }
+    setState((prev) => ({ ...prev, readOnHover: next }));
+  }
+
   function changeFont(step: number) {
     setState((prev) => ({
       ...prev,
@@ -221,6 +350,7 @@ export function AccessibilityWidget() {
         aria-controls="a11y-panel"
         aria-label={open ? "Fechar painel de acessibilidade" : "Abrir painel de acessibilidade"}
         title="Acessibilidade"
+        data-a11y-widget
         className="fixed bottom-4 right-4 z-[60] flex h-12 w-12 items-center justify-center rounded-full bg-brand text-ink shadow-lg shadow-black/40 transition-transform hover:scale-105"
       >
         {open ? <X size={22} /> : <Accessibility size={22} />}
@@ -231,6 +361,7 @@ export function AccessibilityWidget() {
           id="a11y-panel"
           role="dialog"
           aria-label="Opções de acessibilidade"
+          data-a11y-widget
           className="fixed bottom-20 right-4 z-[60] w-72 rounded-2xl border border-graphite-border bg-graphite p-4 shadow-xl shadow-black/50"
         >
           <div className="grid grid-cols-2 gap-2">
@@ -277,6 +408,22 @@ export function AccessibilityWidget() {
           >
             {reading ? <VolumeX size={16} /> : <Volume2 size={16} />}
             {reading ? "Parar leitura" : "Ouvir a página"}
+          </button>
+
+          <button
+            type="button"
+            onClick={toggleReadOnHover}
+            aria-pressed={state.readOnHover}
+            className={`mt-3 flex w-full items-center justify-center gap-2 rounded-lg border py-2.5 text-sm font-medium transition-colors ${
+              state.readOnHover
+                ? "border-brand bg-brand/10 text-brand"
+                : "border-graphite-border text-neutral-300 hover:border-brand hover:text-brand"
+            }`}
+          >
+            <MousePointerClick size={16} />
+            {state.readOnHover
+              ? "Parar leitura ao passar o mouse"
+              : "Ler ao passar o mouse"}
           </button>
 
           <button

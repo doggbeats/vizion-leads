@@ -1,9 +1,18 @@
+export type FreteData = {
+  cep: string;
+  valor: number;
+  prazo: number;
+  servico: string;
+  transportadora: string;
+};
+
 export type CheckoutData = {
   customerName: string;
   customerPhone: string;
   customerEmail: string;
   documentoTipo: "CPF" | "CNPJ";
   documento: string;
+  frete?: FreteData | null;
 };
 
 const STORAGE_KEY = "vizion-checkout";
@@ -29,6 +38,48 @@ export function loadCheckoutData(): CheckoutData | null {
 export function clearCheckoutData(): void {
   try {
     window.sessionStorage.removeItem(STORAGE_KEY);
+  } catch {
+    // armazenamento indisponível
+  }
+}
+
+export type PaymentItem = {
+  productName: string;
+  price: number;
+  quantity: number;
+  size: string;
+};
+
+export type PaymentData = {
+  orderId: string;
+  total: number;
+  frete: number;
+  items: PaymentItem[];
+};
+
+const PAYMENT_STORAGE_KEY = "vizion-payment";
+
+export function savePaymentData(data: PaymentData): void {
+  try {
+    window.sessionStorage.setItem(PAYMENT_STORAGE_KEY, JSON.stringify(data));
+  } catch {
+    // armazenamento indisponível
+  }
+}
+
+export function loadPaymentData(): PaymentData | null {
+  try {
+    const raw = window.sessionStorage.getItem(PAYMENT_STORAGE_KEY);
+    if (!raw) return null;
+    return JSON.parse(raw) as PaymentData;
+  } catch {
+    return null;
+  }
+}
+
+export function clearPaymentData(): void {
+  try {
+    window.sessionStorage.removeItem(PAYMENT_STORAGE_KEY);
   } catch {
     // armazenamento indisponível
   }

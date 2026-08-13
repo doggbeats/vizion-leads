@@ -3,9 +3,11 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { useSession } from "@/lib/session";
 
 export default function LoginPage() {
   const router = useRouter();
+  const { refresh } = useSession();
   const [redirect, setRedirect] = useState<string | null>(null);
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
@@ -35,6 +37,7 @@ export default function LoginPage() {
       const data = await response.json();
 
       if (response.ok) {
+        await refresh();
         if (data.user?.role === "ADMIN") {
           router.push("/admin");
         } else {

@@ -31,6 +31,7 @@ export type AdminOrder = {
   estado: string | null;
   documento: string | null;
   documentoTipo: string | null;
+  frete: number;
   total: number;
   notes: string | null;
   createdAt: string;
@@ -835,6 +836,25 @@ export function PedidosManager({
               </p>
             ) : null}
 
+            <div className="space-y-1.5 border-t border-graphite-border pt-4 text-sm">
+              <div className="flex items-center justify-between">
+                <span className="text-neutral-400">Subtotal</span>
+                <span className="text-neutral-300">
+                  {formatCurrency(
+                    viewOrder.items.reduce(
+                      (sum, item) => sum + item.price * item.quantity,
+                      0,
+                    ),
+                  )}
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-neutral-400">Frete</span>
+                <span className="text-neutral-300">
+                  {formatCurrency(viewOrder.frete)}
+                </span>
+              </div>
+            </div>
             <div className="flex items-center justify-between border-t border-graphite-border pt-4">
               <span className="text-sm text-neutral-400">Total</span>
               <span className="text-xl font-bold text-brand">

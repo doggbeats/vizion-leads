@@ -87,6 +87,18 @@ export async function PATCH(request: Request, { params }: RouteProps) {
     const stock = Number(body.stock);
     data.stock = Number.isFinite(stock) ? Math.max(0, Math.round(stock)) : 0;
   }
+  for (const field of ["weight", "width", "height", "length"] as const) {
+    if (body[field] !== undefined) {
+      const value = parseFloatSafe(body[field]);
+      if (value === undefined || value === null || value < 0) {
+        return NextResponse.json(
+          { error: `Valor inválido para ${field}.` },
+          { status: 400 },
+        );
+      }
+      data[field] = value;
+    }
+  }
   if (typeof body.featured === "boolean") data.featured = body.featured;
   if (typeof body.active === "boolean") data.active = body.active;
 

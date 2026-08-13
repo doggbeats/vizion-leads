@@ -29,6 +29,10 @@ export default async function AdminProdutosPage() {
     images: product.images,
     sizes: product.sizes,
     stock: product.stock,
+    weight: product.weight,
+    width: product.width,
+    height: product.height,
+    length: product.length,
     featured: product.featured,
     active: product.active,
   }));

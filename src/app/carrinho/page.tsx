@@ -6,10 +6,12 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import {
   ArrowRight,
+  Loader2,
   Minus,
   Plus,
   ShoppingBag,
   Trash2,
+  Truck,
 } from "lucide-react";
 import { Container } from "@/components/ui/Container";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -17,9 +19,17 @@ import { Input } from "@/components/ui/Input";
 import { useCart } from "@/lib/cart";
 import { useSession } from "@/lib/session";
 import { useToast } from "@/components/ui/toast";
-import { formatCurrency } from "@/lib/format";
+import { formatCurrency, formatCep } from "@/lib/format";
 import { saveCheckoutData } from "@/lib/checkout";
 import type { ProductSize } from "@/lib/types";
+
+type FreteOption = {
+  id: number;
+  name: string;
+  price: number;
+  deliveryTime: number;
+  company: string;
+};
 
 function formatDocumento(value: string, tipo: "CPF" | "CNPJ"): string {
   const digits = value.replace(/\D/g, "").slice(0, tipo === "CNPJ" ? 14 : 11);
@@ -38,7 +48,7 @@ function formatDocumento(value: string, tipo: "CPF" | "CNPJ"): string {
 
 export default function CartPage() {
   const { items, count, subtotal, updateQuantity, removeItem, clear } = useCart();
-  const { user } = useSession();
+  const { user, loading } = useSession();
   const { showToast } = useToast();
   const router = useRouter();
 
@@ -48,6 +58,48 @@ export default function CartPage() {
   const [documentoTipo, setDocumentoTipo] = useState<"CPF" | "CNPJ">("CPF");
   const [documento, setDocumento] = useState("");
   const [erro, setErro] = useState("");
+
+  const [freteCep, setFreteCep] = useState("");
+  const [freteOptions, setFreteOptions] = useState<FreteOption[]>([]);
+  const [freteSelecionado, setFreteSelecionado] = useState<FreteOption | null>(null);
+  const [freteCepConsultado, setFreteCepConsultado] = useState("");
+  const [calculandoFrete, setCalculandoFrete] = useState(false);
+  const [freteErro, setFreteErro] = useState("");
+
+  async function calcularFrete() {
+    const cep = freteCep.replace(/\D/g, "");
+    if (cep.length !== 8) {
+      setFreteErro("Digite um CEP válido.");
+      return;
+    }
+    setCalculandoFrete(true);
+    setFreteErro("");
+    try {
+      const response = await fetch("/api/frete", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          cep,
+          items: items.map((item) => ({
+            productId: item.product.id,
+            quantity: item.quantity,
+          })),
+        }),
+      });
+      const data = await response.json();
+      if (response.ok && data.options?.length) {
+        setFreteOptions(data.options);
+        setFreteSelecionado(data.options[0]);
+        setFreteCepConsultado(cep);
+      } else {
+        setFreteErro(data.error ?? "Não foi possível calcular o frete.");
+      }
+    } catch {
+      setFreteErro("Erro de conexão ao calcular o frete.");
+    } finally {
+      setCalculandoFrete(false);
+    }
+  }
 
   function handleCheckout(event: React.FormEvent) {
     event.preventDefault();
@@ -64,10 +116,27 @@ export default function CartPage() {
       customerEmail: email,
       documentoTipo,
       documento,
+      frete: freteSelecionado
+        ? {
+            cep: freteCepConsultado,
+            valor: freteSelecionado.price,
+            prazo: freteSelecionado.deliveryTime,
+            servico: freteSelecionado.name,
+            transportadora: freteSelecionado.company,
+          }
+        : null,
     });
+
+    if (loading) return;
+    if (!user) {
+      router.push(`/login?redirect=${encodeURIComponent("/carrinho/entrega")}`);
+      return;
+    }
 
     router.push("/carrinho/entrega");
   }
+
+  const totalComFrete = subtotal + (freteSelecionado?.price ?? 0);
 
   return (
     <section className="bg-ink py-16 sm:py-20">
@@ -261,15 +330,97 @@ export default function CartPage() {
                 </div>
                 <div className="flex items-center justify-between">
                   <dt className="text-neutral-400">Frete</dt>
-                  <dd className="text-neutral-500">Calculado na entrega</dd>
+                  {freteSelecionado ? (
+                    <dd className="text-neutral-300">
+                      {formatCurrency(freteSelecionado.price)}
+                    </dd>
+                  ) : (
+                    <dd className="text-neutral-500">Calcular abaixo</dd>
+                  )}
                 </div>
                 <div className="flex items-center justify-between border-t border-graphite-border pt-3">
                   <dt className="font-semibold text-white">Total</dt>
                   <dd className="text-xl font-bold text-brand">
-                    {formatCurrency(subtotal)}
+                    {formatCurrency(totalComFrete)}
                   </dd>
                 </div>
               </dl>
+
+              <div className="mt-6 rounded-2xl border border-graphite-border bg-graphite-light p-4">
+                <div className="flex items-center gap-2">
+                  <Truck size={18} className="text-brand" />
+                  <h3 className="text-sm font-bold uppercase tracking-widest text-brand">
+                    Calcular frete
+                  </h3>
+                </div>
+                <div className="mt-3 flex gap-2">
+                  <Input
+                    label="CEP para entrega"
+                    inputMode="numeric"
+                    value={freteCep}
+                    onChange={(e) => setFreteCep(formatCep(e.target.value))}
+                    placeholder="00000-000"
+                    maxLength={9}
+                    className="py-2.5"
+                  />
+                  <div className="flex items-end">
+                    <button
+                      type="button"
+                      onClick={calcularFrete}
+                      disabled={calculandoFrete}
+                      className="flex h-11 items-center justify-center gap-2 rounded-lg bg-brand px-4 text-xs font-bold uppercase tracking-wider text-ink transition-colors hover:bg-brand-dark disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      {calculandoFrete ? (
+                        <Loader2 size={16} className="animate-spin" />
+                      ) : (
+                        "Calcular"
+                      )}
+                    </button>
+                  </div>
+                </div>
+
+                {freteErro ? (
+                  <p role="alert" className="mt-2 text-xs text-red-400">
+                    {freteErro}
+                  </p>
+                ) : null}
+
+                {freteOptions.length > 0 ? (
+                  <div className="mt-3 space-y-2">
+                    {freteOptions.map((option) => {
+                      const ativo = freteSelecionado?.id === option.id;
+                      return (
+                        <button
+                          key={option.id}
+                          type="button"
+                          onClick={() => setFreteSelecionado(option)}
+                          aria-pressed={ativo}
+                          className={`flex w-full items-center justify-between gap-3 rounded-lg border p-3 text-left transition-colors ${
+                            ativo
+                              ? "border-brand bg-brand/10"
+                              : "border-graphite-border bg-graphite hover:border-neutral-600"
+                          }`}
+                        >
+                          <span className="min-w-0">
+                            <span className="block text-sm font-semibold text-white">
+                              {option.name}
+                            </span>
+                            <span className="block text-xs text-neutral-400">
+                              {option.company}
+                              {option.deliveryTime > 0
+                                ? ` · até ${option.deliveryTime} dias úteis`
+                                : ""}
+                            </span>
+                          </span>
+                          <span className="shrink-0 text-sm font-bold text-brand">
+                            {formatCurrency(option.price)}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                ) : null}
+              </div>
 
               <form onSubmit={handleCheckout} className="mt-6 space-y-6">
                 <div className="space-y-4">

@@ -141,6 +141,12 @@ export async function POST(request: Request) {
     0,
   );
 
+  const frete =
+    typeof body?.frete === "number" && Number.isFinite(body.frete)
+      ? Math.min(Math.max(0, body.frete), 10000)
+      : 0;
+  const totalComFrete = total + frete;
+
   try {
     const order = await db.$transaction(async (tx) => {
       const created = await tx.order.create({
@@ -159,7 +165,8 @@ export async function POST(request: Request) {
           estado: estado || null,
           documento: documentoDigits,
           documentoTipo,
-          total,
+          frete,
+          total: totalComFrete,
           items: {
             create: computedItems.map(
               ({ productId, productName, price, quantity, size }) => ({

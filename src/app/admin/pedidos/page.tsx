@@ -47,6 +47,7 @@ export default async function AdminPedidosPage() {
     estado: order.estado,
     documento: order.documento,
     documentoTipo: order.documentoTipo,
+    frete: order.frete,
     total: order.total,
     notes: order.notes,
     createdAt: order.createdAt.toISOString(),
@@ -79,6 +80,10 @@ export default async function AdminPedidosPage() {
     images: product.images,
     sizes: product.sizes,
     stock: product.stock,
+    weight: product.weight,
+    width: product.width,
+    height: product.height,
+    length: product.length,
     featured: product.featured,
     active: product.active,
   }));

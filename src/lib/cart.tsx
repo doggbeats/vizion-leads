@@ -15,6 +15,7 @@ type CartContextValue = {
   items: CartItem[];
   count: number;
   subtotal: number;
+  loaded: boolean;
   addItem: (product: Product, size: ProductSize, quantity?: number) => void;
   removeItem: (productId: string, size: ProductSize) => void;
   updateQuantity: (productId: string, size: ProductSize, quantity: number) => void;
@@ -27,17 +28,23 @@ const STORAGE_KEY = "vizion-cart";
 
 export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
+  const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
     try {
       const raw = window.localStorage.getItem(STORAGE_KEY);
       if (raw) {
         const stored = JSON.parse(raw) as CartItem[];
-        window.setTimeout(() => setItems(stored), 0);
+        window.setTimeout(() => {
+          setItems(stored);
+          setLoaded(true);
+        }, 0);
+        return;
       }
     } catch {
       // storage indisponível ou dado corrompido
     }
+    window.setTimeout(() => setLoaded(true), 0);
   }, []);
 
   useEffect(() => {
@@ -113,12 +120,13 @@ export function CartProvider({ children }: { children: ReactNode }) {
       items,
       count,
       subtotal,
+      loaded,
       addItem,
       removeItem,
       updateQuantity,
       clear,
     }),
-    [items, count, subtotal, addItem, removeItem, updateQuantity, clear],
+    [items, count, subtotal, loaded, addItem, removeItem, updateQuantity, clear],
   );
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;

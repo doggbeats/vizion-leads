@@ -27,6 +27,12 @@ export async function POST(request: Request) {
   const customerEmail =
     typeof body?.customerEmail === "string" ? body.customerEmail.trim() : "";
   const cep = typeof body?.cep === "string" ? body.cep.trim() : "";
+  const endereco = typeof body?.endereco === "string" ? body.endereco.trim() : "";
+  const numero = typeof body?.numero === "string" ? body.numero.trim() : "";
+  const complemento = typeof body?.complemento === "string" ? body.complemento.trim() : "";
+  const bairro = typeof body?.bairro === "string" ? body.bairro.trim() : "";
+  const cidade = typeof body?.cidade === "string" ? body.cidade.trim() : "";
+  const estado = typeof body?.estado === "string" ? body.estado.trim() : "";
   const documento = typeof body?.documento === "string" ? body.documento.trim() : "";
   const documentoTipo = body?.documentoTipo === "CNPJ" ? "CNPJ" : "CPF";
   const documentoDigits = documento.replace(/\D/g, "");
@@ -67,6 +73,13 @@ export async function POST(request: Request) {
   if (cep.replace(/\D/g, "").length !== 8) {
     return NextResponse.json(
       { error: "Informe um CEP válido." },
+      { status: 400 },
+    );
+  }
+
+  if (!endereco || !numero || !bairro || !cidade || !estado) {
+    return NextResponse.json(
+      { error: "Informe o endereço completo para a entrega." },
       { status: 400 },
     );
   }
@@ -138,6 +151,12 @@ export async function POST(request: Request) {
           customerEmail: customerEmail || null,
           status: "PENDENTE",
           cep,
+          endereco: endereco || null,
+          numero: numero || null,
+          complemento: complemento || null,
+          bairro: bairro || null,
+          cidade: cidade || null,
+          estado: estado || null,
           documento: documentoDigits,
           documentoTipo,
           total,

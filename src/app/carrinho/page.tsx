@@ -2,10 +2,10 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 import {
   ArrowRight,
-  CheckCircle2,
   Minus,
   Plus,
   ShoppingBag,
@@ -18,14 +18,8 @@ import { useCart } from "@/lib/cart";
 import { useSession } from "@/lib/session";
 import { useToast } from "@/components/ui/toast";
 import { formatCurrency } from "@/lib/format";
+import { saveCheckoutData } from "@/lib/checkout";
 import type { ProductSize } from "@/lib/types";
-
-function formatCep(value: string): string {
-  return value
-    .replace(/\D/g, "")
-    .slice(0, 8)
-    .replace(/^(\d{5})(\d)/, "$1-$2");
-}
 
 function formatDocumento(value: string, tipo: "CPF" | "CNPJ"): string {
   const digits = value.replace(/\D/g, "").slice(0, tipo === "CNPJ" ? 14 : 11);
@@ -46,108 +40,33 @@ export default function CartPage() {
   const { items, count, subtotal, updateQuantity, removeItem, clear } = useCart();
   const { user } = useSession();
   const { showToast } = useToast();
+  const router = useRouter();
 
   const [nome, setNome] = useState(user?.nome ?? "");
   const [telefone, setTelefone] = useState(user?.telefone ?? "");
   const [email, setEmail] = useState(user?.email ?? "");
-  const [cep, setCep] = useState("");
   const [documentoTipo, setDocumentoTipo] = useState<"CPF" | "CNPJ">("CPF");
   const [documento, setDocumento] = useState("");
-  const [carregando, setCarregando] = useState(false);
-  const [pedidoId, setPedidoId] = useState<string | null>(null);
   const [erro, setErro] = useState("");
 
-  async function handleCheckout(event: React.FormEvent) {
+  function handleCheckout(event: React.FormEvent) {
     event.preventDefault();
-    setCarregando(true);
     setErro("");
-
-    if (cep.replace(/\D/g, "").length !== 8) {
-      setErro("Digite um CEP válido.");
-      setCarregando(false);
-      return;
-    }
 
     if (documento.replace(/\D/g, "").length !== (documentoTipo === "CNPJ" ? 14 : 11)) {
       setErro(`Digite um ${documentoTipo} válido para a nota fiscal.`);
-      setCarregando(false);
       return;
     }
 
-    try {
-      const response = await fetch("/api/orders", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          customerName: nome,
-          customerPhone: telefone,
-          customerEmail: email,
-          cep,
-          documentoTipo,
-          documento,
-          items: items.map((item) => ({
-            productId: item.product.id,
-            productName: item.product.name,
-            price: item.product.promotionalPrice ?? item.product.price,
-            quantity: item.quantity,
-            size: item.size,
-          })),
-        }),
-      });
+    saveCheckoutData({
+      customerName: nome,
+      customerPhone: telefone,
+      customerEmail: email,
+      documentoTipo,
+      documento,
+    });
 
-      const data = await response.json();
-
-      if (response.ok) {
-        clear();
-        setPedidoId(data.order.id);
-        showToast("Pedido finalizado com sucesso!");
-      } else {
-        setErro(data.error ?? "Erro ao finalizar o pedido.");
-        showToast(data.error ?? "Erro ao finalizar o pedido.", "error");
-      }
-    } catch {
-      setErro("Erro de conexão. Tente novamente.");
-      showToast("Erro de conexão. Tente novamente.", "error");
-    } finally {
-      setCarregando(false);
-    }
-  }
-
-  if (pedidoId) {
-    return (
-      <section className="bg-ink py-16 sm:py-24">
-        <Container>
-          <div className="mx-auto max-w-lg rounded-2xl border border-graphite-border bg-graphite p-8 text-center sm:p-12">
-            <CheckCircle2 size={56} className="mx-auto text-brand" />
-            <h1 className="mt-6 font-display text-4xl tracking-wide text-white sm:text-5xl">
-              Pedido confirmado!
-            </h1>
-            <p className="mt-4 text-sm leading-relaxed text-neutral-400">
-              Obrigado pela compra. Seu pedido{" "}
-              <span className="font-semibold text-brand">#{pedidoId}</span> foi
-              registrado e você será contatado para a confirmação e entrega.
-            </p>
-            {cep ? (
-              <div className="mt-6 rounded-xl border border-graphite-border bg-graphite-light p-5 text-left">
-                <p className="text-xs font-bold uppercase tracking-[0.3em] text-neutral-500">
-                  Endereço de entrega
-                </p>
-                <p className="mt-2 text-sm text-white">CEP {cep}</p>
-              </div>
-            ) : null}
-            <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
-              <Link
-                href="/produtos"
-                className="inline-flex items-center justify-center gap-2 rounded-lg bg-brand px-6 py-3 text-sm font-bold uppercase tracking-wider text-ink transition-colors hover:bg-brand-dark"
-              >
-                Continuar comprando
-                <ArrowRight size={16} />
-              </Link>
-            </div>
-          </div>
-        </Container>
-      </section>
-    );
+    router.push("/carrinho/entrega");
   }
 
   return (
@@ -383,22 +302,6 @@ export default function CartPage() {
 
                 <div className="space-y-4">
                   <h3 className="text-sm font-bold uppercase tracking-widest text-brand">
-                    Dados para entrega
-                  </h3>
-                  <Input
-                    label="CEP"
-                    inputMode="numeric"
-                    autoComplete="postal-code"
-                    value={cep}
-                    onChange={(e) => setCep(formatCep(e.target.value))}
-                    placeholder="00000-000"
-                    maxLength={9}
-                    required
-                  />
-                </div>
-
-                <div className="space-y-4">
-                  <h3 className="text-sm font-bold uppercase tracking-widest text-brand">
                     Nota fiscal
                   </h3>
                   <div className="flex gap-2">
@@ -445,10 +348,10 @@ export default function CartPage() {
 
                 <button
                   type="submit"
-                  disabled={carregando || items.length === 0}
+                  disabled={items.length === 0}
                   className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-brand text-sm font-bold uppercase tracking-wider text-ink transition-colors hover:bg-brand-dark disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  {carregando ? "Finalizando..." : "Finalizar pedido"}
+                  Finalizar pedido
                   <ArrowRight size={18} />
                 </button>
               </form>

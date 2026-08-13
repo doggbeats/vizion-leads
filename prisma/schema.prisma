@@ -1,5 +1,6 @@
 generator client {
-  provider = "prisma-client-js"
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
 }
 
 datasource db {
@@ -67,6 +68,12 @@ model Order {
   customerEmail String?
   status        OrderStatus @default(PENDENTE)
   cep           String?
+  endereco      String?
+  numero        String?
+  complemento   String?
+  bairro        String?
+  cidade        String?
+  estado        String?
   documento     String?
   documentoTipo String?
   total         Float

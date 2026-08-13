@@ -32,6 +32,12 @@ export async function POST(request: Request) {
   const status = STATUSES.includes(body?.status) ? body.status : "PENDENTE";
 
   const cep = typeof body?.cep === "string" ? body.cep.trim() : "";
+  const endereco = typeof body?.endereco === "string" ? body.endereco.trim() : "";
+  const numero = typeof body?.numero === "string" ? body.numero.trim() : "";
+  const complemento = typeof body?.complemento === "string" ? body.complemento.trim() : "";
+  const bairro = typeof body?.bairro === "string" ? body.bairro.trim() : "";
+  const cidade = typeof body?.cidade === "string" ? body.cidade.trim() : "";
+  const estado = typeof body?.estado === "string" ? body.estado.trim() : "";
   const documento = typeof body?.documento === "string" ? body.documento.trim() : "";
   const documentoTipo = body?.documentoTipo === "CNPJ" ? "CNPJ" : "CPF";
 
@@ -88,6 +94,12 @@ export async function POST(request: Request) {
         status,
         notes: notes || null,
         cep: cep || null,
+        endereco: endereco || null,
+        numero: numero || null,
+        complemento: complemento || null,
+        bairro: bairro || null,
+        cidade: cidade || null,
+        estado: estado || null,
         documento: documento || null,
         documentoTipo,
         total,

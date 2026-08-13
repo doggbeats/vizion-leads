@@ -8955,3 +8955,95 @@ Unknown argument `userId`. Did you mean `user`? Available options are marked wit
   clientVersion: '7.9.1'
 }
  POST /api/orders 500 in 2.0s (next.js: 7ms, application-code: 2.0s)
+ GET /carrinho 200 in 80ms (next.js: 9ms, application-code: 71ms)
+ GET /carrinho 200 in 73ms (next.js: 10ms, application-code: 64ms)
+ GET /carrinho 200 in 85ms (next.js: 9ms, application-code: 76ms)
+ POST /api/orders 400 in 199ms (next.js: 183ms, application-code: 16ms)
+ POST /api/orders 400 in 19ms (next.js: 5ms, application-code: 14ms)
+✓ Compiled in 1935ms
+ GET /carrinho 200 in 123ms (next.js: 63ms, application-code: 60ms)
+⚠ Fast Refresh had to perform a full reload when ./src/lib/cart.tsx changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+✓ Compiled in 1101ms
+ GET /carrinho 200 in 200ms (next.js: 18ms, application-code: 183ms)
+ GET /carrinho 200 in 329ms (next.js: 31ms, application-code: 297ms)
+ GET /api/auth/me 200 in 2.1s (next.js: 6ms, application-code: 2.1s)
+ GET /api/auth/me 200 in 223ms (next.js: 4ms, application-code: 219ms)
+⚠ Fast Refresh had to perform a full reload when ./src/lib/cart.tsx changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+ GET /carrinho 200 in 221ms (next.js: 63ms, application-code: 158ms)
+ GET /carrinho 200 in 13ms
+✓ Compiled in 1196ms
+ GET /api/auth/me 200 in 207ms (next.js: 7ms, application-code: 200ms)
+ GET /api/auth/me 200 in 217ms (next.js: 8ms, application-code: 208ms)
+⚠ Fast Refresh had to perform a full reload when ./src/lib/cart.tsx changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+✓ Compiled in 244ms
+ GET /carrinho 200 in 254ms (next.js: 36ms, application-code: 218ms)
+ GET /carrinho 200 in 261ms (next.js: 49ms, application-code: 212ms)
+ GET /api/auth/me 200 in 238ms (next.js: 6ms, application-code: 232ms)
+ GET /api/auth/me 200 in 224ms (next.js: 6ms, application-code: 218ms)
+✓ Compiled in 2.5s
+⚠ Fast Refresh had to perform a full reload when ./node_modules/next/dist/client/image-component.js changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+ GET /carrinho 200 in 806ms (next.js: 70ms, application-code: 736ms)
+ GET /carrinho 200 in 188ms (next.js: 34ms, application-code: 154ms)
+ GET /carrinho 200 in 2.3s (next.js: 1386ms, application-code: 939ms)
+ GET /carrinho 200 in 817ms (next.js: 9ms, application-code: 807ms)
+ GET /api/auth/me 200 in 1744ms (next.js: 359ms, application-code: 1385ms)
+ GET /api/auth/me 200 in 166ms (next.js: 5ms, application-code: 162ms)
+✓ Compiled in 748ms
+ GET /carrinho 200 in 139ms (next.js: 33ms, application-code: 106ms)
+✓ Compiled in 464ms
+ GET /carrinho 200 in 76ms (next.js: 22ms, application-code: 54ms)
+✓ Compiled in 129ms
+ GET /carrinho 200 in 175ms (next.js: 30ms, application-code: 145ms)
+✓ Compiled in 203ms
+ GET /carrinho 200 in 113ms (next.js: 29ms, application-code: 84ms)
+ GET /carrinho 200 in 72ms (next.js: 10ms, application-code: 62ms)
+ GET /carrinho 200 in 69ms (next.js: 8ms, application-code: 61ms)
+ GET /carrinho 200 in 81ms (next.js: 11ms, application-code: 69ms)
+ GET /carrinho 200 in 110ms (next.js: 10ms, application-code: 100ms)
+ GET /carrinho 200 in 86ms (next.js: 13ms, application-code: 73ms)
+ GET /carrinho 200 in 78ms (next.js: 9ms, application-code: 69ms)
+ GET /carrinho 200 in 76ms (next.js: 9ms, application-code: 68ms)
+ GET /carrinho 200 in 78ms (next.js: 9ms, application-code: 69ms)
+ GET /carrinho 200 in 101ms (next.js: 10ms, application-code: 91ms)
+ GET /carrinho 200 in 116ms (next.js: 13ms, application-code: 103ms)
+[browser] Received `true` for a non-boolean attribute `vw-access-button`.
+
+If you want to write it to the DOM, pass a string instead: vw-access-button="true" or vw-access-button={value.toString()}. 
+[browser] Received `true` for a non-boolean attribute `vw-plugin-wrapper`.
+
+If you want to write it to the DOM, pass a string instead: vw-plugin-wrapper="true" or vw-plugin-wrapper={value.toString()}. 
+ GET / 200 in 3.2s (next.js: 1649ms, application-code: 1527ms)
+[browser] Detected `scroll-behavior: smooth` on the `<html>` element. To disable smooth scrolling during route transitions, add `data-scroll-behavior="smooth"` to your <html> element. Learn more: https://nextjs.org/docs/messages/missing-data-scroll-behavior
+ GET / 200 in 1797ms (next.js: 16ms, application-code: 1781ms)
+ GET /carrinho 200 in 58ms (next.js: 11ms, application-code: 47ms)
+ GET /produtos/bermudas 200 in 348ms (next.js: 42ms, generate-params: 12ms, application-code: 295ms)
+ GET /carrinho 200 in 43ms (next.js: 9ms, application-code: 33ms)
+⚠ Fast Refresh had to perform a full reload when ./src/lib/cart.tsx changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+✓ Compiled in 126ms
+ GET /carrinho 200 in 87ms (next.js: 14ms, application-code: 73ms)
+ GET /carrinho 200 in 283ms (next.js: 27ms, application-code: 256ms)
+[browser] Received `true` for a non-boolean attribute `vw-access-button`.
+
+If you want to write it to the DOM, pass a string instead: vw-access-button="true" or vw-access-button={value.toString()}. 
+[browser] Received `true` for a non-boolean attribute `vw-plugin-wrapper`.
+
+If you want to write it to the DOM, pass a string instead: vw-plugin-wrapper="true" or vw-plugin-wrapper={value.toString()}. 
+ GET /api/auth/me 200 in 251ms (next.js: 8ms, application-code: 243ms)
+ GET /api/auth/me 200 in 257ms (next.js: 7ms, application-code: 250ms)
+ GET /produtos 200 in 2.4s (next.js: 656ms, application-code: 1730ms)
+[browser] Detected `scroll-behavior: smooth` on the `<html>` element. To disable smooth scrolling during route transitions, add `data-scroll-behavior="smooth"` to your <html> element. Learn more: https://nextjs.org/docs/messages/missing-data-scroll-behavior
+ GET /images/products/camiseta4.jpg 404 in 845ms (next.js: 595ms, application-code: 250ms)
+⨯ The requested resource isn't a valid image for /images/products/camiseta4.jpg received null
+ GET /images/products/camisetas2.jpg 404 in 844ms (next.js: 725ms, application-code: 119ms)
+⨯ The requested resource isn't a valid image for /images/products/camisetas2.jpg received null
+ GET /carrinho 200 in 56ms (next.js: 6ms, application-code: 50ms)
+ GET /images/products/camiseta3.jpg 404 in 107ms (next.js: 11ms, application-code: 96ms)
+⨯ The requested resource isn't a valid image for /images/products/camiseta3.jpg received null
+ GET /carrinho/entrega 200 in 1647ms (next.js: 1616ms, application-code: 31ms)
+ GET /carrinho 200 in 62ms (next.js: 23ms, application-code: 39ms)
+ GET /images/products/camiseta3.jpg 404 in 142ms (next.js: 24ms, application-code: 119ms)
+⨯ The requested resource isn't a valid image for /images/products/camiseta3.jpg received null
+ GET /carrinho/entrega 200 in 56ms (next.js: 16ms, application-code: 40ms)
+✓ Compiled in 277ms
+ GET /carrinho/entrega 200 in 296ms (next.js: 100ms, application-code: 197ms)
+ GET /carrinho/entrega 200 in 180ms (next.js: 24ms, application-code: 156ms)

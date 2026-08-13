@@ -5,7 +5,7 @@ import path from "node:path";
 import "dotenv/config";
 
 const require = createRequire(import.meta.url);
-const { PrismaClient } = require("@prisma/client");
+const { PrismaClient } = await import("../src/generated/prisma/client");
 const { PrismaPg } = require("@prisma/adapter-pg");
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));

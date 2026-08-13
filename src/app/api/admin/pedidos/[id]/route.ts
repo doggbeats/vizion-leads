@@ -45,7 +45,7 @@ export async function PATCH(request: Request, { params }: RouteProps) {
         : null;
   }
 
-  const addressFields = ["cep"];
+  const addressFields = ["cep", "endereco", "numero", "complemento", "bairro", "cidade", "estado"];
   for (const field of addressFields) {
     if (body[field] !== undefined) {
       data[field] =

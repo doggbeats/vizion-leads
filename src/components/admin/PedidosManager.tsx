@@ -23,6 +23,12 @@ export type AdminOrder = {
   customerEmail: string | null;
   status: OrderStatus;
   cep: string | null;
+  endereco: string | null;
+  numero: string | null;
+  complemento: string | null;
+  bairro: string | null;
+  cidade: string | null;
+  estado: string | null;
   documento: string | null;
   documentoTipo: string | null;
   total: number;
@@ -73,6 +79,12 @@ export function PedidosManager({
   const [selectedClient, setSelectedClient] = useState("");
   const [status, setStatus] = useState<OrderStatus>("PENDENTE");
   const [cep, setCep] = useState("");
+  const [endereco, setEndereco] = useState("");
+  const [numero, setNumero] = useState("");
+  const [complemento, setComplemento] = useState("");
+  const [bairro, setBairro] = useState("");
+  const [cidade, setCidade] = useState("");
+  const [estado, setEstado] = useState("");
   const [documentoTipo, setDocumentoTipo] = useState<"CPF" | "CNPJ">("CPF");
   const [documento, setDocumento] = useState("");
   const [notes, setNotes] = useState("");
@@ -88,6 +100,12 @@ export function PedidosManager({
     setSelectedClient("");
     setStatus("PENDENTE");
     setCep("");
+    setEndereco("");
+    setNumero("");
+    setComplemento("");
+    setBairro("");
+    setCidade("");
+    setEstado("");
     setDocumentoTipo("CPF");
     setDocumento("");
     setNotes("");
@@ -168,6 +186,12 @@ export function PedidosManager({
       customerEmail,
       status,
       cep,
+      endereco,
+      numero,
+      complemento,
+      bairro,
+      cidade,
+      estado,
       documento: documento.replace(/\D/g, "") || undefined,
       documentoTipo,
       notes,
@@ -495,6 +519,73 @@ export function PedidosManager({
               </div>
               <div>
                 <label className="mb-1.5 block text-sm font-medium text-neutral-400">
+                  Endereço
+                </label>
+                <input
+                  value={endereco}
+                  onChange={(e) => setEndereco(e.target.value)}
+                  placeholder="Rua, avenida, logradouro"
+                  className={inputClass}
+                />
+              </div>
+              <div>
+                <label className="mb-1.5 block text-sm font-medium text-neutral-400">
+                  Número
+                </label>
+                <input
+                  value={numero}
+                  onChange={(e) => setNumero(e.target.value)}
+                  placeholder="Ex.: 123"
+                  className={inputClass}
+                />
+              </div>
+              <div>
+                <label className="mb-1.5 block text-sm font-medium text-neutral-400">
+                  Complemento
+                </label>
+                <input
+                  value={complemento}
+                  onChange={(e) => setComplemento(e.target.value)}
+                  placeholder="Apto, bloco, casa... (opcional)"
+                  className={inputClass}
+                />
+              </div>
+              <div>
+                <label className="mb-1.5 block text-sm font-medium text-neutral-400">
+                  Bairro
+                </label>
+                <input
+                  value={bairro}
+                  onChange={(e) => setBairro(e.target.value)}
+                  className={inputClass}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="mb-1.5 block text-sm font-medium text-neutral-400">
+                    Cidade
+                  </label>
+                  <input
+                    value={cidade}
+                    onChange={(e) => setCidade(e.target.value)}
+                    className={inputClass}
+                  />
+                </div>
+                <div>
+                  <label className="mb-1.5 block text-sm font-medium text-neutral-400">
+                    UF
+                  </label>
+                  <input
+                    value={estado}
+                    onChange={(e) => setEstado(e.target.value)}
+                    placeholder="SP"
+                    maxLength={2}
+                    className={inputClass}
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="mb-1.5 block text-sm font-medium text-neutral-400">
                   Documento para nota fiscal
                 </label>
                 <div className="flex gap-2">
@@ -674,13 +765,36 @@ export function PedidosManager({
               <StatusBadge status={viewOrder.status} />
             </div>
 
-            {viewOrder.cep || viewOrder.documento ? (
+            {viewOrder.cep ||
+            viewOrder.endereco ||
+            viewOrder.numero ||
+            viewOrder.bairro ||
+            viewOrder.cidade ||
+            viewOrder.estado ||
+            viewOrder.documento ? (
               <div className="rounded-xl border border-graphite-border bg-graphite-light p-4">
                 <p className="text-xs font-bold uppercase tracking-[0.3em] text-neutral-500">
                   Entrega e nota fiscal
                 </p>
-                {viewOrder.cep ? (
-                  <p className="mt-2 text-sm text-white">CEP {viewOrder.cep}</p>
+                {viewOrder.endereco ||
+                viewOrder.numero ||
+                viewOrder.complemento ? (
+                  <p className="mt-2 text-sm text-white">
+                    {[viewOrder.endereco, viewOrder.numero, viewOrder.complemento]
+                      .filter(Boolean)
+                      .join(", ")}
+                  </p>
+                ) : null}
+                {viewOrder.bairro ||
+                viewOrder.cidade ||
+                viewOrder.estado ||
+                viewOrder.cep ? (
+                  <p className="text-sm text-neutral-400">
+                    {[viewOrder.bairro, viewOrder.cidade, viewOrder.estado]
+                      .filter(Boolean)
+                      .join(", ")}
+                    {viewOrder.cep ? ` · CEP ${viewOrder.cep}` : ""}
+                  </p>
                 ) : null}
                 {viewOrder.documento ? (
                   <p className="text-sm text-neutral-400">

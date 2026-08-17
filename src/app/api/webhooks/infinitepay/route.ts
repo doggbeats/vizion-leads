@@ -63,11 +63,21 @@ export async function POST(request: Request) {
             ? "Cartão de débito"
             : data.capture_method ?? "";
 
+    const transaction = data.transaction_nsu ?? transactionNsu ?? "-";
+    const receiptUrl =
+      typeof data.receipt_url === "string" && data.receipt_url
+        ? ` Comprovante: ${data.receipt_url}`
+        : "";
+
+    if (order.status === "PAGO") {
+      return NextResponse.json({ ok: true, already: true });
+    }
+
     await db.order.update({
       where: { id: order.id },
       data: {
         status: "PAGO",
-        notes: `Pagamento confirmado via InfinitPay (${paymentMethod}). Transação: ${data.transaction_nsu ?? transactionNsu ?? "-"}`,
+        notes: `Pagamento confirmado via InfinitPay (${paymentMethod}). Transação: ${transaction}.${receiptUrl}`,
       },
     });
 

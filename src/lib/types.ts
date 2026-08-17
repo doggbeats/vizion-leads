@@ -3,6 +3,8 @@ export type Category = {
   name: string;
   description: string;
   image: string;
+  metaTitle?: string;
+  metaDescription?: string;
 };
 
 export type ProductSize =
@@ -12,6 +14,7 @@ export type ProductSize =
   | "G"
   | "GG"
   | "XG"
+  | "U"
   | "38"
   | "40"
   | "42"

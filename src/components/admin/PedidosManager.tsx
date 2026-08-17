@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
-import { Plus, Trash2, Eye, X } from "lucide-react";
+import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
+import { Plus, Trash2, Eye, X, Loader2, PackageCheck } from "lucide-react";
 import { Modal } from "@/components/ui/Modal";
 import { StatusBadge, ORDER_STATUSES, type OrderStatus } from "./StatusBadge";
 import { formatCurrency, formatDate } from "@/lib/format";
+import { useToast } from "@/components/ui/toast";
 import type { AdminProduct } from "./ProdutosManager";
 
 export type AdminOrderItem = {
@@ -29,9 +30,8 @@ export type AdminOrder = {
   bairro: string | null;
   cidade: string | null;
   estado: string | null;
-  documento: string | null;
-  documentoTipo: string | null;
   frete: number;
+  retirada: boolean;
   total: number;
   notes: string | null;
   createdAt: string;
@@ -86,10 +86,50 @@ export function PedidosManager({
   const [bairro, setBairro] = useState("");
   const [cidade, setCidade] = useState("");
   const [estado, setEstado] = useState("");
-  const [documentoTipo, setDocumentoTipo] = useState<"CPF" | "CNPJ">("CPF");
-  const [documento, setDocumento] = useState("");
   const [notes, setNotes] = useState("");
   const [items, setItems] = useState<ItemForm[]>([]);
+
+  const { showToast } = useToast();
+  const knownPagoIds = useRef(new Set<string>(initial.filter((o) => o.status === "PAGO").map((o) => o.id)));
+
+  const refreshOrders = useCallback(async () => {
+    try {
+      const response = await fetch("/api/admin/pedidos", { cache: "no-store" });
+      if (!response.ok) return;
+      const data = await response.json().catch(() => null);
+      const novos = Array.isArray(data?.orders) ? data.orders : [];
+      if (!Array.isArray(data?.orders)) return;
+
+      setOrders((prev) => {
+        const next = novos.map((remote: AdminOrder) => {
+          const local = prev.find((o) => o.id === remote.id);
+          return local && local.status !== remote.status ? local : remote;
+        });
+        return next;
+      });
+
+      for (const order of novos) {
+        if (order.status === "PAGO" && !knownPagoIds.current.has(order.id)) {
+          knownPagoIds.current.add(order.id);
+          showToast(
+            order.retirada
+              ? `Pagamento confirmado! Separe os itens do pedido #${order.id.slice(-6).toUpperCase()} para retirada.`
+              : `Pagamento confirmado! Separe os itens e poste o pedido #${order.id.slice(-6).toUpperCase()}.`,
+            "info",
+          );
+        }
+      }
+    } catch {
+      // ignore
+    }
+  }, [showToast]);
+
+  useEffect(() => {
+    const interval = window.setInterval(refreshOrders, 30000);
+    return () => window.clearInterval(interval);
+  }, [refreshOrders]);
+
+  const aguardandoPostagem = orders.filter((o) => o.status === "PAGO");
 
   const inputClass =
     "w-full rounded-lg border border-graphite-border bg-graphite px-4 py-3 text-sm text-white placeholder:text-neutral-500 outline-none transition-colors focus:border-brand";
@@ -107,8 +147,6 @@ export function PedidosManager({
     setBairro("");
     setCidade("");
     setEstado("");
-    setDocumentoTipo("CPF");
-    setDocumento("");
     setNotes("");
     setItems([newEmptyItem()]);
     setErro("");
@@ -193,8 +231,6 @@ export function PedidosManager({
       bairro,
       cidade,
       estado,
-      documento: documento.replace(/\D/g, "") || undefined,
-      documentoTipo,
       notes,
       items: items.map((item) => ({
         productId: item.productId || null,
@@ -264,6 +300,84 @@ export function PedidosManager({
 
   return (
     <div>
+      {aguardandoPostagem.length > 0 ? (
+        <div className="mb-6 rounded-2xl border border-brand/40 bg-brand/10 p-5">
+          <div className="flex items-center gap-3">
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand/20">
+              <PackageCheck size={20} className="text-brand" />
+            </span>
+            <div>
+              <p className="font-display text-lg tracking-wide text-white">
+                {aguardandoPostagem.length}{" "}
+                {aguardandoPostagem.length === 1
+                  ? "pedido pago aguardando"
+                  : "pedidos pagos aguardando"}{" "}
+                {aguardandoPostagem.some((o) => o.retirada)
+                  ? "separação"
+                  : "separação e postagem"}
+              </p>
+              <p className="mt-0.5 text-sm text-neutral-400">
+                {aguardandoPostagem.some((o) => o.retirada)
+                  ? "Separe os itens do estoque para retirada na loja."
+                  : "Separe os itens do estoque, gere a etiqueta e clique em Postar para liberar o acompanhamento do cliente."}
+              </p>
+            </div>
+          </div>
+          <ul className="mt-4 space-y-2">
+            {aguardandoPostagem.map((order) => (
+              <li
+                key={order.id}
+                className="flex flex-col gap-3 rounded-xl border border-brand/20 bg-graphite p-3 sm:flex-row sm:items-center sm:justify-between"
+              >
+                <div className="min-w-0">
+                  <p className="font-mono text-xs text-neutral-400">
+                    #{order.id.slice(-6).toUpperCase()} ·{" "}
+                    {formatDate(order.createdAt)}
+                  </p>
+                  <p className="truncate font-semibold text-white">
+                    {order.customerName}
+                  </p>
+                  <p className="text-xs text-neutral-500">
+                    {order.items.reduce((sum, item) => sum + item.quantity, 0)}{" "}
+                    {order.items.reduce((sum, item) => sum + item.quantity, 0) === 1
+                      ? "item"
+                      : "itens"}{" "}
+                    · {formatCurrency(order.total)}
+                  </p>
+                </div>
+                <div className="flex shrink-0 items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setViewOrder(order)}
+                    className="rounded-lg border border-graphite-border px-3 py-2 text-xs font-semibold text-neutral-300 transition-colors hover:border-brand hover:text-brand"
+                  >
+                    Detalhes
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      changeStatus(
+                        order,
+                        order.retirada ? "ENTREGUE" : "ENVIADO",
+                      )
+                    }
+                    disabled={busyId === order.id}
+                    className="inline-flex items-center gap-1.5 rounded-lg bg-brand px-4 py-2 text-xs font-bold uppercase tracking-wider text-ink transition-colors hover:bg-brand-dark disabled:opacity-50"
+                  >
+                    {busyId === order.id ? (
+                      <Loader2 size={14} className="animate-spin" />
+                    ) : (
+                      <PackageCheck size={14} />
+                    )}
+                    {order.retirada ? "Retirado" : "Postar"}
+                  </button>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
+
       <div className="mb-6 flex justify-end">
         <button
           type="button"
@@ -285,7 +399,11 @@ export function PedidosManager({
             {orders.map((order) => (
               <div
                 key={order.id}
-                className="rounded-2xl border border-graphite-border bg-graphite p-4"
+                className={`rounded-2xl border bg-graphite p-4 ${
+                  order.status === "PAGO"
+                    ? "border-sky-500/50 ring-1 ring-inset ring-sky-500/20"
+                    : "border-graphite-border"
+                }`}
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
@@ -296,12 +414,14 @@ export function PedidosManager({
                       {order.customerName}
                     </p>
                     <p className="text-xs text-neutral-500">{order.customerPhone}</p>
+                    {order.retirada ? (
+                      <p className="mt-0.5 text-xs font-semibold text-brand">
+                        Retirada na loja
+                      </p>
+                    ) : null}
                     {order.cep ? (
                       <p className="mt-0.5 text-xs text-neutral-500">
                         CEP {order.cep}
-                        {order.documento
-                          ? ` · ${order.documentoTipo ?? "CPF"} ${order.documento}`
-                          : ""}
                       </p>
                     ) : null}
                   </div>
@@ -371,7 +491,14 @@ export function PedidosManager({
               </thead>
               <tbody className="divide-y divide-graphite-border">
                 {orders.map((order) => (
-                  <tr key={order.id} className="text-neutral-300">
+                  <tr
+                    key={order.id}
+                    className={`text-neutral-300 ${
+                      order.status === "PAGO"
+                        ? "bg-sky-500/5"
+                        : "even:bg-graphite/60"
+                    }`}
+                  >
                     <td className="px-5 py-4">
                       <p className="font-mono text-xs text-neutral-400">
                         #{order.id.slice(-6).toUpperCase()}
@@ -383,12 +510,14 @@ export function PedidosManager({
                     <td className="px-5 py-4">
                       <p className="font-semibold text-white">{order.customerName}</p>
                       <p className="text-xs text-neutral-500">{order.customerPhone}</p>
+                      {order.retirada ? (
+                        <p className="text-xs font-semibold text-brand">
+                          Retirada na loja
+                        </p>
+                      ) : null}
                       {order.cep ? (
                         <p className="mt-0.5 text-xs text-neutral-500">
                           CEP {order.cep}
-                          {order.documento
-                            ? ` · ${order.documentoTipo ?? "CPF"} ${order.documento}`
-                            : ""}
                         </p>
                       ) : null}
                     </td>
@@ -585,42 +714,6 @@ export function PedidosManager({
                   />
                 </div>
               </div>
-              <div>
-                <label className="mb-1.5 block text-sm font-medium text-neutral-400">
-                  Documento para nota fiscal
-                </label>
-                <div className="flex gap-2">
-                  {(["CPF", "CNPJ"] as const).map((tipo) => (
-                    <button
-                      key={tipo}
-                      type="button"
-                      onClick={() => setDocumentoTipo(tipo)}
-                      className={`flex-1 rounded-lg border px-2 py-2 text-xs font-bold uppercase tracking-wider transition-colors ${
-                        documentoTipo === tipo
-                          ? "border-brand bg-brand/10 text-brand"
-                          : "border-graphite-border bg-graphite text-neutral-400 hover:border-neutral-600"
-                      }`}
-                    >
-                      {tipo}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <div className="sm:col-span-2">
-                <input
-                  value={documento}
-                  onChange={(e) =>
-                    setDocumento(e.target.value.replace(/\D/g, ""))
-                  }
-                  placeholder={
-                    documentoTipo === "CPF"
-                      ? "000.000.000-00"
-                      : "00.000.000/0000-00"
-                  }
-                  maxLength={documentoTipo === "CPF" ? 11 : 14}
-                  className={inputClass}
-                />
-              </div>
             </div>
           </div>
 
@@ -766,16 +859,26 @@ export function PedidosManager({
               <StatusBadge status={viewOrder.status} />
             </div>
 
+            {viewOrder.retirada ? (
+              <div className="rounded-xl border border-brand/40 bg-brand/10 p-4">
+                <p className="text-xs font-bold uppercase tracking-[0.3em] text-brand">
+                  Retirada na loja
+                </p>
+                <p className="mt-2 text-sm text-white">
+                  Pedido para retirada na loja, sem custo de entrega.
+                </p>
+              </div>
+            ) : null}
+
             {viewOrder.cep ||
             viewOrder.endereco ||
             viewOrder.numero ||
             viewOrder.bairro ||
             viewOrder.cidade ||
-            viewOrder.estado ||
-            viewOrder.documento ? (
+            viewOrder.estado ? (
               <div className="rounded-xl border border-graphite-border bg-graphite-light p-4">
                 <p className="text-xs font-bold uppercase tracking-[0.3em] text-neutral-500">
-                  Entrega e nota fiscal
+                  Entrega
                 </p>
                 {viewOrder.endereco ||
                 viewOrder.numero ||
@@ -795,11 +898,6 @@ export function PedidosManager({
                       .filter(Boolean)
                       .join(", ")}
                     {viewOrder.cep ? ` · CEP ${viewOrder.cep}` : ""}
-                  </p>
-                ) : null}
-                {viewOrder.documento ? (
-                  <p className="text-sm text-neutral-400">
-                    {viewOrder.documentoTipo ?? "CPF"} {viewOrder.documento}
                   </p>
                 ) : null}
               </div>

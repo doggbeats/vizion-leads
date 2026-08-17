@@ -32,8 +32,9 @@ export function Footer() {
               height={32}
               className="h-8 w-8"
             />
-            <span className="font-display text-xl tracking-widest text-white">
-              VIZION<span className="text-brand">.</span>
+            <span className="font-display text-xl tracking-widest">
+              <span className="text-white">VIZI</span>
+              <span className="text-brand">ON</span>
             </span>
           </div>
           <p className="mt-4 text-sm leading-relaxed text-neutral-400">

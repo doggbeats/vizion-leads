@@ -7,6 +7,7 @@ import {
   Users,
   Package,
   ShoppingBag,
+  Star,
   LogOut,
   ExternalLink,
 } from "lucide-react";
@@ -16,6 +17,7 @@ const links = [
   { href: "/admin/clientes", label: "Clientes", icon: Users },
   { href: "/admin/pedidos", label: "Pedidos", icon: ShoppingBag },
   { href: "/admin/produtos", label: "Produtos", icon: Package },
+  { href: "/admin/destaques", label: "Destaques", icon: Star },
 ];
 
 export function AdminSidebar({ adminName }: { adminName: string }) {
@@ -32,8 +34,9 @@ export function AdminSidebar({ adminName }: { adminName: string }) {
     <>
       <aside className="hidden w-64 shrink-0 flex-col border-r border-graphite-border bg-graphite lg:flex">
         <div className="border-b border-graphite-border p-6">
-          <Link href="/admin" className="font-display text-3xl tracking-widest text-white">
-            VIZION<span className="text-brand">.</span>
+          <Link href="/admin" className="font-display text-3xl tracking-widest">
+            <span className="text-white">VIZI</span>
+            <span className="text-brand">ON</span>
           </Link>
           <p className="mt-1 text-xs uppercase tracking-[0.3em] text-neutral-500">
             Painel Admin
@@ -82,8 +85,9 @@ export function AdminSidebar({ adminName }: { adminName: string }) {
 
       <div className="flex flex-col border-b border-graphite-border bg-graphite lg:hidden">
         <div className="flex items-center justify-between p-4">
-          <Link href="/admin" className="font-display text-2xl tracking-widest text-white">
-            VIZION<span className="text-brand">.</span>
+          <Link href="/admin" className="font-display text-2xl tracking-widest">
+            <span className="text-white">VIZI</span>
+            <span className="text-brand">ON</span>
           </Link>
           <button
             type="button"

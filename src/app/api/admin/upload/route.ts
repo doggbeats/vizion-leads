@@ -1,5 +1,8 @@
 import { NextResponse } from "next/server";
 import { put } from "@vercel/blob";
+import { mkdir, writeFile } from "node:fs/promises";
+import path from "node:path";
+import crypto from "node:crypto";
 import { requireAdmin, adminUnauthorized } from "@/lib/admin";
 
 const ALLOWED_TYPES = new Set([
@@ -9,6 +12,14 @@ const ALLOWED_TYPES = new Set([
   "image/gif",
   "image/avif",
 ]);
+
+const EXT_BY_TYPE: Record<string, string> = {
+  "image/jpeg": ".jpg",
+  "image/png": ".png",
+  "image/webp": ".webp",
+  "image/gif": ".gif",
+  "image/avif": ".avif",
+};
 
 const MAX_SIZE = 5 * 1024 * 1024;
 
@@ -48,7 +59,28 @@ export async function POST(request: Request) {
     });
     return NextResponse.json({ url: blob.url });
   } catch (error) {
-    console.error("Erro ao enviar imagem:", error);
+    console.error("Erro ao enviar imagem para o Blob:", error);
+
+    const message = error instanceof Error ? error.message : "";
+    if (message.includes("OIDC is enabled")) {
+      try {
+        const buffer = Buffer.from(await file.arrayBuffer());
+        const ext = path.extname(cleanName) || EXT_BY_TYPE[file.type] || ".jpg";
+        const base = path.basename(cleanName, path.extname(cleanName));
+        const unique = `${base}-${crypto.randomBytes(8).toString("hex")}${ext}`;
+        const dir = path.join(process.cwd(), "public", "uploads");
+        await mkdir(dir, { recursive: true });
+        await writeFile(path.join(dir, unique), buffer);
+        return NextResponse.json({ url: `/uploads/${unique}` });
+      } catch (localError) {
+        console.error("Erro ao salvar imagem localmente:", localError);
+        return NextResponse.json(
+          { error: "Erro ao salvar a imagem localmente." },
+          { status: 500 },
+        );
+      }
+    }
+
     return NextResponse.json(
       { error: "Erro ao enviar a imagem. Verifique o armazenamento (BLOB_READ_WRITE_TOKEN)." },
       { status: 500 },

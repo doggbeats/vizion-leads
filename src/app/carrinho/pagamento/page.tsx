@@ -4,47 +4,88 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
   ArrowLeft,
-  ArrowRight,
   CreditCard,
-  Loader2,
   QrCode,
   ShoppingBag,
-  Wallet,
+  MessageCircle,
 } from "lucide-react";
 import { Container } from "@/components/ui/Container";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { formatCurrency } from "@/lib/format";
+import { siteConfig } from "@/lib/site";
 import { loadPaymentData, type PaymentData } from "@/lib/checkout";
 
 const METODOS = [
   {
-    id: "credito",
-    label: "Cartão de crédito",
-    description: "Via InfinitPay, com parcelamento",
-    icon: CreditCard,
-  },
-  {
-    id: "debito",
-    label: "Cartão de débito",
-    description: "Pagamento na hora via InfinitPay",
-    icon: Wallet,
-  },
-  {
     id: "pix",
     label: "PIX",
-    description: "Aprovação imediata via InfinitPay",
+    description: "Pagamento imediato, taxa zero",
     icon: QrCode,
+  },
+  {
+    id: "credito",
+    label: "Cartão de crédito",
+    description: "Em até 6x",
+    icon: CreditCard,
   },
 ] as const;
 
 type MetodoId = (typeof METODOS)[number]["id"];
 
+function buildWhatsAppUrl(payment: PaymentData, metodo: MetodoId): string {
+  const metodoLabel = METODOS.find((m) => m.id === metodo)?.label ?? "";
+  const linhas = [
+    "Olá! Seja bem-vindo à VIZION STORE.",
+    "",
+    "Recebemos sua solicitação de compra pelo nosso site.",
+    "",
+    "Para finalizar seu pedido, vamos confirmar os detalhes por aqui:",
+    "",
+    ...payment.items.flatMap((item) => [
+      `Produto: ${item.productName}`,
+      `Tamanho: ${item.size}`,
+      `Quantidade: ${item.quantity}x`,
+      `Valor: ${formatCurrency(item.price * item.quantity)}`,
+      "",
+    ]),
+    `Subtotal: ${formatCurrency(payment.total + (payment.desconto ?? 0) - (payment.frete ?? 0))}`,
+    ...(payment.desconto && payment.desconto > 0
+      ? [`Desconto (10% cadastro): -${formatCurrency(payment.desconto)}`, ""]
+      : []),
+    `Frete: ${payment.retirada ? "Grátis (retirada na loja)" : (payment.frete ?? 0) === 0 ? "Grátis" : formatCurrency(payment.frete ?? 0)}`,
+    `Total: ${formatCurrency(payment.total)}`,
+    "",
+    `Forma de pagamento: ${metodoLabel}`,
+    "",
+    ...(payment.retirada
+      ? ["Tipo: Retirada na loja"]
+      : payment.address
+        ? [
+            "Tipo: Entrega",
+            `Endereço: ${payment.address.endereco}, ${payment.address.numero}${payment.address.complemento ? ` - ${payment.address.complemento}` : ""}`,
+            `${payment.address.bairro} - ${payment.address.cidade}/${payment.address.estado}`,
+            `CEP: ${payment.address.cep}`,
+          ]
+        : ["Tipo: Entrega"]),
+    "",
+    "Após a confirmação, enviaremos um link oficial de pagamento para você.",
+    "",
+    "Segurança: não solicitamos senha, dados completos do cartão ou código de segurança pelo WhatsApp. O pagamento é realizado através do nosso provedor de pagamento.",
+    "",
+    `VIZION STORE`,
+    `CNPJ: ${siteConfig.cnpj}`,
+    "",
+    `Política de Privacidade: ${siteConfig.url}/privacidade`,
+    "",
+    "Se estiver tudo certo, responda CONFIRMO e continuaremos seu pedido.",
+  ];
+  return `https://wa.me/${siteConfig.whatsapp}?text=${encodeURIComponent(linhas.join("\n"))}`;
+}
+
 export default function PagamentoPage() {
   const [payment, setPayment] = useState<PaymentData | null>(null);
   const [ready, setReady] = useState(false);
   const [metodo, setMetodo] = useState<MetodoId>("pix");
-  const [carregando, setCarregando] = useState(false);
-  const [erro, setErro] = useState("");
 
   useEffect(() => {
     const data = loadPaymentData();
@@ -54,42 +95,15 @@ export default function PagamentoPage() {
     }, 0);
   }, []);
 
-  async function handlePagar() {
-    if (!payment) return;
-    setCarregando(true);
-    setErro("");
-
-    try {
-      const response = await fetch("/api/checkout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ orderId: payment.orderId }),
-      });
-
-      const data = await response.json();
-
-      if (response.ok && data.url) {
-        window.location.href = data.url;
-        return;
-      }
-
-      setErro(data.error ?? "Não foi possível gerar o pagamento.");
-    } catch {
-      setErro("Erro de conexão. Tente novamente.");
-    } finally {
-      setCarregando(false);
-    }
-  }
-
   return (
     <section className="bg-ink py-16 sm:py-20">
       <Container>
         <div className="mb-10 sm:mb-12">
           <p className="mb-3 text-xs font-bold uppercase tracking-[0.3em] text-brand">
-            Pagamento
+            Finalizar compra
           </p>
           <h1 className="font-display text-5xl tracking-wide text-white sm:text-6xl">
-            Forma de pagamento
+            Confirmação do pedido
           </h1>
           <Link
             href="/carrinho/entrega"
@@ -104,20 +118,19 @@ export default function PagamentoPage() {
           <EmptyState
             icon={<ShoppingBag size={48} />}
             title="Carregando..."
-            description="Aguarde enquanto preparamos o pagamento."
+            description="Aguarde enquanto preparamos seu pedido."
           />
         ) : !payment ? (
           <EmptyState
             icon={<ShoppingBag size={48} />}
             title="Nenhum pedido encontrado"
-            description="Finalize um pedido para escolher a forma de pagamento."
+            description="Finalize um pedido para continuar."
             action={
               <Link
                 href="/carrinho"
                 className="inline-flex items-center justify-center gap-2 rounded-lg bg-brand px-6 py-3 text-sm font-bold uppercase tracking-wider text-ink transition-colors hover:bg-brand-dark"
               >
                 Ir para o carrinho
-                <ArrowRight size={16} />
               </Link>
             }
           />
@@ -126,7 +139,7 @@ export default function PagamentoPage() {
             <div className="space-y-6">
               <div className="space-y-4 rounded-2xl border border-graphite-border bg-graphite p-6">
                 <h2 className="font-display text-2xl tracking-wide text-white">
-                  Escolha como pagar
+                  Como você quer pagar?
                 </h2>
 
                 <div className="space-y-3">
@@ -171,35 +184,25 @@ export default function PagamentoPage() {
                   })}
                 </div>
 
-                {erro ? (
-                  <p role="alert" className="text-sm text-red-400">
-                    {erro}
-                  </p>
-                ) : null}
-
-                <button
-                  type="button"
-                  onClick={handlePagar}
-                  disabled={carregando}
-                  className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-brand text-sm font-bold uppercase tracking-wider text-ink transition-colors hover:bg-brand-dark disabled:cursor-not-allowed disabled:opacity-50"
+                <a
+                  href={buildWhatsAppUrl(payment, metodo)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#25D366] text-sm font-bold uppercase tracking-wider text-ink transition-colors hover:bg-[#1ebe57]"
                 >
-                  {carregando ? (
-                    <>
-                      <Loader2 size={18} className="animate-spin" />
-                      Gerando pagamento...
-                    </>
-                  ) : (
-                    <>
-                      Pagar agora
-                      <ArrowRight size={18} />
-                    </>
-                  )}
-                </button>
+                  <MessageCircle size={18} />
+                  Finalizar pelo WhatsApp
+                </a>
 
-                <p className="text-center text-xs leading-relaxed text-neutral-500">
-                  O pagamento é processado com segurança pelo{" "}
-                  <span className="font-semibold text-neutral-400">InfinitPay</span>.
-                  Você será redirecionado para concluir a compra.
+                <p className="text-center text-xs leading-relaxed text-neutral-400">
+                  Você será direcionado ao WhatsApp com o resumo do pedido.{" "}
+                  <span className="font-semibold text-white">
+                    Nossa equipe confirmará o pagamento e a retirada/entrega
+                  </span>{" "}
+                  para concluir sua compra.
+                </p>
+                <p className="text-center text-xs text-neutral-500">
+                  {siteConfig.whatsappDisplay}
                 </p>
               </div>
             </div>
@@ -237,13 +240,25 @@ export default function PagamentoPage() {
                 <div className="flex items-center justify-between">
                   <dt className="text-neutral-400">Subtotal</dt>
                   <dd className="text-neutral-300">
-                    {formatCurrency(payment.total - (payment.frete ?? 0))}
+                    {formatCurrency(payment.total + (payment.desconto ?? 0) - (payment.frete ?? 0))}
                   </dd>
                 </div>
+                {payment.desconto && payment.desconto > 0 ? (
+                  <div className="flex items-center justify-between">
+                    <dt className="text-green-400">Desconto (10% cadastro)</dt>
+                    <dd className="font-semibold text-green-400">
+                      -{formatCurrency(payment.desconto)}
+                    </dd>
+                  </div>
+                ) : null}
                 <div className="flex items-center justify-between">
                   <dt className="text-neutral-400">Frete</dt>
                   <dd className="text-neutral-300">
-                    {formatCurrency(payment.frete ?? 0)}
+                    {payment.retirada
+                      ? "Grátis (retirada)"
+                      : (payment.frete ?? 0) === 0
+                        ? "Grátis"
+                        : formatCurrency(payment.frete ?? 0)}
                   </dd>
                 </div>
                 <div className="flex items-center justify-between border-t border-graphite-border pt-3">
@@ -259,9 +274,27 @@ export default function PagamentoPage() {
                   Pagamento selecionado
                 </p>
                 <p className="mt-2 font-medium text-white">
-                  {METODOS.find((m) => m.id === metodo)?.label} via InfinitPay
+                  {METODOS.find((m) => m.id === metodo)?.label}
                 </p>
               </div>
+
+              {!payment.retirada && payment.address ? (
+                <div className="mt-5 rounded-xl border border-graphite-border bg-graphite-light p-4 text-sm">
+                  <p className="text-xs font-bold uppercase tracking-[0.3em] text-neutral-500">
+                    Endereço de entrega
+                  </p>
+                  <p className="mt-2 font-medium text-white">
+                    {payment.address.endereco}, {payment.address.numero}
+                    {payment.address.complemento
+                      ? ` - ${payment.address.complemento}`
+                      : ""}
+                  </p>
+                  <p className="mt-1 text-neutral-400">
+                    {payment.address.bairro} - {payment.address.cidade}/
+                    {payment.address.estado} · CEP {payment.address.cep}
+                  </p>
+                </div>
+              ) : null}
             </aside>
           </div>
         )}

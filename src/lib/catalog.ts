@@ -4,62 +4,89 @@ export const categories: Category[] = [
   {
     slug: "camisetas",
     name: "Camisetas",
-    description: "Camisetas premium para compor seu estilo urbano.",
+    description:
+      "Camisetas masculinas premium, do oversize ao gola polo, para compor um look urbano com estilo.",
     image: "/images/categories/camisetas.jpg",
+    metaTitle: "Camisetas Masculinas | Streetwear Premium VIZION",
+    metaDescription:
+      "Compre camisetas masculinas VIZION: oversize, gola polo e mais. Tecidos premium, estampas exclusivas e entrega para todo o Brasil.",
   },
   {
     slug: "bermudas",
     name: "Bermudas",
-    description: "Bermudas masculinas para um visual casual e moderno.",
+    description:
+      "Bermudas masculinas modernas para um visual casual, fresco e cheio de atitude.",
     image: "/images/categories/bermudas.jpg",
+    metaTitle: "Bermudas Masculinas | Moda Streetwear VIZION",
+    metaDescription:
+      "Bermudas masculinas confortáveis e estilosas para o verão: dry fit, jeans e mais. Modelagens modernas e entrega em todo o Brasil.",
   },
   {
     slug: "calcas",
     name: "Calças",
-    description: "Calças masculinas com estética streetwear.",
+    description:
+      "Calças masculinas com estética streetwear e caimento impecável para qualquer ocasião.",
     image: "/images/categories/calcas.jpg",
-  },
-  {
-    slug: "calcas-jeans",
-    name: "Calças Jeans",
-    description: "Jeans premium para combinações urbanas.",
-    image: "/images/categories/calcas-jeans.jpg",
+    metaTitle: "Calças Masculinas | Estilo Streetwear VIZION",
+    metaDescription:
+      "Calças masculinas com modelagem streetwear, tecidos de qualidade e caimento perfeito. Compre online e receba em todo o Brasil.",
   },
   {
     slug: "acessorios",
     name: "Acessórios",
-    description: "Óculos, bonés e cintos para completar o visual.",
+    description:
+      "Óculos, bonés e cintos para completar o visual com a identidade VIZION.",
     image: "/images/categories/camisetas.jpg",
+    metaTitle: "Acessórios Streetwear | Bonés, Óculos e Cintos VIZION",
+    metaDescription:
+      "Complete seu estilo com acessórios masculinos VIZION: bonés, óculos e cintos com acabamento premium.",
   },
   {
     slug: "meias",
     name: "Meias",
-    description: "Meias confortáveis e estilosas para o dia a dia.",
+    description:
+      "Meias confortáveis e estilosas para o dia a dia com acabamento premium.",
     image: "/images/categories/camisetas.jpg",
+    metaTitle: "Meias Masculinas | Conforto e Estilo VIZION",
+    metaDescription:
+      "Meias masculinas com toque premium, cano e cores para combinar com todos os looks do seu guarda-roupa.",
   },
   {
     slug: "cuecas",
     name: "Cuecas",
-    description: "Cuecas confortáveis com caimento perfeito.",
+    description:
+      "Cuecas confortáveis, com tecido de qualidade e caimento perfeito.",
     image: "/images/categories/camisetas.jpg",
+    metaTitle: "Cuecas Masculinas | Conforto Premium VIZION",
+    metaDescription:
+      "Cuecas masculinas com tecidos que abraçam e conforto que dura o dia inteiro. Qualidade VIZION com bom preço.",
   },
   {
     slug: "agasalhos",
     name: "Agasalhos",
-    description: "Moletons e corta ventos para o frio com estilo.",
+    description:
+      "Moletons e corta ventos para o frio com estilo e aquecimento de verdade.",
     image: "/images/categories/camisetas.jpg",
+    metaTitle: "Moletons e Agasalhos Masculinos | VIZION",
+    metaDescription:
+      "Moletons e corta ventos masculinos com forro macio e estética streetwear. Esquente seu estilo com a VIZION.",
   },
   {
     slug: "regatas",
     name: "Regatas",
-    description: "Regatas masculinas para um visual marcante.",
+    description:
+      "Regatas masculinas para um visual marcante no treino e na rua.",
     image: "/images/categories/camisetas.jpg",
+    metaTitle: "Regatas Masculinas | Estilo VIZION",
+    metaDescription:
+      "Regatas masculinas com caimento perfeito para treino e look do dia a dia. Modelagens modernas e qualidade premium.",
   },
 ];
 
 export const categorySubcategories: Record<string, string[]> = {
   camisetas: ["oversize", "gola-polo", "peruanas"],
   bermudas: ["bermudas-drifit", "bermudas-jeans"],
+  calcas: ["calcas-jeans"],
   acessorios: ["oculos", "bone", "cinto"],
   agasalhos: ["moletons", "corta-vento"],
   regatas: ["regatas-machao", "regatas-nba"],
@@ -69,6 +96,9 @@ export const subcategoryLabels: Record<string, string> = {
   oversize: "Oversize",
   "gola-polo": "Gola Polo",
   peruanas: "Peruanas",
+  "bermudas-drifit": "Bermudas Drifit",
+  "bermudas-jeans": "Bermudas Jeans",
+  "calcas-jeans": "Calças Jeans",
   oculos: "Óculos",
   bone: "Boné",
   cinto: "Cinto",

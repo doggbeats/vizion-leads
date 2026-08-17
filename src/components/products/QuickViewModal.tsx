@@ -21,6 +21,7 @@ type QuickViewModalProps = {
 
 export function QuickViewModal({ product, open, onClose }: QuickViewModalProps) {
   const [activeIndex, setActiveIndex] = useState(0);
+  const [selectedSize, setSelectedSize] = useState(product.sizes[0] ?? "");
   const { addItem } = useCart();
   const { user } = useSession();
   const { showToast } = useToast();
@@ -53,7 +54,7 @@ export function QuickViewModal({ product, open, onClose }: QuickViewModalProps) 
       return;
     }
 
-    addItem(product, product.sizes[0]);
+    addItem(product, selectedSize);
     showToast(`${product.name} adicionado ao carrinho`);
     onClose();
   };
@@ -139,6 +140,30 @@ export function QuickViewModal({ product, open, onClose }: QuickViewModalProps) 
                 : "Em estoque"}
           </p>
         </div>
+
+        {product.sizes.length > 0 ? (
+          <div className="mt-4">
+            <p className="mb-2 text-xs font-bold uppercase tracking-widest text-neutral-500">
+              Tamanho
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {product.sizes.map((size) => (
+                <button
+                  key={size}
+                  type="button"
+                  onClick={() => setSelectedSize(size)}
+                  className={`min-w-[2.5rem] rounded-lg px-3 py-2 text-sm font-bold uppercase tracking-wider transition-colors ${
+                    selectedSize === size
+                      ? "bg-brand text-ink"
+                      : "border border-graphite-border text-neutral-400 hover:border-neutral-500 hover:text-white"
+                  }`}
+                >
+                  {size}
+                </button>
+              ))}
+            </div>
+          </div>
+        ) : null}
 
         <button
           type="button"

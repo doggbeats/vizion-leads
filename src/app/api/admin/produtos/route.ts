@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { requireAdmin, adminUnauthorized } from "@/lib/admin";
 
-const ALLOWED_SIZES = new Set(["PP", "P", "M", "G", "GG", "XG", "38", "40", "42", "44"]);
+const ALLOWED_SIZES = new Set(["PP", "P", "M", "G", "GG", "XG", "U", "38", "40", "42", "44"]);
 
 function parseImages(raw: unknown): string[] {
   if (Array.isArray(raw)) {

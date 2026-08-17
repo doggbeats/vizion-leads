@@ -10,6 +10,7 @@ import {
   Minus,
   Plus,
   ShoppingBag,
+  Store,
   Trash2,
   Truck,
 } from "lucide-react";
@@ -20,7 +21,7 @@ import { useCart } from "@/lib/cart";
 import { useSession } from "@/lib/session";
 import { useToast } from "@/components/ui/toast";
 import { formatCurrency, formatCep } from "@/lib/format";
-import { saveCheckoutData } from "@/lib/checkout";
+import { saveCheckoutData, savePaymentData, clearCheckoutData } from "@/lib/checkout";
 import type { ProductSize } from "@/lib/types";
 
 type FreteOption = {
@@ -31,21 +32,6 @@ type FreteOption = {
   company: string;
 };
 
-function formatDocumento(value: string, tipo: "CPF" | "CNPJ"): string {
-  const digits = value.replace(/\D/g, "").slice(0, tipo === "CNPJ" ? 14 : 11);
-  if (tipo === "CPF") {
-    return digits
-      .replace(/(\d{3})(\d)/, "$1.$2")
-      .replace(/(\d{3})(\d)/, "$1.$2")
-      .replace(/(\d{3})(\d{1,2})$/, "$1-$2");
-  }
-  return digits
-    .replace(/(\d{2})(\d)/, "$1.$2")
-    .replace(/(\d{3})(\d)/, "$1.$2")
-    .replace(/(\d{3})(\d)/, "$1/$2")
-    .replace(/(\d{4})(\d{1,2})$/, "$1-$2");
-}
-
 export default function CartPage() {
   const { items, count, subtotal, updateQuantity, removeItem, clear } = useCart();
   const { user, loading } = useSession();
@@ -55,8 +41,6 @@ export default function CartPage() {
   const [nome, setNome] = useState(user?.nome ?? "");
   const [telefone, setTelefone] = useState(user?.telefone ?? "");
   const [email, setEmail] = useState(user?.email ?? "");
-  const [documentoTipo, setDocumentoTipo] = useState<"CPF" | "CNPJ">("CPF");
-  const [documento, setDocumento] = useState("");
   const [erro, setErro] = useState("");
 
   const [freteCep, setFreteCep] = useState("");
@@ -65,6 +49,7 @@ export default function CartPage() {
   const [freteCepConsultado, setFreteCepConsultado] = useState("");
   const [calculandoFrete, setCalculandoFrete] = useState(false);
   const [freteErro, setFreteErro] = useState("");
+  const [retirada, setRetirada] = useState(false);
 
   async function calcularFrete() {
     const cep = freteCep.replace(/\D/g, "");
@@ -74,6 +59,7 @@ export default function CartPage() {
     }
     setCalculandoFrete(true);
     setFreteErro("");
+    setRetirada(false);
     try {
       const response = await fetch("/api/frete", {
         method: "POST",
@@ -101,42 +87,112 @@ export default function CartPage() {
     }
   }
 
-  function handleCheckout(event: React.FormEvent) {
+  async function handleCheckout(event: React.FormEvent) {
     event.preventDefault();
     setErro("");
 
-    if (documento.replace(/\D/g, "").length !== (documentoTipo === "CNPJ" ? 14 : 11)) {
-      setErro(`Digite um ${documentoTipo} válido para a nota fiscal.`);
-      return;
-    }
-
-    saveCheckoutData({
+    const checkoutData = {
       customerName: nome,
       customerPhone: telefone,
       customerEmail: email,
-      documentoTipo,
-      documento,
-      frete: freteSelecionado
-        ? {
-            cep: freteCepConsultado,
-            valor: freteSelecionado.price,
-            prazo: freteSelecionado.deliveryTime,
-            servico: freteSelecionado.name,
-            transportadora: freteSelecionado.company,
-          }
-        : null,
-    });
+      frete: retirada || freteGratis
+        ? null
+        : freteSelecionado
+          ? {
+              cep: freteCepConsultado,
+              valor: freteSelecionado.price,
+              prazo: freteSelecionado.deliveryTime,
+              servico: freteSelecionado.name,
+              transportadora: freteSelecionado.company,
+            }
+          : null,
+      retirada,
+    };
+    saveCheckoutData(checkoutData);
 
-    if (loading) return;
+    if (loading) {
+      setErro("Aguarde a validação da sessão...");
+      return;
+    }
     if (!user) {
-      router.push(`/login?redirect=${encodeURIComponent("/carrinho/entrega")}`);
+      router.push(`/login?redirect=${encodeURIComponent("/carrinho")}`);
       return;
     }
 
-    router.push("/carrinho/entrega");
+    if (!retirada) {
+      router.push("/carrinho/entrega");
+      return;
+    }
+
+    try {
+      const response = await fetch("/api/orders", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...checkoutData,
+          cep: undefined,
+          endereco: undefined,
+          numero: undefined,
+          complemento: undefined,
+          bairro: undefined,
+          cidade: undefined,
+          estado: undefined,
+          frete: 0,
+          retirada: true,
+          items: items.map((item) => ({
+            productId: item.product.id,
+            productName: item.product.name,
+            price: item.product.promotionalPrice ?? item.product.price,
+            quantity: item.quantity,
+            size: item.size,
+          })),
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        savePaymentData({
+          orderId: data.order.id,
+          total: data.order.total,
+          frete: 0,
+          desconto: data.order.desconto ?? 0,
+          items: data.order.items.map(
+            (item: { productName: string; price: number; quantity: number; size: string }) => ({
+              productName: item.productName,
+              price: item.price,
+              quantity: item.quantity,
+              size: item.size,
+            }),
+          ),
+          customerName: nome,
+          customerPhone: telefone,
+          retirada: true,
+          address: null,
+        });
+        clear();
+        clearCheckoutData();
+        showToast("Pedido finalizado! Escolha a forma de pagamento.");
+        router.push(`/carrinho/pagamento?pedido=${data.order.id}`);
+      } else {
+        if (response.status === 401) {
+          router.push(
+            `/login?redirect=${encodeURIComponent("/carrinho")}`,
+          );
+          return;
+        }
+        setErro(data.details ?? data.error ?? "Erro ao finalizar o pedido.");
+        showToast(data.details ?? data.error ?? "Erro ao finalizar o pedido.", "error");
+      }
+    } catch {
+      setErro("Erro de conexão. Tente novamente.");
+      showToast("Erro de conexão. Tente novamente.", "error");
+    }
   }
 
-  const totalComFrete = subtotal + (freteSelecionado?.price ?? 0);
+  const freteGratis = !!user && subtotal >= 200;
+  const desconto = !!user ? Math.round(subtotal * 0.1 * 100) / 100 : 0;
+  const totalComFrete = subtotal - desconto + (retirada || freteGratis ? 0 : freteSelecionado?.price ?? 0);
 
   return (
     <section className="bg-ink py-16 sm:py-20">
@@ -328,9 +384,21 @@ export default function CartPage() {
                   </dt>
                   <dd className="text-neutral-300">{formatCurrency(subtotal)}</dd>
                 </div>
+                {desconto > 0 ? (
+                  <div className="flex items-center justify-between">
+                    <dt className="text-green-400">Desconto (10% cadastro)</dt>
+                    <dd className="font-semibold text-green-400">
+                      -{formatCurrency(desconto)}
+                    </dd>
+                  </div>
+                ) : null}
                 <div className="flex items-center justify-between">
                   <dt className="text-neutral-400">Frete</dt>
-                  {freteSelecionado ? (
+                  {retirada ? (
+                    <dd className="text-neutral-300">Grátis (retirada)</dd>
+                  ) : freteGratis ? (
+                    <dd className="font-semibold text-green-400">Grátis</dd>
+                  ) : freteSelecionado ? (
                     <dd className="text-neutral-300">
                       {formatCurrency(freteSelecionado.price)}
                     </dd>
@@ -393,7 +461,10 @@ export default function CartPage() {
                         <button
                           key={option.id}
                           type="button"
-                          onClick={() => setFreteSelecionado(option)}
+                          onClick={() => {
+                            setRetirada(false);
+                            setFreteSelecionado(option);
+                          }}
                           aria-pressed={ativo}
                           className={`flex w-full items-center justify-between gap-3 rounded-lg border p-3 text-left transition-colors ${
                             ativo
@@ -422,6 +493,44 @@ export default function CartPage() {
                 ) : null}
               </div>
 
+              <button
+                type="button"
+                onClick={() => {
+                  setRetirada(true);
+                  setFreteSelecionado(null);
+                  setFreteOptions([]);
+                }}
+                aria-pressed={retirada}
+                className={`mt-4 flex w-full items-center justify-between gap-3 rounded-2xl border p-4 text-left transition-colors ${
+                  retirada
+                    ? "border-brand bg-brand/10"
+                    : "border-graphite-border bg-graphite-light hover:border-neutral-600"
+                }`}
+              >
+                <span className="flex items-center gap-3">
+                  <Store size={18} className={retirada ? "text-brand" : "text-neutral-400"} />
+                  <span>
+                    <span className="block text-sm font-semibold text-white">
+                      Retirada na loja
+                    </span>
+                    <span className="block text-xs text-neutral-400">
+                      Sem custo de entrega
+                    </span>
+                  </span>
+                </span>
+                <span className="shrink-0 text-sm font-bold text-brand">Grátis</span>
+              </button>
+
+              {retirada ? (
+                <div className="mt-3 rounded-xl border border-graphite-border bg-graphite-light p-4 text-sm">
+                  <p className="text-xs font-bold uppercase tracking-[0.3em] text-neutral-500">
+                    Endereço da loja
+                  </p>
+                  <p className="mt-2 font-medium text-white">Av. Exemplo, 000 - Bairro</p>
+                  <p className="text-neutral-400">Cidade/UF</p>
+                </div>
+              ) : null}
+
               <form onSubmit={handleCheckout} className="mt-6 space-y-6">
                 <div className="space-y-4">
                   <h3 className="text-sm font-bold uppercase tracking-widest text-brand">
@@ -448,46 +557,6 @@ export default function CartPage() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="seu@email.com"
-                  />
-                </div>
-
-                <div className="space-y-4">
-                  <h3 className="text-sm font-bold uppercase tracking-widest text-brand">
-                    Nota fiscal
-                  </h3>
-                  <div className="flex gap-2">
-                    {(["CPF", "CNPJ"] as const).map((tipo) => (
-                      <button
-                        key={tipo}
-                        type="button"
-                        onClick={() => {
-                          setDocumentoTipo(tipo);
-                          setDocumento("");
-                        }}
-                        className={`flex-1 rounded-lg border px-4 py-2.5 text-xs font-bold uppercase tracking-wider transition-colors ${
-                          documentoTipo === tipo
-                            ? "border-brand bg-brand/10 text-brand"
-                            : "border-graphite-border bg-graphite text-neutral-400 hover:border-neutral-600"
-                        }`}
-                      >
-                        {tipo}
-                      </button>
-                    ))}
-                  </div>
-                  <Input
-                    label={`${documentoTipo} para nota fiscal`}
-                    inputMode="numeric"
-                    value={documento}
-                    onChange={(e) =>
-                      setDocumento(formatDocumento(e.target.value, documentoTipo))
-                    }
-                    placeholder={
-                      documentoTipo === "CPF"
-                        ? "000.000.000-00"
-                        : "00.000.000/0000-00"
-                    }
-                    maxLength={documentoTipo === "CPF" ? 14 : 18}
-                    required
                   />
                 </div>
 

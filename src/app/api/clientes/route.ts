@@ -3,6 +3,7 @@ import { Prisma } from "@/generated/prisma/client";
 import bcrypt from "bcryptjs";
 import { db } from "@/lib/db";
 import { createSession } from "@/lib/auth";
+import { validateRealEmail } from "@/lib/emailValidation";
 
 export async function POST(request: Request) {
   const body = await request.json().catch(() => null);
@@ -25,9 +26,12 @@ export async function POST(request: Request) {
     );
   }
 
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!emailRegex.test(email)) {
-    return NextResponse.json({ error: "E-mail inválido." }, { status: 400 });
+  const emailValidation = await validateRealEmail(email);
+  if (!emailValidation.valid) {
+    return NextResponse.json(
+      { error: emailValidation.error },
+      { status: 400 },
+    );
   }
 
   const senhaHash = await bcrypt.hash(senha, 10);

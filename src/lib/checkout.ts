@@ -10,9 +10,8 @@ export type CheckoutData = {
   customerName: string;
   customerPhone: string;
   customerEmail: string;
-  documentoTipo: "CPF" | "CNPJ";
-  documento: string;
   frete?: FreteData | null;
+  retirada?: boolean;
 };
 
 const STORAGE_KEY = "vizion-checkout";
@@ -50,11 +49,26 @@ export type PaymentItem = {
   size: string;
 };
 
+export type PaymentAddress = {
+  cep: string;
+  endereco: string;
+  numero: string;
+  complemento: string;
+  bairro: string;
+  cidade: string;
+  estado: string;
+};
+
 export type PaymentData = {
   orderId: string;
   total: number;
   frete: number;
+  desconto: number;
   items: PaymentItem[];
+  customerName: string;
+  customerPhone: string;
+  retirada: boolean;
+  address?: PaymentAddress | null;
 };
 
 const PAYMENT_STORAGE_KEY = "vizion-payment";

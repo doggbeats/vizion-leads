@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { db } from "@/lib/db";
 import { createSession } from "@/lib/auth";
+import { validateRealEmail } from "@/lib/emailValidation";
 
 export async function POST(request: Request) {
   const body = await request.json().catch(() => null);
@@ -12,6 +13,14 @@ export async function POST(request: Request) {
     return NextResponse.json(
       { error: "Informe e-mail e senha." },
       { status: 400 },
+    );
+  }
+
+  const emailValidation = await validateRealEmail(email);
+  if (!emailValidation.valid) {
+    return NextResponse.json(
+      { error: "E-mail ou senha incorretos." },
+      { status: 401 },
     );
   }
 

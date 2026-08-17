@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useSession } from "@/lib/session";
@@ -8,17 +8,15 @@ import { useSession } from "@/lib/session";
 export default function LoginPage() {
   const router = useRouter();
   const { refresh } = useSession();
-  const [redirect, setRedirect] = useState<string | null>(null);
+  const [redirect] = useState<string | null>(() => {
+    if (typeof window === "undefined") return null;
+    const value = new URLSearchParams(window.location.search).get("redirect");
+    return value && value.startsWith("/") ? value : null;
+  });
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
   const [erro, setErro] = useState("");
   const [carregando, setCarregando] = useState(false);
-
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const value = params.get("redirect");
-    setRedirect(value && value.startsWith("/") ? value : null);
-  }, []);
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
@@ -98,6 +96,15 @@ export default function LoginPage() {
           {erro && (
             <p className="text-sm text-red-400">{erro}</p>
           )}
+
+          <div className="flex items-center justify-end">
+            <Link
+              href="/esqueci-minha-senha"
+              className="text-sm text-zinc-400 transition-colors hover:text-[#B6FF00]"
+            >
+              Esqueci minha senha
+            </Link>
+          </div>
 
           <button
             type="submit"

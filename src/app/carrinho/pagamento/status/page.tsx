@@ -21,19 +21,19 @@ function StatusContent() {
   const slug = searchParams.get("slug") ?? "";
 
   const [status, setStatus] = useState<"verificando" | "pago" | "aguardando" | "erro">(
-    "verificando",
+    () => {
+      if (typeof window === "undefined") return "verificando";
+      return orderId ? "verificando" : "aguardando";
+    },
   );
   const [erro, setErro] = useState("");
-  const [total, setTotal] = useState(0);
+  const [total] = useState(() => {
+    if (typeof window === "undefined") return 0;
+    return loadPaymentData()?.total ?? 0;
+  });
 
   useEffect(() => {
-    const payment = loadPaymentData();
-    if (payment) setTotal(payment.total);
-
-    if (!orderId) {
-      setStatus("aguardando");
-      return;
-    }
+    if (!orderId) return;
 
     let ativo = true;
 

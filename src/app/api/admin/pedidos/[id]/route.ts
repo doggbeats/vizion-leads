@@ -35,16 +35,6 @@ export async function PATCH(request: Request, { params }: RouteProps) {
   }
   if (STATUSES.includes(body.status)) data.status = body.status;
 
-  if (body.documentoTipo === "CPF" || body.documentoTipo === "CNPJ") {
-    data.documentoTipo = body.documentoTipo;
-  }
-  if (body.documento !== undefined) {
-    data.documento =
-      typeof body.documento === "string" && body.documento.trim() !== ""
-        ? body.documento.replace(/\D/g, "")
-        : null;
-  }
-
   const addressFields = ["cep", "endereco", "numero", "complemento", "bairro", "cidade", "estado"];
   for (const field of addressFields) {
     if (body[field] !== undefined) {

@@ -38,8 +38,6 @@ export async function POST(request: Request) {
   const bairro = typeof body?.bairro === "string" ? body.bairro.trim() : "";
   const cidade = typeof body?.cidade === "string" ? body.cidade.trim() : "";
   const estado = typeof body?.estado === "string" ? body.estado.trim() : "";
-  const documento = typeof body?.documento === "string" ? body.documento.trim() : "";
-  const documentoTipo = body?.documentoTipo === "CNPJ" ? "CNPJ" : "CPF";
 
   const rawItems = Array.isArray(body?.items) ? body.items : [];
   const items = rawItems
@@ -100,8 +98,6 @@ export async function POST(request: Request) {
         bairro: bairro || null,
         cidade: cidade || null,
         estado: estado || null,
-        documento: documento || null,
-        documentoTipo,
         total,
         items: { create: items },
       },

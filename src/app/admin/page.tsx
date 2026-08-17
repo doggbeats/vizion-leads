@@ -5,6 +5,7 @@ import {
   Banknote,
   Package,
   ArrowRight,
+  PackageCheck,
 } from "lucide-react";
 import { db } from "@/lib/db";
 import { formatCurrency, formatDate } from "@/lib/format";
@@ -13,7 +14,7 @@ import { StatusBadge } from "@/components/admin/StatusBadge";
 export const dynamic = "force-dynamic";
 
 export default async function AdminDashboard() {
-  const [totalClientes, totalPedidos, totalProdutos, produtosAtivos, orders, lowStock] =
+  const [totalClientes, totalPedidos, totalProdutos, produtosAtivos, orders, lowStock, aguardandoPostagem] =
     await Promise.all([
       db.user.count(),
       db.order.count(),
@@ -28,6 +29,11 @@ export default async function AdminDashboard() {
         where: { active: true, stock: { lte: 5 } },
         orderBy: { stock: "asc" },
         take: 6,
+      }),
+      db.order.findMany({
+        where: { status: "PAGO" },
+        orderBy: { createdAt: "desc" },
+        include: { items: true },
       }),
     ]);
 
@@ -54,6 +60,38 @@ export default async function AdminDashboard() {
           Visão geral
         </h1>
       </div>
+
+      {aguardandoPostagem.length > 0 && (
+        <div className="flex flex-col gap-4 rounded-2xl border border-brand/40 bg-brand/10 p-5 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-start gap-3">
+            <span className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand/20">
+              <PackageCheck size={20} className="text-brand" />
+            </span>
+            <div>
+              <p className="font-display text-lg tracking-wide text-white">
+                {aguardandoPostagem.length}{" "}
+                {aguardandoPostagem.length === 1
+                  ? "pedido pago aguardando"
+                  : "pedidos pagos aguardando"}{" "}
+                {aguardandoPostagem.some((o) => o.retirada)
+                  ? "separação"
+                  : "separação e postagem"}
+              </p>
+              <p className="mt-1 text-sm text-neutral-400">
+                {aguardandoPostagem.some((o) => o.retirada)
+                  ? "Separe os itens do estoque para retirada na loja."
+                  : "Separe os itens, gere a etiqueta e marque como enviado para liberar o acompanhamento do cliente."}
+              </p>
+            </div>
+          </div>
+          <Link
+            href="/admin/pedidos"
+            className="inline-flex shrink-0 items-center gap-2 rounded-xl bg-brand px-5 py-3 text-sm font-bold uppercase tracking-wider text-black transition-colors hover:bg-brand-dark"
+          >
+            Separar e postar <ArrowRight size={16} />
+          </Link>
+        </div>
+      )}
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {stats.map((stat) => (

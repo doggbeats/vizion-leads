@@ -19,12 +19,6 @@
       "image": "/images/categories/calcas.jpg"
     },
     {
-      "slug": "calcas-jeans",
-      "name": "Calças Jeans",
-      "description": "Jeans premium para combinações urbanas.",
-      "image": "/images/categories/calcas-jeans.jpg"
-    },
-    {
       "slug": "acessorios",
       "name": "Acessórios",
       "description": "Óculos, bonés e cintos para completar o visual.",
@@ -360,7 +354,8 @@
       "name": "Jeans Slim Skinny",
       "description": "Jeans slim skinny com elastano para liberdade de movimento. Lavagem escura e caimento impecável.",
       "price": 189.9,
-      "category": "calcas-jeans",
+      "category": "calcas",
+      "subcategory": "calcas-jeans",
       "images": ["/images/products/cal%C3%A7cas_jeans.jpg", "/images/products/cal%C3%A7cas_jeans.jpg"],
       "sizes": ["38", "40", "42", "44"],
       "stock": 16,
@@ -372,7 +367,8 @@
       "name": "Jeans Regular Fit",
       "description": "Jeans regular fit clássico com lavagem média. Versátil para todas as ocasiões urbanas.",
       "price": 199.9,
-      "category": "calcas-jeans",
+      "category": "calcas",
+      "subcategory": "calcas-jeans",
       "images": ["/images/products/cal%C3%A7cas_jeans.jpg", "/images/products/cal%C3%A7cas_jeans.jpg"],
       "sizes": ["38", "40", "42"],
       "stock": 25,
@@ -384,7 +380,8 @@
       "description": "Jeans loose de cintura média com lavagem destroyed. A silhueta ampla em alta no streetwear.",
       "price": 209.9,
       "promotionalPrice": 179.9,
-      "category": "calcas-jeans",
+      "category": "calcas",
+      "subcategory": "calcas-jeans",
       "images": ["/images/products/cal%C3%A7cas_jeans.jpg", "/images/products/cal%C3%A7as.jpg"],
       "sizes": ["40", "42", "44"],
       "stock": 8,

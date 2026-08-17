@@ -1,12 +1,38 @@
 import type { Metadata } from "next";
 import { getProducts } from "@/lib/products";
+import { siteConfig } from "@/lib/site";
 import { Container } from "@/components/ui/Container";
 import { ProductGrid } from "@/components/products/ProductGrid";
 
 export const metadata: Metadata = {
-  title: "Todos os produtos",
+  title: "Todos os produtos | Moda Masculina Streetwear",
   description:
-    "Confira todos os produtos VIZION: camisetas, bermudas, calças e calças jeans com estilo streetwear premium.",
+    "Confira todos os produtos VIZION: camisetas oversize, bermudas, calças jeans e acessórios com estilo streetwear premium. Enviamos para todo o Brasil.",
+  alternates: { canonical: "/produtos" },
+  openGraph: {
+    title: "Todos os produtos | Moda Masculina Streetwear",
+    description:
+      "Confira todos os produtos VIZION: camisetas oversize, bermudas, calças jeans e acessórios com estilo streetwear premium.",
+    url: `${siteConfig.url}/produtos`,
+    type: "website",
+    siteName: siteConfig.fullName,
+    locale: "pt_BR",
+    images: [
+      {
+        url: "/images/hero.svg",
+        width: 1200,
+        height: 630,
+        alt: "Produtos VIZION — moda masculina streetwear",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Todos os produtos | VIZION",
+    description:
+      "Camisetas oversize, bermudas, calças jeans e acessórios streetwear premium.",
+    images: ["/images/hero.svg"],
+  },
 };
 
 export const dynamic = "force-dynamic";
@@ -14,9 +40,33 @@ export const dynamic = "force-dynamic";
 export default async function ProductsPage() {
   const activeProducts = await getProducts();
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    name: "Todos os produtos VIZION",
+    description: metadata.description,
+    url: `${siteConfig.url}/produtos`,
+    inLanguage: "pt-BR",
+    mainEntity: {
+      "@type": "ItemList",
+      name: "Produtos VIZION",
+      itemListElement: activeProducts.map((product, index) => ({
+        "@type": "ListItem",
+        position: index + 1,
+        name: product.name,
+        description: product.description,
+      })),
+    },
+    isPartOf: { "@id": `${siteConfig.url}/#website` },
+  };
+
   return (
     <section className="bg-ink py-16 sm:py-20">
       <Container>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
         <div className="mb-10 sm:mb-12">
           <p className="mb-3 text-xs font-bold uppercase tracking-[0.3em] text-brand">
             Produtos
@@ -25,8 +75,8 @@ export default async function ProductsPage() {
             Todos os produtos
           </h1>
           <p className="mt-4 max-w-2xl text-base leading-relaxed text-neutral-400">
-            Camisetas, bermudas, calças e calças jeans com estilo, qualidade e
-            bom preço.
+            Camisetas oversize, bermudas, calças jeans e acessórios com estilo
+            streetwear premium, qualidade e bom preço.
           </p>
           <p className="mt-4 text-sm font-medium text-neutral-500">
             {activeProducts.length}{" "}

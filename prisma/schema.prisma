@@ -21,15 +21,28 @@ enum OrderStatus {
 }
 
 model User {
-  id        String     @id @default(cuid())
-  nome      String
-  email     String     @unique
-  telefone  String?
-  senha     String
-  role      UserRole   @default(CLIENT)
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
-  orders    Order[]
+  id           String              @id @default(cuid())
+  nome         String
+  email        String              @unique
+  telefone     String?
+  senha        String
+  role         UserRole            @default(CLIENT)
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
+  orders       Order[]
+  resetTokens  PasswordResetToken[]
+}
+
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  tokenHash String   @unique
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([userId])
 }
 
 model Category {
@@ -81,6 +94,8 @@ model Order {
   documento     String?
   documentoTipo String?
   frete         Float       @default(0)
+  desconto      Float       @default(0)
+  retirada      Boolean     @default(false)
   total         Float
   notes         String?
   createdAt     DateTime    @default(now())

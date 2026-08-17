@@ -43,8 +43,24 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
-    refresh();
-  }, [refresh]);
+    let ativo = true;
+
+    (async () => {
+      try {
+        const response = await fetch("/api/auth/me");
+        const data = await response.json();
+        if (ativo) setUser(data.user ?? null);
+      } catch {
+        if (ativo) setUser(null);
+      } finally {
+        if (ativo) setLoading(false);
+      }
+    })();
+
+    return () => {
+      ativo = false;
+    };
+  }, []);
 
   const value = useMemo(
     () => ({ user, loading, refresh }),

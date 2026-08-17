@@ -77,8 +77,9 @@ export function Navbar() {
             className="h-9 w-9"
             priority
           />
-          <span className="font-display text-2xl tracking-widest text-white">
-            VIZION<span className="text-brand">.</span>
+          <span className="font-display text-2xl tracking-widest">
+            <span className="text-white">VIZI</span>
+            <span className="text-brand">ON</span>
           </span>
         </Link>
 

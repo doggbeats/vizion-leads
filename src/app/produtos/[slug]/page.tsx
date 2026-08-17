@@ -5,6 +5,7 @@ import {
   getCategoryBySlug,
   getProductsByCategory,
 } from "@/lib/products";
+import { siteConfig } from "@/lib/site";
 import { Container } from "@/components/ui/Container";
 import { CategoryProducts } from "@/components/products/CategoryProducts";
 
@@ -28,9 +29,38 @@ export async function generateMetadata({
     return { title: "Categoria não encontrada" };
   }
 
+  const title = category.metaTitle ?? `${category.name} | Moda Masculina`;
+  const description =
+    category.metaDescription ??
+    `${category.description} Enviamos para todo o Brasil.`;
+  const canonicalPath = `/produtos/${category.slug}`;
+
   return {
-    title: category.name,
-    description: category.description,
+    title,
+    description,
+    alternates: { canonical: canonicalPath },
+    openGraph: {
+      title,
+      description,
+      url: `${siteConfig.url}${canonicalPath}`,
+      type: "website",
+      siteName: siteConfig.fullName,
+      locale: "pt_BR",
+      images: [
+        {
+          url: category.image,
+          width: 1200,
+          height: 630,
+          alt: category.name,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [category.image],
+    },
   };
 }
 
@@ -44,9 +74,33 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
 
   const products = await getProductsByCategory(category.slug);
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    name: category.name,
+    description: category.description,
+    url: `${siteConfig.url}/produtos/${category.slug}`,
+    inLanguage: "pt-BR",
+    mainEntity: {
+      "@type": "ItemList",
+      name: `Produtos da categoria ${category.name}`,
+      itemListElement: products.map((product, index) => ({
+        "@type": "ListItem",
+        position: index + 1,
+        name: product.name,
+        description: product.description,
+      })),
+    },
+    isPartOf: { "@id": `${siteConfig.url}/#website` },
+  };
+
   return (
     <section className="bg-ink py-16 sm:py-20">
       <Container>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
         <div className="mb-10 sm:mb-12">
           <p className="mb-3 text-xs font-bold uppercase tracking-[0.3em] text-brand">
             {category.name}

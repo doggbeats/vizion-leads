@@ -33,9 +33,7 @@ export async function POST(request: Request) {
   const bairro = typeof body?.bairro === "string" ? body.bairro.trim() : "";
   const cidade = typeof body?.cidade === "string" ? body.cidade.trim() : "";
   const estado = typeof body?.estado === "string" ? body.estado.trim() : "";
-  const documento = typeof body?.documento === "string" ? body.documento.trim() : "";
-  const documentoTipo = body?.documentoTipo === "CNPJ" ? "CNPJ" : "CPF";
-  const documentoDigits = documento.replace(/\D/g, "");
+  const retirada = body?.retirada === true;
 
   const rawItems = Array.isArray(body?.items) ? body.items : [];
   const items: OrderItemInput[] = rawItems
@@ -70,28 +68,20 @@ export async function POST(request: Request) {
     );
   }
 
-  if (cep.replace(/\D/g, "").length !== 8) {
-    return NextResponse.json(
-      { error: "Informe um CEP válido." },
-      { status: 400 },
-    );
-  }
+  if (!retirada) {
+    if (cep.replace(/\D/g, "").length !== 8) {
+      return NextResponse.json(
+        { error: "Informe um CEP válido." },
+        { status: 400 },
+      );
+    }
 
-  if (!endereco || !numero || !bairro || !cidade || !estado) {
-    return NextResponse.json(
-      { error: "Informe o endereço completo para a entrega." },
-      { status: 400 },
-    );
-  }
-
-  if (
-    (documentoTipo === "CPF" && documentoDigits.length !== 11) ||
-    (documentoTipo === "CNPJ" && documentoDigits.length !== 14)
-  ) {
-    return NextResponse.json(
-      { error: `Informe um ${documentoTipo} válido para a nota fiscal.` },
-      { status: 400 },
-    );
+    if (!endereco || !numero || !bairro || !cidade || !estado) {
+      return NextResponse.json(
+        { error: "Informe o endereço completo para a entrega." },
+        { status: 400 },
+      );
+    }
   }
 
   if (items.length === 0) {
@@ -136,22 +126,26 @@ export async function POST(request: Request) {
     };
   });
 
-  const total = computedItems.reduce(
+  const subtotal = computedItems.reduce(
     (sum, item) => sum + item.price * item.quantity,
     0,
   );
 
-  const frete =
-    typeof body?.frete === "number" && Number.isFinite(body.frete)
+  const freteGratis = subtotal >= 200;
+  const desconto = Math.round(subtotal * 0.1 * 100) / 100;
+
+  const frete = retirada || freteGratis
+    ? 0
+    : typeof body?.frete === "number" && Number.isFinite(body.frete)
       ? Math.min(Math.max(0, body.frete), 10000)
       : 0;
-  const totalComFrete = total + frete;
+  const totalComFrete = subtotal - desconto + frete;
 
   try {
     const order = await db.$transaction(async (tx) => {
       const created = await tx.order.create({
         data: {
-          userId: session.userId,
+          user: { connect: { id: session.userId } },
           customerName,
           customerPhone,
           customerEmail: customerEmail || null,
@@ -163,9 +157,9 @@ export async function POST(request: Request) {
           bairro: bairro || null,
           cidade: cidade || null,
           estado: estado || null,
-          documento: documentoDigits,
-          documentoTipo,
           frete,
+          desconto,
+          retirada,
           total: totalComFrete,
           items: {
             create: computedItems.map(
@@ -196,7 +190,10 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error("Erro ao criar pedido:", error);
     return NextResponse.json(
-      { error: "Erro ao finalizar o pedido. Tente novamente." },
+      {
+        error: "Erro ao finalizar o pedido. Tente novamente.",
+        details: error instanceof Error ? error.message : String(error),
+      },
       { status: 500 },
     );
   }

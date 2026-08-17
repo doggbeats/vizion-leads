@@ -123,12 +123,11 @@ function loadState(): A11yState {
 
 export function AccessibilityWidget() {
   const [open, setOpen] = useState(false);
-  const [state, setState] = useState<A11yState>(DEFAULT_STATE);
+  const [state, setState] = useState<A11yState>(() => {
+    if (typeof window === "undefined") return DEFAULT_STATE;
+    return loadState();
+  });
   const [reading, setReading] = useState(false);
-
-  useEffect(() => {
-    setState(loadState());
-  }, []);
 
   useEffect(() => {
     const { documentElement } = document;

@@ -23,6 +23,7 @@ export function ProductCard({ product }: ProductCardProps) {
   const { showToast } = useToast();
   const router = useRouter();
   const [quickViewOpen, setQuickViewOpen] = useState(false);
+  const [selectedSize, setSelectedSize] = useState(product.sizes[0] ?? "");
 
   const category = getCategoryBySlug(product.category);
   const hasPromotion =
@@ -51,7 +52,7 @@ export function ProductCard({ product }: ProductCardProps) {
       return;
     }
 
-    addItem(product, product.sizes[0]);
+    addItem(product, selectedSize);
     showToast(`${product.name} adicionado ao carrinho`);
   };
 
@@ -112,7 +113,26 @@ export function ProductCard({ product }: ProductCardProps) {
           {soldOut ? "Sem estoque" : lowStock ? `Últimas unidades (${product.stock})` : "Em estoque"}
         </p>
 
-        <div className="mt-4 flex gap-2">
+        {product.sizes.length > 0 ? (
+          <div className="mt-2 flex flex-wrap gap-1.5">
+            {product.sizes.map((size) => (
+              <button
+                key={size}
+                type="button"
+                onClick={() => setSelectedSize(size)}
+                className={`min-w-[2rem] rounded-md px-2 py-1 text-[11px] font-bold uppercase tracking-wider transition-colors ${
+                  selectedSize === size
+                    ? "bg-brand text-ink"
+                    : "border border-graphite-border text-neutral-400 hover:border-neutral-500 hover:text-white"
+                }`}
+              >
+                {size}
+              </button>
+            ))}
+          </div>
+        ) : null}
+
+        <div className="mt-3 flex gap-2">
           <button
             type="button"
             onClick={handleAddToCart}

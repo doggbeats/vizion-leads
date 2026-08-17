@@ -132,14 +132,13 @@ export async function POST(request: Request) {
   );
 
   const freteGratis = subtotal >= 200;
-  const desconto = Math.round(subtotal * 0.1 * 100) / 100;
 
   const frete = retirada || freteGratis
     ? 0
     : typeof body?.frete === "number" && Number.isFinite(body.frete)
       ? Math.min(Math.max(0, body.frete), 10000)
       : 0;
-  const totalComFrete = subtotal - desconto + frete;
+  const totalComFrete = subtotal + frete;
 
   try {
     const order = await db.$transaction(async (tx) => {
@@ -158,7 +157,6 @@ export async function POST(request: Request) {
           cidade: cidade || null,
           estado: estado || null,
           frete,
-          desconto,
           retirada,
           total: totalComFrete,
           items: {

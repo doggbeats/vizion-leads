@@ -8,11 +8,6 @@ export function FloatingPromo() {
   const router = useRouter();
   const [aberto, setAberto] = useState(true);
 
-  function handleCadastrar() {
-    setAberto(false);
-    router.push("/cadastro");
-  }
-
   if (!aberto) return null;
 
   return (
@@ -34,16 +29,16 @@ export function FloatingPromo() {
 
         <div className="p-5">
           <h3 className="mb-4 text-center font-display text-2xl leading-tight tracking-wide text-white sm:text-3xl">
-            CADASTRE-SE E<br />
-            <span className="text-brand">GANHE 10% OFF</span>
+            PAGUE PELO<br />
+            <span className="text-brand">PIX E GANHE 5% OFF</span>
           </h3>
 
           <div className="mb-5 space-y-2.5">
             <div className="flex items-center gap-3 rounded-lg bg-graphite-light/50 px-3.5 py-2.5">
               <Percent className="h-5 w-5 shrink-0 text-brand" />
               <p className="text-sm text-neutral-300">
-                <span className="font-semibold text-white">10% de desconto</span>{" "}
-                na sua primeira compra
+                <span className="font-semibold text-white">5% de desconto</span>{" "}
+                ao pagar pelo PIX
               </p>
             </div>
             <div className="flex items-center gap-3 rounded-lg bg-graphite-light/50 px-3.5 py-2.5">
@@ -56,10 +51,10 @@ export function FloatingPromo() {
           </div>
 
           <button
-            onClick={handleCadastrar}
+            onClick={() => setAberto(false)}
             className="block w-full rounded-lg bg-brand py-3 text-center text-sm font-bold uppercase tracking-wider text-black transition hover:bg-brand-dark"
           >
-            QUERO MEU DESCONTO
+            ENTENDI
           </button>
         </div>
       </div>

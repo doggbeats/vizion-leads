@@ -121,9 +121,8 @@ export default function EntregaPage() {
 
   const retirada = checkout?.retirada === true;
   const freteGratis = !!user && subtotal >= 200;
-  const desconto = !!user ? Math.round(subtotal * 0.1 * 100) / 100 : 0;
   const freteValor = retirada || freteGratis ? 0 : (checkout?.frete?.valor ?? 0);
-  const totalComFrete = subtotal - desconto + freteValor;
+  const totalComFrete = subtotal + freteValor;
 
   async function handleConfirm(event: React.FormEvent) {
     event.preventDefault();
@@ -185,7 +184,7 @@ export default function EntregaPage() {
           orderId: data.order.id,
           total: data.order.total,
           frete: data.order.frete ?? 0,
-          desconto: data.order.desconto ?? 0,
+          desconto: 0,
           items: data.order.items.map(
             (item: { productName: string; price: number; quantity: number; size: string }) => ({
               productName: item.productName,
@@ -456,14 +455,6 @@ export default function EntregaPage() {
                   </dt>
                   <dd className="text-neutral-300">{formatCurrency(subtotal)}</dd>
                 </div>
-                {desconto > 0 ? (
-                  <div className="flex items-center justify-between">
-                    <dt className="text-green-400">Desconto (10% cadastro)</dt>
-                    <dd className="font-semibold text-green-400">
-                      -{formatCurrency(desconto)}
-                    </dd>
-                  </div>
-                ) : null}
                 <div className="flex items-center justify-between">
                   <dt className="text-neutral-400">Frete</dt>
                   {retirada ? (

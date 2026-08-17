@@ -34,6 +34,9 @@ type MetodoId = (typeof METODOS)[number]["id"];
 
 function buildWhatsAppUrl(payment: PaymentData, metodo: MetodoId): string {
   const metodoLabel = METODOS.find((m) => m.id === metodo)?.label ?? "";
+  const subtotal = payment.total + (payment.frete ?? 0);
+  const descontoPix = metodo === "pix" ? Math.round(subtotal * 0.05 * 100) / 100 : 0;
+  const totalFinal = subtotal - descontoPix;
   const linhas = [
     "Olá! Seja bem-vindo à VIZION STORE.",
     "",
@@ -48,12 +51,12 @@ function buildWhatsAppUrl(payment: PaymentData, metodo: MetodoId): string {
       `Valor: ${formatCurrency(item.price * item.quantity)}`,
       "",
     ]),
-    `Subtotal: ${formatCurrency(payment.total + (payment.desconto ?? 0) - (payment.frete ?? 0))}`,
-    ...(payment.desconto && payment.desconto > 0
-      ? [`Desconto (10% cadastro): -${formatCurrency(payment.desconto)}`, ""]
+    `Subtotal: ${formatCurrency(subtotal)}`,
+    ...(descontoPix > 0
+      ? [`Desconto (5% PIX): -${formatCurrency(descontoPix)}`, ""]
       : []),
     `Frete: ${payment.retirada ? "Grátis (retirada na loja)" : (payment.frete ?? 0) === 0 ? "Grátis" : formatCurrency(payment.frete ?? 0)}`,
-    `Total: ${formatCurrency(payment.total)}`,
+    `Total: ${formatCurrency(totalFinal)}`,
     "",
     `Forma de pagamento: ${metodoLabel}`,
     "",
@@ -240,17 +243,21 @@ export default function PagamentoPage() {
                 <div className="flex items-center justify-between">
                   <dt className="text-neutral-400">Subtotal</dt>
                   <dd className="text-neutral-300">
-                    {formatCurrency(payment.total + (payment.desconto ?? 0) - (payment.frete ?? 0))}
+                    {formatCurrency(payment.total + (payment.frete ?? 0))}
                   </dd>
                 </div>
-                {payment.desconto && payment.desconto > 0 ? (
-                  <div className="flex items-center justify-between">
-                    <dt className="text-green-400">Desconto (10% cadastro)</dt>
-                    <dd className="font-semibold text-green-400">
-                      -{formatCurrency(payment.desconto)}
-                    </dd>
-                  </div>
-                ) : null}
+                {metodo === "pix" && payment.total > 0 ? (() => {
+                  const subtotal = payment.total + (payment.frete ?? 0);
+                  const descontoPix = Math.round(subtotal * 0.05 * 100) / 100;
+                  return descontoPix > 0 ? (
+                    <div className="flex items-center justify-between">
+                      <dt className="text-green-400">Desconto (5% PIX)</dt>
+                      <dd className="font-semibold text-green-400">
+                        -{formatCurrency(descontoPix)}
+                      </dd>
+                    </div>
+                  ) : null;
+                })() : null}
                 <div className="flex items-center justify-between">
                   <dt className="text-neutral-400">Frete</dt>
                   <dd className="text-neutral-300">
@@ -264,7 +271,11 @@ export default function PagamentoPage() {
                 <div className="flex items-center justify-between border-t border-graphite-border pt-3">
                   <dt className="font-semibold text-white">Total</dt>
                   <dd className="text-xl font-bold text-brand">
-                    {formatCurrency(payment.total)}
+                    {formatCurrency(
+                      metodo === "pix"
+                        ? (payment.total + (payment.frete ?? 0)) - Math.round((payment.total + (payment.frete ?? 0)) * 0.05 * 100) / 100
+                        : payment.total
+                    )}
                   </dd>
                 </div>
               </dl>

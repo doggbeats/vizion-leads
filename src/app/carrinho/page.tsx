@@ -156,7 +156,7 @@ export default function CartPage() {
           orderId: data.order.id,
           total: data.order.total,
           frete: 0,
-          desconto: data.order.desconto ?? 0,
+          desconto: 0,
           items: data.order.items.map(
             (item: { productName: string; price: number; quantity: number; size: string }) => ({
               productName: item.productName,
@@ -191,8 +191,7 @@ export default function CartPage() {
   }
 
   const freteGratis = !!user && subtotal >= 200;
-  const desconto = !!user ? Math.round(subtotal * 0.1 * 100) / 100 : 0;
-  const totalComFrete = subtotal - desconto + (retirada || freteGratis ? 0 : freteSelecionado?.price ?? 0);
+  const totalComFrete = subtotal + (retirada || freteGratis ? 0 : freteSelecionado?.price ?? 0);
 
   return (
     <section className="bg-ink py-16 sm:py-20">
@@ -384,14 +383,6 @@ export default function CartPage() {
                   </dt>
                   <dd className="text-neutral-300">{formatCurrency(subtotal)}</dd>
                 </div>
-                {desconto > 0 ? (
-                  <div className="flex items-center justify-between">
-                    <dt className="text-green-400">Desconto (10% cadastro)</dt>
-                    <dd className="font-semibold text-green-400">
-                      -{formatCurrency(desconto)}
-                    </dd>
-                  </div>
-                ) : null}
                 <div className="flex items-center justify-between">
                   <dt className="text-neutral-400">Frete</dt>
                   {retirada ? (

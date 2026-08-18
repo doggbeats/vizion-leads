@@ -106,14 +106,14 @@ export function ClientRegistration({ redirect }: { redirect?: string }) {
 
           <input
             type="password"
-            placeholder="Senha (mínimo 6 caracteres)"
+            placeholder="Senha (mínimo 8 caracteres)"
             value={form.senha}
             onChange={(e) =>
               setForm({ ...form, senha: e.target.value })
             }
             className="w-full rounded-lg border border-gray-700 bg-zinc-900 p-4 text-white outline-none"
             required
-            minLength={6}
+            minLength={8}
           />
 
           <button

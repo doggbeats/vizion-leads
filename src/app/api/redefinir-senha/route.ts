@@ -11,9 +11,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Informe o código de recuperação." }, { status: 400 });
   }
 
-  if (novaSenha.length < 6) {
+  if (novaSenha.length < 8) {
     return NextResponse.json(
-      { error: "A nova senha deve ter no mínimo 6 caracteres." },
+      { error: "A nova senha deve ter no mínimo 8 caracteres." },
       { status: 400 },
     );
   }

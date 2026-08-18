@@ -101,21 +101,8 @@ export async function POST(request: Request) {
 
     if (!response.ok || !data?.url) {
       console.error("Erro InfinitPay:", response.status, JSON.stringify(data));
-      const detalhes = [
-        data?.error ?? data?.message ?? null,
-        data?.errors
-          ? JSON.stringify(data.errors, (key, value) =>
-              Array.isArray(value) ? value.join(", ") : value,
-            )
-          : null,
-      ]
-        .filter(Boolean)
-        .join(" | ");
       return NextResponse.json(
-        {
-          error: "Não foi possível gerar o link de pagamento. Tente novamente.",
-          detalhes: detalhes || null,
-        },
+        { error: "Não foi possível gerar o link de pagamento. Tente novamente." },
         { status: 502 },
       );
     }

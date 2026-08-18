@@ -3,7 +3,63 @@ import { db } from "@/lib/db";
 
 const INFINITEPAY_CHECK = "https://api.checkout.infinitepay.io/payment_check";
 
+const INFINITEPAY_IPS = [
+  "18.228.0.0/12",
+  "18.230.0.0/12",
+  "13.34.0.0/14",
+  "15.160.0.0/13",
+];
+
+function isAllowedIP(ip: string): boolean {
+  for (const cidr of INFINITEPAY_IPS) {
+    const [network, bits] = cidr.split("/");
+    const mask = ~(2 ** (32 - Number(bits)) - 1);
+    const ipNum = ipToNum(ip);
+    const netNum = ipToNum(network);
+    if ((ipNum & mask) === (netNum & mask)) return true;
+  }
+  return false;
+}
+
+function ipToNum(ip: string): number {
+  return ip.split(".").reduce((acc, octet) => (acc << 8) + Number(octet), 0) >>> 0;
+}
+
+function timingSafeEqual(a: string, b: string): boolean {
+  if (a.length !== b.length) return false;
+  let result = 0;
+  for (let i = 0; i < a.length; i++) {
+    result |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  }
+  return result === 0;
+}
+
 export async function POST(request: Request) {
+  const webhookSecret = process.env.INFINITEPAY_WEBHOOK_SECRET?.trim();
+  
+  if (!webhookSecret) {
+    console.error("INFINITEPAY_WEBHOOK_SECRET não configurado");
+    return NextResponse.json({ error: "Configuração inválida" }, { status: 500 });
+  }
+
+  const authHeader = request.headers.get("authorization");
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
+  }
+
+  const token = authHeader.slice(7);
+  if (!timingSafeEqual(token, webhookSecret)) {
+    return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
+  }
+
+  const forwarded = request.headers.get("x-forwarded-for");
+  const clientIP = forwarded?.split(",")[0]?.trim() || "0.0.0.0";
+  
+  if (!isAllowedIP(clientIP)) {
+    console.warn(`Webhook rejeitado de IP não autorizado: ${clientIP}`);
+    return NextResponse.json({ error: "IP não autorizado" }, { status: 403 });
+  }
+
   const body = await request.json().catch(() => null);
 
   const orderId =

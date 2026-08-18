@@ -44,9 +44,8 @@ export async function POST(request: Request) {
 
   return NextResponse.json({
     ok: true,
-    codigo,
     mensagem: `Código gerado para ${
       isPhone ? `o WhatsApp ${identificador}` : `o e-mail ${email}`
-    }. Anote o código abaixo e use para redefinir sua senha.`,
+    }. Use o código abaixo para redefinir sua senha.`,
   });
 }

@@ -9,7 +9,6 @@ export default function EsqueciSenhaPage() {
 
   const [identificador, setIdentificador] = useState("");
   const [codigo, setCodigo] = useState("");
-  const [codigoGerado, setCodigoGerado] = useState("");
   const [novaSenha, setNovaSenha] = useState("");
   const [confirmar, setConfirmar] = useState("");
   const [etapa, setEtapa] = useState<"solicitar" | "redefinir" | "sucesso">("solicitar");
@@ -31,8 +30,7 @@ export default function EsqueciSenhaPage() {
       const data = await response.json();
 
       if (response.ok) {
-        setInfo(data.mensagem ?? "");
-        setCodigoGerado(data.codigo ?? "");
+        setInfo(data.mensagem ?? "Código de recuperação enviado. Verifique seu e-mail ou WhatsApp.");
         setEtapa("redefinir");
       } else {
         setErro(data.error ?? "Erro ao solicitar recuperação.");
@@ -47,6 +45,11 @@ export default function EsqueciSenhaPage() {
   async function handleRedefinir(e: React.FormEvent) {
     e.preventDefault();
     setErro("");
+
+    if (novaSenha.length < 8) {
+      setErro("A nova senha deve ter no mínimo 8 caracteres.");
+      return;
+    }
 
     if (novaSenha !== confirmar) {
       setErro("As senhas não coincidem.");
@@ -122,17 +125,6 @@ export default function EsqueciSenhaPage() {
               </p>
             )}
 
-            {codigoGerado && (
-              <div className="rounded-xl border border-[#B6FF00] bg-[#B6FF00]/10 px-4 py-4 text-center">
-                <p className="text-xs font-bold uppercase tracking-[0.3em] text-zinc-400">
-                  Seu código
-                </p>
-                <p className="mt-1 text-3xl font-bold tracking-[0.4em] text-[#B6FF00]">
-                  {codigoGerado}
-                </p>
-              </div>
-            )}
-
             <div>
               <label className="mb-2 block text-sm text-zinc-300">
                 Código de recuperação
@@ -157,7 +149,7 @@ export default function EsqueciSenhaPage() {
                 type="password"
                 value={novaSenha}
                 onChange={(e) => setNovaSenha(e.target.value)}
-                placeholder="Mínimo 6 caracteres"
+                placeholder="Mínimo 8 caracteres"
                 required
                 className={inputClass}
               />

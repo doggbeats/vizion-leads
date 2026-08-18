@@ -5,9 +5,13 @@ export const SESSION_COOKIE = "vizion_session";
 const SESSION_MAX_AGE = 60 * 60 * 24 * 7;
 
 function getSecret(): Uint8Array {
-  return new TextEncoder().encode(
-    process.env.SESSION_SECRET ?? "vizion-default-secret-change-me",
-  );
+  const secret = process.env.SESSION_SECRET;
+  if (!secret || secret.length < 32) {
+    throw new Error(
+      "SESSION_SECRET não configurado ou muito curto. Configure uma variável de ambiente com pelo menos 32 caracteres.",
+    );
+  }
+  return new TextEncoder().encode(secret);
 }
 
 export type SessionPayload = {

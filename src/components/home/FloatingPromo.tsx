@@ -54,7 +54,7 @@ export function FloatingPromo() {
             onClick={() => setAberto(false)}
             className="block w-full rounded-lg bg-brand py-3 text-center text-sm font-bold uppercase tracking-wider text-black transition hover:bg-brand-dark"
           >
-            QUERO MEU DESCONTO
+            QUERO MEU DESCONTO 
           </button>
         </div>
       </div>

@@ -188,10 +188,7 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error("Erro ao criar pedido:", error);
     return NextResponse.json(
-      {
-        error: "Erro ao finalizar o pedido. Tente novamente.",
-        details: error instanceof Error ? error.message : String(error),
-      },
+      { error: "Erro ao finalizar o pedido. Tente novamente." },
       { status: 500 },
     );
   }

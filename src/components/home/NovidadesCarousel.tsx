@@ -6,9 +6,9 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 
 const images = [
   { src: "/images/page_principal.jpg", alt: "Vizion Store - Novidades" },
-  { src: "/images/products/pagina_principal1.jpg", alt: "Camiseta Streetwear" },
-  { src: "/images/products/pagina_principal2.jpg", alt: "Calças Premium" },
-  { src: "/images/products/pagina_principal3.jpg", alt: "Coleção Boss" },
+  { src: "/images/page1.jpg", alt: "Camiseta Streetwear" },
+  { src: "/images/pagina_principal2.jpg", alt: "Calças Premium" },
+  { src: "/images/pagina_principal3.jpg", alt: "Coleção Boss" },
 
 ];
 
@@ -29,11 +29,9 @@ export function NovidadesCarousel() {
   }, [next]);
 
   return (
-    <section className="relative w-full bg-black py-4">
+    <section className="relative w-full bg-black py-2">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <h2 className="mb-4 text-center text-sm font-bold uppercase tracking-[0.4em] text-brand">
-          Novidades
-        </h2>
+       
 
         <div className="relative overflow-hidden rounded-2xl">
           <div
@@ -42,7 +40,7 @@ export function NovidadesCarousel() {
           >
             {images.map((img, index) => (
               <div key={index} className="relative min-w-full">
-                <div className="relative aspect-[16/9] w-full">
+                <div className="relative aspect-[21/9] w-full">
                   <Image
                     src={img.src}
                     alt={img.alt}

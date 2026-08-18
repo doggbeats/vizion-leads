@@ -3,15 +3,25 @@ import Image from "next/image";
 import { ArrowRight } from "lucide-react";
 import { categories } from "@/lib/catalog";
 import { getProducts } from "@/lib/products";
+import { db } from "@/lib/db";
 import { Container } from "@/components/ui/Container";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 
 export async function Categories() {
-  const products = await getProducts();
+  const [products, dbCategories] = await Promise.all([
+    getProducts(),
+    db.category.findMany(),
+  ]);
+
+  const imageMap = new Map(dbCategories.map((c) => [c.slug, c.image]));
+
   const activeSlugs = new Set(products.map((product) => product.category));
-  const activeCategories = categories.filter((category) =>
-    activeSlugs.has(category.slug),
-  );
+  const activeCategories = categories
+    .filter((category) => activeSlugs.has(category.slug))
+    .map((category) => ({
+      ...category,
+      image: imageMap.get(category.slug) ?? category.image,
+    }));
   return (
     <section id="categorias" className="scroll-mt-20 bg-ink py-20 sm:py-24">
       <Container>

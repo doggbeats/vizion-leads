@@ -8,6 +8,7 @@ import {
   Package,
   ShoppingBag,
   Star,
+  LayoutGrid,
   LogOut,
   ExternalLink,
 } from "lucide-react";
@@ -18,6 +19,7 @@ const links = [
   { href: "/admin/pedidos", label: "Pedidos", icon: ShoppingBag },
   { href: "/admin/produtos", label: "Produtos", icon: Package },
   { href: "/admin/destaques", label: "Destaques", icon: Star },
+  { href: "/admin/categorias", label: "Categorias", icon: LayoutGrid },
 ];
 
 export function AdminSidebar({ adminName }: { adminName: string }) {

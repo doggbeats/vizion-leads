@@ -6,10 +6,10 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 
 const images = [
   { src: "/images/page_principal.jpg", alt: "Vizion Store - Novidades" },
-  { src: "/images/products/camiseta.jpg", alt: "Camiseta Streetwear" },
-  { src: "/images/products/calças.jpg", alt: "Calças Premium" },
-  { src: "/images/products/boss2.jpg", alt: "Coleção Boss" },
-  { src: "/images/products/calçcas_jeans.jpg", alt: "Calças Jeans" },
+  { src: "/images/products/pagina_principal1.jpg", alt: "Camiseta Streetwear" },
+  { src: "/images/products/pagina_principal2.jpg", alt: "Calças Premium" },
+  { src: "/images/products/pagina_principal3.jpg", alt: "Coleção Boss" },
+
 ];
 
 export function NovidadesCarousel() {

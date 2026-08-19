@@ -45,7 +45,7 @@ export function FloatingPromo() {
               <Truck className="h-5 w-5 shrink-0 text-brand" />
               <p className="text-sm text-neutral-300">
                 <span className="font-semibold text-white">Frete grátis</span>{" "}
-                em compras acima de R$ 200
+                em compras acima de R$ 199,90
               </p>
             </div>
           </div>

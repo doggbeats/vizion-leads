@@ -15,9 +15,9 @@ export async function Categories() {
 
   const imageMap = new Map(dbCategories.map((c) => [c.slug, c.image]));
 
-  const activeSlugs = new Set(products.map((product) => product.category));
+  const homepageSlugs = ["camisetas", "bermudas", "calcas", "regatas"];
   const activeCategories = categories
-    .filter((category) => activeSlugs.has(category.slug))
+    .filter((category) => homepageSlugs.includes(category.slug))
     .map((category) => ({
       ...category,
       image: imageMap.get(category.slug) ?? category.image,

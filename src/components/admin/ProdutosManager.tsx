@@ -5,6 +5,7 @@ import Image from "next/image";
 import { Plus, Pencil, Trash2, Star, ImagePlus } from "lucide-react";
 import { Modal } from "@/components/ui/Modal";
 import { formatCurrency } from "@/lib/format";
+import { getSubcategories, getSubcategoryLabel } from "@/lib/catalog";
 
 export type AdminProduct = {
   id: string;
@@ -640,14 +641,20 @@ export function ProdutosManager({
               <label className="mb-1.5 block text-sm font-medium text-neutral-300">
                 Subcategoria (opcional)
               </label>
-              <input
+              <select
                 value={form.subcategory}
                 onChange={(e) =>
                   setForm({ ...form, subcategory: e.target.value })
                 }
-                placeholder="ex: oversize, gola-polo"
                 className={inputClass}
-              />
+              >
+                <option value="">Nenhuma</option>
+                {getSubcategories(form.categorySlug).map((sub) => (
+                  <option key={sub} value={sub}>
+                    {getSubcategoryLabel(sub)}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
 

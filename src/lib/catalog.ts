@@ -62,14 +62,24 @@ export const categories: Category[] = [
       "Cuecas masculinas com tecidos que abraçam e conforto que dura o dia inteiro. Qualidade VIZION com bom preço.",
   },
   {
-    slug: "agasalhos",
-    name: "Agasalhos",
+    slug: "moletom",
+    name: "Moletom",
     description:
-      "Moletons e corta ventos para o frio com estilo e aquecimento de verdade.",
+      "Moletons masculinos com forro macio e estética streetwear para o dia mais frio.",
     image: "/images/categories/camisetas.jpg",
-    metaTitle: "Moletons e Agasalhos Masculinos | VIZION",
+    metaTitle: "Moletons Masculinos | Streetwear Premium VIZION",
     metaDescription:
-      "Moletons e corta ventos masculinos com forro macio e estética streetwear. Esquente seu estilo com a VIZION.",
+      "Moletons masculinos com forro macio e estilo streetwear. Esquente seu estilo com a VIZION.",
+  },
+  {
+    slug: "corta-vento",
+    name: "Corta-Vento",
+    description:
+      "Corta ventos masculinos leves e estilosos para se proteger do vento e chuva.",
+    image: "/images/categories/camisetas.jpg",
+    metaTitle: "Corta Ventos Masculinos | VIZION",
+    metaDescription:
+      "Corta ventos masculinos com acabamento premium e estética streetwear. Proteção e estilo em uma peça.",
   },
   {
     slug: "regatas",
@@ -85,10 +95,9 @@ export const categories: Category[] = [
 
 export const categorySubcategories: Record<string, string[]> = {
   camisetas: ["oversize", "gola-polo", "peruanas"],
-  bermudas: ["bermudas-drifit", "bermudas-jeans"],
+  bermudas: ["bermudas-jeans"],
   calcas: ["calcas-jeans"],
   acessorios: ["oculos", "bone", "cinto"],
-  agasalhos: ["moletons", "corta-vento"],
   regatas: ["regatas-machao", "regatas-nba"],
 };
 
@@ -96,7 +105,6 @@ export const subcategoryLabels: Record<string, string> = {
   oversize: "Oversize",
   "gola-polo": "Gola Polo",
   peruanas: "Peruanas",
-  "bermudas-drifit": "Bermudas Drifit",
   "bermudas-jeans": "Bermudas Jeans",
   "calcas-jeans": "Calças Jeans",
   oculos: "Óculos",

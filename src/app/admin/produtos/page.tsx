@@ -1,6 +1,7 @@
 import { db } from "@/lib/db";
 import { requireAdmin } from "@/lib/admin";
 import { redirect } from "next/navigation";
+import { categories } from "@/lib/catalog";
 import {
   ProdutosManager,
   type AdminProduct,
@@ -13,10 +14,7 @@ export default async function AdminProdutosPage() {
   const admin = await requireAdmin();
   if (!admin) redirect("/login");
 
-  const [products, categories] = await Promise.all([
-    db.product.findMany({ orderBy: { createdAt: "desc" } }),
-    db.category.findMany({ orderBy: { name: "asc" } }),
-  ]);
+  const products = await db.product.findMany({ orderBy: { createdAt: "desc" } });
 
   const produtos: AdminProduct[] = products.map((product) => ({
     id: product.id,

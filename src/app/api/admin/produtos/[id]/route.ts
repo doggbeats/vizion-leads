@@ -50,12 +50,6 @@ export async function PATCH(request: Request, { params }: RouteProps) {
   if (typeof body.name === "string" && body.name.trim() !== "") data.name = body.name.trim();
   if (typeof body.description === "string") data.description = body.description.trim();
   if (typeof body.categorySlug === "string" && body.categorySlug !== "") {
-    const categoryExists = await db.category.findUnique({
-      where: { slug: body.categorySlug },
-    });
-    if (!categoryExists) {
-      return NextResponse.json({ error: "Categoria inválida." }, { status: 400 });
-    }
     data.categorySlug = body.categorySlug;
   }
   if (body.price !== undefined) {

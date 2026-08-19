@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { Truck, CreditCard, MessageCircle } from "lucide-react";
 import { buttonClassName } from "@/components/ui/Button";
 
 const heroContent = {

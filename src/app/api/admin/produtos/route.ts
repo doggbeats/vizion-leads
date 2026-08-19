@@ -68,11 +68,6 @@ export async function POST(request: Request) {
     );
   }
 
-  const categoryExists = await db.category.findUnique({ where: { slug: categorySlug } });
-  if (!categoryExists) {
-    return NextResponse.json({ error: "Categoria inválida." }, { status: 400 });
-  }
-
   const images = parseImages(body?.images);
   if (images.length === 0) {
     return NextResponse.json({ error: "Informe ao menos uma imagem." }, { status: 400 });

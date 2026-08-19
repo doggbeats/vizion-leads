@@ -77,6 +77,14 @@ export async function getFeaturedProducts(): Promise<Product[]> {
   return rows.map(mapProduct);
 }
 
+export async function getPromotionalProducts(): Promise<Product[]> {
+  const rows = await db.product.findMany({
+    where: { active: true, promotionalPrice: { not: null } },
+    orderBy: { createdAt: "desc" },
+  });
+  return rows.map(mapProduct);
+}
+
 export async function getRelatedProducts(product: Product): Promise<Product[]> {
   const rows = await db.product.findMany({
     where: {

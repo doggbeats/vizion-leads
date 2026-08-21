@@ -1,13 +1,37 @@
 "use client";
 
-import { Percent, Truck } from "lucide-react";
+import { useSyncExternalStore } from "react";
+import { Percent, Truck, X } from "lucide-react";
 import { useSession } from "@/lib/session";
+
+const STORAGE_KEY = "floating-promo-fechado";
+const EVENTO = "floating-promo-change";
+
+function inscrever(callback: () => void) {
+  window.addEventListener("storage", callback);
+  window.addEventListener(EVENTO, callback);
+  return () => {
+    window.removeEventListener("storage", callback);
+    window.removeEventListener(EVENTO, callback);
+  };
+}
+
+function estaFechado() {
+  return window.localStorage.getItem(STORAGE_KEY) === "1";
+}
 
 export function FloatingPromo() {
   const { user, loading } = useSession();
+  const fechado = useSyncExternalStore(inscrever, estaFechado, () => true);
+
+  function fechar() {
+    window.localStorage.setItem(STORAGE_KEY, "1");
+    window.dispatchEvent(new Event(EVENTO));
+  }
 
   if (loading) return null;
   if (user) return null;
+  if (fechado) return null;
 
   return (
     <div className="fixed inset-x-0 bottom-0 z-50 sm:bottom-3">
@@ -18,7 +42,16 @@ export function FloatingPromo() {
           </p>
         </div>
 
-        <div className="p-2.5 sm:p-4">
+        <button
+          type="button"
+          onClick={fechar}
+          aria-label="Fechar promoção"
+          className="absolute right-1.5 top-1 z-10 flex h-6 w-6 items-center justify-center rounded-full bg-black/70 text-white transition-colors hover:bg-black sm:h-7 sm:w-7"
+        >
+          <X size={14} />
+        </button>
+
+        <div className="p-2.5 pt-4 sm:p-4">
           <h3 className="mb-1.5 text-center font-display text-base leading-tight tracking-wide text-white sm:mb-3 sm:text-lg md:text-xl">
             PAGUE PELO<br />
             <span className="text-brand">PIX E GANHE 5% OFF</span>

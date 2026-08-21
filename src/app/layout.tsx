@@ -9,6 +9,7 @@ import { Footer } from "@/components/layout/Footer";
 import { VLibras } from "@/components/accessibility/VLibras";
 import { AccessibilityWidget } from "@/components/accessibility/AccessibilityWidget";
 import { PromoBar } from "@/components/layout/PromoBar";
+import { FloatingWhatsApp } from "@/components/layout/FloatingWhatsApp";
 import "./globals.css";
 
 const bebas = Bebas_Neue({
@@ -143,6 +144,7 @@ export default function RootLayout({
                 {children}
               </main>
               <Footer />
+              <FloatingWhatsApp />
               <AccessibilityWidget />
               <VLibras />
             </SessionProvider>

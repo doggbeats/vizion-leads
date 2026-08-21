@@ -110,7 +110,8 @@ export async function PATCH(request: Request, { params }: RouteProps) {
   try {
     const product = await db.product.update({ where: { id }, data });
     return NextResponse.json({ product });
-  } catch {
+  } catch (error) {
+    console.error("Erro ao atualizar produto:", JSON.stringify(error, Object.getOwnPropertyNames(error)));
     return NextResponse.json({ error: "Produto não encontrado." }, { status: 404 });
   }
 }

@@ -123,7 +123,7 @@ export function Footer() {
             © {new Date().getFullYear()} {siteConfig.fullName}. Todos os direitos
             reservados.
           </p>
-          <p>Feito para quem vive a rua.</p>
+          <p>Criado por Paulo Henrique, vulgo DoggD_Code</p>
         </Container>
       </div>
     </footer>

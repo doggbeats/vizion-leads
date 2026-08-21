@@ -5,7 +5,7 @@ import Image from "next/image";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 const slides = [
-  { src: "/images/page_principal.jpg", alt: "Vizion Store" },
+  { src: "/images/newimagem2.jpg", alt: "Vizion Store" },
   { src: "/images/pagina_principal1.jpg", alt: "Vizion Store" },
   { src: "/images/pagina_principal2.jpg", alt: "Vizion Store" },
   { src: "/images/pagina_principal3.jpg", alt: "Vizion Store" },

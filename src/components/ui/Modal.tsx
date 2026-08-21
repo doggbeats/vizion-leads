@@ -39,15 +39,15 @@ export function Modal({ open, onClose, title, className = "", children }: ModalP
         className={`animate-fade-up relative max-h-[90vh] w-full overflow-y-auto rounded-2xl border border-graphite-border bg-graphite p-5 shadow-2xl ${className}`}
         onClick={(event) => event.stopPropagation()}
       >
-        <div className="mb-4 flex items-center justify-between">
+        <div className="mb-4 flex items-center justify-between gap-3">
           {title ? <h3 className="font-display text-2xl tracking-wide text-white">{title}</h3> : null}
           <button
             type="button"
             onClick={onClose}
             aria-label="Fechar"
-            className="rounded-full p-1 text-neutral-500 transition-colors hover:bg-graphite-light hover:text-white"
+            className="ml-auto flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-graphite-border bg-graphite-light text-white transition-colors hover:border-brand hover:bg-brand hover:text-ink"
           >
-            <X size={20} />
+            <X size={18} />
           </button>
         </div>
         {children}

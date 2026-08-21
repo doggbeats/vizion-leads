@@ -41,3 +41,8 @@ next-env.d.ts
 
 .vercel
 .env*
+
+.gen-token.mts
+.test-patch.mts
+.verify-token.mts
+.test-token

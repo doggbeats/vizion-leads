@@ -774,7 +774,7 @@ export function ProdutosManager({
               className={inputClass}
             />
             <p className="mt-1 text-xs text-neutral-500">
-              Permitidos: PP, P, M, G, GG, XG, U, 38, 40, 42, 44
+              Permitidos: PP, P, M, G, GG, XG, U, 38, 40, 42, 44, 46, 48, 50
             </p>
           </div>
 

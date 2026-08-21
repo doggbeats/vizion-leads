@@ -11,7 +11,7 @@ export function FloatingWhatsApp() {
       target="_blank"
       rel="noopener noreferrer"
       aria-label="Falar com a loja no WhatsApp"
-      className="fixed bottom-4 left-3 z-[55] flex h-12 w-12 items-center justify-center rounded-full bg-[#25D366] text-white shadow-lg shadow-black/40 transition-transform duration-300 hover:scale-110 sm:left-4 sm:bottom-4 sm:h-14 sm:w-14"
+      className="fixed bottom-4 left-6 z-[55] flex h-12 w-12 items-center justify-center rounded-full bg-[#25D366] text-white shadow-lg shadow-black/40 transition-transform duration-300 hover:scale-110 sm:left-8 sm:bottom-4 sm:h-14 sm:w-14"
     >
       <svg
         viewBox="0 0 24 24"

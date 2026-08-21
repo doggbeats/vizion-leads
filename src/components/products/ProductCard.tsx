@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { ShoppingCart, Eye } from "lucide-react";
+import { ShoppingCart, Eye, Tag } from "lucide-react";
 import type { Product } from "@/lib/types";
 import { getCategoryBySlug } from "@/lib/catalog";
 import { formatCurrency } from "@/lib/format";
@@ -112,6 +112,13 @@ export function ProductCard({ product }: ProductCardProps) {
         >
           {soldOut ? "Sem estoque" : lowStock ? `Últimas unidades (${product.stock})` : "Em estoque"}
         </p>
+
+        {hasPromotion && product.promoQuantity && product.promoPrice ? (
+          <p className="mt-1 inline-flex w-fit items-center gap-1 rounded-md bg-brand/10 px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide text-brand">
+            <Tag size={12} />
+            Leve {product.promoQuantity} por {formatCurrency(product.promoPrice)}
+          </p>
+        ) : null}
 
         {product.sizes.length > 0 ? (
           <div className="mt-2 flex flex-wrap gap-1.5">

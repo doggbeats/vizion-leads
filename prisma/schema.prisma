@@ -59,6 +59,8 @@ model Product {
   description      String
   price            Float
   promotionalPrice Float?
+  promoQuantity    Int?
+  promoPrice       Float?
   categorySlug     String
   category         Category    @relation(fields: [categorySlug], references: [slug])
   subcategory      String?

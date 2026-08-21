@@ -8,7 +8,6 @@ import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { VLibras } from "@/components/accessibility/VLibras";
 import { AccessibilityWidget } from "@/components/accessibility/AccessibilityWidget";
-import { FloatingPromo } from "@/components/home/FloatingPromo";
 import { PromoBar } from "@/components/layout/PromoBar";
 import "./globals.css";
 
@@ -146,7 +145,6 @@ export default function RootLayout({
               <Footer />
               <AccessibilityWidget />
               <VLibras />
-              <FloatingPromo />
             </SessionProvider>
           </ToastProvider>
         </CartProvider>

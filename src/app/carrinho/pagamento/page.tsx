@@ -34,9 +34,10 @@ type MetodoId = (typeof METODOS)[number]["id"];
 
 function buildWhatsAppUrl(payment: PaymentData, metodo: MetodoId): string {
   const metodoLabel = METODOS.find((m) => m.id === metodo)?.label ?? "";
-  const subtotal = payment.total + (payment.frete ?? 0);
-  const descontoPix = metodo === "pix" ? Math.round(subtotal * 0.05 * 100) / 100 : 0;
-  const totalFinal = subtotal - descontoPix;
+  const totalFinal = metodo === "pix"
+    ? payment.total - Math.round((payment.total - (payment.frete ?? 0)) * 0.05 * 100) / 100
+    : payment.total;
+  const descontoPix = metodo === "pix" ? Math.round((payment.total - (payment.frete ?? 0)) * 0.05 * 100) / 100 : 0;
   const linhas = [
     "Olá! Seja bem-vindo à VIZION STORE.",
     "",
@@ -51,7 +52,7 @@ function buildWhatsAppUrl(payment: PaymentData, metodo: MetodoId): string {
       `Valor: ${formatCurrency(item.price * item.quantity)}`,
       "",
     ]),
-    `Subtotal: ${formatCurrency(subtotal)}`,
+    `Subtotal: ${formatCurrency(payment.total - (payment.frete ?? 0))}`,
     ...(descontoPix > 0
       ? [`Desconto (5% PIX): -${formatCurrency(descontoPix)}`, ""]
       : []),
@@ -243,12 +244,11 @@ export default function PagamentoPage() {
                 <div className="flex items-center justify-between">
                   <dt className="text-neutral-400">Subtotal</dt>
                   <dd className="text-neutral-300">
-                    {formatCurrency(payment.total + (payment.frete ?? 0))}
+                    {formatCurrency(payment.total - (payment.frete ?? 0))}
                   </dd>
                 </div>
-                {metodo === "pix" && payment.total > 0 ? (() => {
-                  const subtotal = payment.total + (payment.frete ?? 0);
-                  const descontoPix = Math.round(subtotal * 0.05 * 100) / 100;
+                {metodo === "pix" ? (() => {
+                  const descontoPix = Math.round((payment.total - (payment.frete ?? 0)) * 0.05 * 100) / 100;
                   return descontoPix > 0 ? (
                     <div className="flex items-center justify-between">
                       <dt className="text-green-400">Desconto (5% PIX)</dt>
@@ -273,7 +273,7 @@ export default function PagamentoPage() {
                   <dd className="text-xl font-bold text-brand">
                     {formatCurrency(
                       metodo === "pix"
-                        ? (payment.total + (payment.frete ?? 0)) - Math.round((payment.total + (payment.frete ?? 0)) * 0.05 * 100) / 100
+                        ? payment.total - Math.round((payment.total - (payment.frete ?? 0)) * 0.05 * 100) / 100
                         : payment.total
                     )}
                   </dd>

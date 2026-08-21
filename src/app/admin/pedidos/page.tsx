@@ -74,6 +74,8 @@ export default async function AdminPedidosPage() {
     description: product.description,
     price: product.price,
     promotionalPrice: product.promotionalPrice,
+    promoQuantity: product.promoQuantity,
+    promoPrice: product.promoPrice,
     categorySlug: product.categorySlug,
     subcategory: product.subcategory,
     images: product.images,

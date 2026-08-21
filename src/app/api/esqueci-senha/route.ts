@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { randomInt } from "node:crypto";
 import bcrypt from "bcryptjs";
 import { db } from "@/lib/db";
+import { sendResetCode } from "@/lib/mail";
 
 export async function POST(request: Request) {
   const body = await request.json().catch(() => null);
@@ -21,7 +22,7 @@ export async function POST(request: Request) {
 
   const user = await db.user.findFirst({
     where: isPhone ? { telefone: { contains: digitos } } : { email },
-    select: { id: true },
+    select: { id: true, email: true, nome: true },
   });
 
   if (!user) {
@@ -42,10 +43,18 @@ export async function POST(request: Request) {
     },
   });
 
+  if (!isPhone && user.email) {
+    try {
+      await sendResetCode(user.email, codigo);
+    } catch (err) {
+      console.error("Erro ao enviar e-mail de recuperação:", err);
+    }
+  }
+
   return NextResponse.json({
     ok: true,
-    mensagem: `Código gerado para ${
-      isPhone ? `o WhatsApp ${identificador}` : `o e-mail ${email}`
-    }. Use o código abaixo para redefinir sua senha.`,
+    mensagem: isPhone
+      ? `Código enviado para o WhatsApp ${identificador}.`
+      : `Código enviado para o e-mail ${user.email}.`,
   });
 }

@@ -22,6 +22,8 @@ function mapProduct(row: {
   description: string;
   price: number;
   promotionalPrice: number | null;
+  promoQuantity: number | null;
+  promoPrice: number | null;
   categorySlug: string;
   subcategory: string | null;
   images: string[];
@@ -36,6 +38,8 @@ function mapProduct(row: {
     description: row.description,
     price: row.price,
     promotionalPrice: row.promotionalPrice ?? undefined,
+    promoQuantity: row.promoQuantity ?? undefined,
+    promoPrice: row.promoPrice ?? undefined,
     category: row.categorySlug,
     subcategory: row.subcategory ?? undefined,
     images: row.images,

@@ -63,6 +63,17 @@ export async function PATCH(request: Request, { params }: RouteProps) {
     const promotionalPrice = parseFloatSafe(body.promotionalPrice);
     data.promotionalPrice = promotionalPrice ?? null;
   }
+  if (body.promoQuantity !== undefined) {
+    const promoQuantity = parseFloatSafe(body.promoQuantity);
+    data.promoQuantity =
+      promoQuantity !== null && promoQuantity !== undefined && promoQuantity > 0
+        ? Math.round(promoQuantity)
+        : null;
+  }
+  if (body.promoPrice !== undefined) {
+    const promoPrice = parseFloatSafe(body.promoPrice);
+    data.promoPrice = promoPrice ?? null;
+  }
   if (body.subcategory !== undefined) {
     data.subcategory =
       typeof body.subcategory === "string" && body.subcategory.trim() !== ""

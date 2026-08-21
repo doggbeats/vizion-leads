@@ -48,11 +48,13 @@
 
 html {
   scroll-behavior: smooth;
+  overflow-x: hidden;
 }
 
 body {
   @apply bg-ink text-neutral-100 font-sans antialiased;
   font-variant: small-caps;
+  overflow-x: hidden;
 }
 
 ::selection {

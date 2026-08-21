@@ -13,6 +13,8 @@ export type AdminProduct = {
   description: string;
   price: number;
   promotionalPrice: number | null;
+  promoQuantity: number | null;
+  promoPrice: number | null;
   categorySlug: string;
   subcategory: string | null;
   images: string[];
@@ -34,6 +36,8 @@ type FormState = {
   description: string;
   price: string;
   promotionalPrice: string;
+  promoQuantity: string;
+  promoPrice: string;
   categorySlug: string;
   subcategory: string;
   images: string;
@@ -53,6 +57,8 @@ const emptyForm: FormState = {
   description: "",
   price: "",
   promotionalPrice: "",
+  promoQuantity: "",
+  promoPrice: "",
   categorySlug: "",
   subcategory: "",
   images: "",
@@ -96,6 +102,9 @@ export function ProdutosManager({
       price: String(product.price),
       promotionalPrice:
         product.promotionalPrice === null ? "" : String(product.promotionalPrice),
+      promoQuantity:
+        product.promoQuantity === null ? "" : String(product.promoQuantity),
+      promoPrice: product.promoPrice === null ? "" : String(product.promoPrice),
       categorySlug: product.categorySlug,
       subcategory: product.subcategory ?? "",
       images: product.images.join(", "),
@@ -122,6 +131,8 @@ export function ProdutosManager({
       description: form.description,
       price: form.price,
       promotionalPrice: form.promotionalPrice,
+      promoQuantity: form.promoQuantity,
+      promoPrice: form.promoPrice,
       categorySlug: form.categorySlug,
       subcategory: form.subcategory,
       images: form.images,
@@ -558,6 +569,36 @@ export function ProdutosManager({
                 min={0}
                 className={inputClass}
                 required
+              />
+            </div>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div>
+              <label className="mb-1.5 block text-sm font-medium text-neutral-300">
+                Promoção: leve (quantidade)
+              </label>
+              <input
+                value={form.promoQuantity}
+                onChange={(e) =>
+                  setForm({ ...form, promoQuantity: e.target.value })
+                }
+                placeholder="Ex.: 3"
+                type="number"
+                min={0}
+                className={inputClass}
+              />
+            </div>
+            <div>
+              <label className="mb-1.5 block text-sm font-medium text-neutral-300">
+                Promoção: por (valor R$)
+              </label>
+              <input
+                value={form.promoPrice}
+                onChange={(e) => setForm({ ...form, promoPrice: e.target.value })}
+                placeholder="Ex.: 100.00"
+                inputMode="decimal"
+                className={inputClass}
               />
             </div>
           </div>

@@ -139,6 +139,11 @@ export function QuickViewModal({ product, open, onClose }: QuickViewModalProps) 
                 ? `Últimas unidades (${product.stock})`
                 : "Em estoque"}
           </p>
+          {product.description ? (
+            <p className="mt-3 max-h-24 overflow-y-auto text-sm leading-relaxed text-neutral-400">
+              {product.description}
+            </p>
+          ) : null}
         </div>
 
         {product.sizes.length > 0 ? (

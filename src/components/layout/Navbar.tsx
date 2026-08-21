@@ -129,6 +129,7 @@ export function Navbar() {
   }
 
   return (
+    <>
     <header
       className={`sticky top-0 z-50 border-b transition-all duration-500 ${
         scrolled || menuOpen
@@ -376,18 +377,19 @@ export function Navbar() {
           </form>
         </div>
       </div>
+    </header>
 
-      {/* Mobile Menu */}
+      {/* Mobile Menu - outside header to avoid stacking context */}
       <div
         className={`lg:hidden ${
           menuOpen ? "pointer-events-auto" : "pointer-events-none"
         }`}
       >
         <div
-          className={`fixed inset-0 top-16 z-40 overflow-y-auto border-t border-white/[0.05] bg-black/95 backdrop-blur-3xl transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+          className={`fixed inset-0 top-16 z-[55] overflow-y-auto border-t border-white/[0.05] bg-black/95 backdrop-blur-3xl transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${
             menuOpen
               ? "translate-x-0 opacity-100"
-              : "translate-x-full opacity-0"
+              : "translate-x-[110%] opacity-0"
           }`}
         >
           <ul className="mx-auto flex w-full max-w-7xl flex-col gap-0.5 px-5 py-8 sm:px-8">
@@ -516,6 +518,6 @@ export function Navbar() {
           </ul>
         </div>
       </div>
-    </header>
+    </>
   );
 }

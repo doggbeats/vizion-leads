@@ -26,6 +26,8 @@ export type Product = {
   description: string;
   price: number;
   promotionalPrice?: number;
+  promoQuantity?: number;
+  promoPrice?: number;
   category: string;
   subcategory?: string;
   images: string[];

@@ -10,7 +10,6 @@ import {
   Minus,
   Plus,
   ShoppingBag,
-  Store,
   Trash2,
   Truck,
 } from "lucide-react";
@@ -385,9 +384,7 @@ export default function CartPage() {
                 </div>
                 <div className="flex items-center justify-between">
                   <dt className="text-neutral-400">Frete</dt>
-                  {retirada ? (
-                    <dd className="text-neutral-300">Grátis (retirada)</dd>
-                  ) : freteGratis ? (
+                  {freteGratis ? (
                     <dd className="font-semibold text-green-400">Grátis</dd>
                   ) : freteSelecionado ? (
                     <dd className="text-neutral-300">
@@ -453,7 +450,6 @@ export default function CartPage() {
                           key={option.id}
                           type="button"
                           onClick={() => {
-                            setRetirada(false);
                             setFreteSelecionado(option);
                           }}
                           aria-pressed={ativo}
@@ -483,44 +479,6 @@ export default function CartPage() {
                   </div>
                 ) : null}
               </div>
-
-              <button
-                type="button"
-                onClick={() => {
-                  setRetirada(true);
-                  setFreteSelecionado(null);
-                  setFreteOptions([]);
-                }}
-                aria-pressed={retirada}
-                className={`mt-4 flex w-full items-center justify-between gap-3 rounded-2xl border p-4 text-left transition-colors ${
-                  retirada
-                    ? "border-brand bg-brand/10"
-                    : "border-graphite-border bg-graphite-light hover:border-neutral-600"
-                }`}
-              >
-                <span className="flex items-center gap-3">
-                  <Store size={18} className={retirada ? "text-brand" : "text-neutral-400"} />
-                  <span>
-                    <span className="block text-sm font-semibold text-white">
-                      Retirada na loja
-                    </span>
-                    <span className="block text-xs text-neutral-400">
-                      Sem custo de entrega
-                    </span>
-                  </span>
-                </span>
-                <span className="shrink-0 text-sm font-bold text-brand">Grátis</span>
-              </button>
-
-              {retirada ? (
-                <div className="mt-3 rounded-xl border border-graphite-border bg-graphite-light p-4 text-sm">
-                  <p className="text-xs font-bold uppercase tracking-[0.3em] text-neutral-500">
-                    Endereço da loja
-                  </p>
-                  <p className="mt-2 font-medium text-white">Av. Exemplo, 000 - Bairro</p>
-                  <p className="text-neutral-400">Cidade/UF</p>
-                </div>
-              ) : null}
 
               <form onSubmit={handleCheckout} className="mt-6 space-y-6">
                 <div className="space-y-4">

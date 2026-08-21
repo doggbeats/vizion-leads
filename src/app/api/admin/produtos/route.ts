@@ -59,6 +59,12 @@ export async function POST(request: Request) {
   const categorySlug = typeof body?.categorySlug === "string" ? body.categorySlug : "";
   const price = parseFloatSafe(body?.price);
   const promotionalPrice = parseFloatSafe(body?.promotionalPrice);
+  const promoQuantityRaw = parseFloatSafe(body?.promoQuantity);
+  const promoQuantity =
+    promoQuantityRaw !== null && Number.isFinite(promoQuantityRaw)
+      ? Math.max(0, Math.round(promoQuantityRaw))
+      : null;
+  const promoPrice = parseFloatSafe(body?.promoPrice);
   const stock = Number.isInteger(body?.stock) ? body.stock : Number(body?.stock);
 
   if (!name || !description || !categorySlug || price === null) {
@@ -81,6 +87,8 @@ export async function POST(request: Request) {
         categorySlug,
         price,
         promotionalPrice,
+        promoQuantity: promoQuantity && promoQuantity > 0 ? promoQuantity : null,
+        promoPrice: promoPrice ?? null,
         subcategory:
           typeof body?.subcategory === "string" && body.subcategory.trim() !== ""
             ? body.subcategory.trim()

@@ -350,7 +350,7 @@ export function AccessibilityWidget() {
         aria-label={open ? "Fechar painel de acessibilidade" : "Abrir painel de acessibilidade"}
         title="Acessibilidade"
         data-a11y-widget
-        className="fixed bottom-16 left-3 z-[60] flex h-9 w-9 items-center justify-center rounded-full bg-brand text-ink shadow-lg shadow-black/40 transition-transform hover:scale-105 sm:left-auto sm:right-4 sm:bottom-4 sm:h-11 sm:w-11"
+        className="fixed bottom-4 right-3 z-[60] flex h-9 w-9 items-center justify-center rounded-full bg-brand text-ink shadow-lg shadow-black/40 transition-transform hover:scale-105 sm:right-4 sm:h-11 sm:w-11"
       >
         {open ? <X size={22} /> : <Accessibility size={22} />}
       </button>
@@ -361,7 +361,7 @@ export function AccessibilityWidget() {
           role="dialog"
           aria-label="Opções de acessibilidade"
           data-a11y-widget
-          className="fixed bottom-28 left-3 z-[60] w-52 rounded-xl border border-graphite-border bg-graphite p-2.5 shadow-xl shadow-black/50 sm:left-auto sm:bottom-16 sm:right-4 sm:w-72 sm:rounded-2xl sm:p-4"
+          className="fixed bottom-16 right-3 z-[60] w-52 rounded-xl border border-graphite-border bg-graphite p-2.5 shadow-xl shadow-black/50 sm:bottom-16 sm:right-4 sm:w-72 sm:rounded-2xl sm:p-4"
         >
           <div className="grid grid-cols-2 gap-2">
             <A11yButton

@@ -5,10 +5,10 @@ import Image from "next/image";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 const slides = [
-  { src: "/images/newimagem2.jpg", alt: "Vizion Store" },
-  { src: "/images/pagina_principal1.jpg", alt: "Vizion Store" },
-  { src: "/images/pagina_principal2.jpg", alt: "Vizion Store" },
-  { src: "/images/pagina_principal3.jpg", alt: "Vizion Store" },
+  { src: "/images/newimage1.jpg", alt: "Vizion Store" },
+  { src: "/images/newimage2.jpg", alt: "Vizion Store" },
+  { src: "/images/newimage3.jpg", alt: "Vizion Store" },
+  { src: "/images/newimage.jpg", alt: "Vizion Store" },
 ];
 
 export function NovidadesCarousel() {
@@ -40,7 +40,7 @@ export function NovidadesCarousel() {
           onMouseEnter={() => setPaused(true)}
           onMouseLeave={() => setPaused(false)}
         >
-          <div className="relative aspect-[5/2] w-full">
+          <div className="relative aspect-[16/7] w-full">
             {slides.map((slide, i) => (
               <Image
                 key={slide.src}

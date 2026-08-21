@@ -5,10 +5,10 @@ import Image from "next/image";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 const slides = [
+  { src: "/images/newimage.jpg", alt: "Vizion Store" },
   { src: "/images/newimage1.jpg", alt: "Vizion Store" },
   { src: "/images/newimage2.jpg", alt: "Vizion Store" },
   { src: "/images/newimage3.jpg", alt: "Vizion Store" },
-  { src: "/images/newimage.jpg", alt: "Vizion Store" },
 ];
 
 export function NovidadesCarousel() {

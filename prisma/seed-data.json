@@ -47,6 +47,12 @@
       "name": "Regatas",
       "description": "Regatas masculinas para um visual marcante.",
       "image": "/images/categories/camisetas.jpg"
+    },
+    {
+      "slug": "calcados",
+      "name": "Calçados",
+      "description": "Calçados masculinos confortáveis e estilosos.",
+      "image": "/images/categories/camisetas.jpg"
     }
   ],
   "products": [

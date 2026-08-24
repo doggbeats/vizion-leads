@@ -6,6 +6,7 @@ import { Plus, Pencil, Trash2, Star, ImagePlus } from "lucide-react";
 import { Modal } from "@/components/ui/Modal";
 import { formatCurrency } from "@/lib/format";
 import { getSubcategories, getSubcategoryLabel } from "@/lib/catalog";
+import { PRODUCT_COLORS } from "@/lib/colors";
 
 export type AdminProduct = {
   id: string;
@@ -19,6 +20,7 @@ export type AdminProduct = {
   subcategory: string | null;
   images: string[];
   sizes: string[];
+  colors?: string[];
   stock: number;
   weight: number;
   width: number;
@@ -42,6 +44,7 @@ type FormState = {
   subcategory: string;
   images: string;
   sizes: string;
+  colors: string[];
   stock: string;
   weight: string;
   width: string;
@@ -63,6 +66,7 @@ const emptyForm: FormState = {
   subcategory: "",
   images: "",
   sizes: "",
+  colors: [],
   stock: "0",
   weight: "0.5",
   width: "30",
@@ -109,6 +113,7 @@ export function ProdutosManager({
       subcategory: product.subcategory ?? "",
       images: product.images.join(", "),
       sizes: product.sizes.join(", "),
+      colors: product.colors ?? [],
       stock: String(product.stock),
       weight: String(product.weight),
       width: String(product.width),
@@ -137,6 +142,7 @@ export function ProdutosManager({
       subcategory: form.subcategory,
       images: form.images,
       sizes: form.sizes,
+      colors: form.colors,
       stock: form.stock,
       weight: form.weight,
       width: form.width,
@@ -191,6 +197,15 @@ export function ProdutosManager({
 
   function setFormImages(urls: string[]) {
     setForm({ ...form, images: urls.join(", ") });
+  }
+
+  function toggleColor(slug: string) {
+    setForm((prev) => ({
+      ...prev,
+      colors: prev.colors.includes(slug)
+        ? prev.colors.filter((c) => c !== slug)
+        : [...prev.colors, slug],
+    }));
   }
 
   function removerImagem(url: string) {
@@ -419,6 +434,23 @@ export function ProdutosManager({
                         <p className="text-xs text-neutral-500">
                           {product.sizes.join(", ") || "Sem tamanhos"}
                         </p>
+                        {(product.colors ?? []).length > 0 ? (
+                          <div className="mt-1 flex items-center gap-1">
+                            {product.colors!.map((slug) => (
+                              <span
+                                key={slug}
+                                title={slug}
+                                aria-hidden
+                                className="h-3 w-3 rounded-full border border-white/20"
+                                style={{
+                                  backgroundColor: PRODUCT_COLORS.find(
+                                    (c) => c.slug === slug,
+                                  )?.hex,
+                                }}
+                              />
+                            ))}
+                          </div>
+                        ) : null}
                       </div>
                     </div>
                   </td>
@@ -775,6 +807,40 @@ export function ProdutosManager({
             />
             <p className="mt-1 text-xs text-neutral-500">
               Permitidos: PP, P, M, G, GG, XG, U, 38, 40, 42, 44, 46, 48, 50
+            </p>
+          </div>
+
+          <div>
+            <label className="mb-1.5 block text-sm font-medium text-neutral-300">
+              Cores disponíveis
+            </label>
+            <div className="flex flex-wrap gap-2">
+              {PRODUCT_COLORS.map((color) => {
+                const selected = form.colors.includes(color.slug);
+                return (
+                  <button
+                    key={color.slug}
+                    type="button"
+                    onClick={() => toggleColor(color.slug)}
+                    aria-pressed={selected}
+                    className={`flex items-center gap-2 rounded-full border px-3 py-1.5 text-sm font-medium transition-colors ${
+                      selected
+                        ? "border-brand bg-brand/10 text-white"
+                        : "border-graphite-border text-neutral-400 hover:border-neutral-500 hover:text-white"
+                    }`}
+                  >
+                    <span
+                      aria-hidden
+                      className="h-4 w-4 rounded-full border border-white/20"
+                      style={{ backgroundColor: color.hex }}
+                    />
+                    {color.label}
+                  </button>
+                );
+              })}
+            </div>
+            <p className="mt-1 text-xs text-neutral-500">
+              Selecione as cores disponíveis para esta camisa.
             </p>
           </div>
 

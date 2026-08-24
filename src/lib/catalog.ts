@@ -91,6 +91,16 @@ export const categories: Category[] = [
     metaDescription:
       "Regatas masculinas com caimento perfeito para treino e look do dia a dia. Modelagens modernas e qualidade premium.",
   },
+  {
+    slug: "calcados",
+    name: "Calçados",
+    description:
+      "Calçados masculinos confortáveis e estilosos para completar o look streetwear.",
+    image: "/images/categories/camisetas.jpg",
+    metaTitle: "Calçados Masculinos | Estilo Streetwear VIZION",
+    metaDescription:
+      "Calçados masculinos VIZION com conforto, durabilidade e estilo streetwear. Entrega para todo o Brasil.",
+  },
 ];
 
 export const categorySubcategories: Record<string, string[]> = {

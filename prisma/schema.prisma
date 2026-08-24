@@ -66,6 +66,7 @@ model Product {
   subcategory      String?
   images           String[]
   sizes            String[]
+  colors           String[]    @default([])
   stock            Int         @default(0)
   weight           Float       @default(0.5)
   width            Float       @default(30)

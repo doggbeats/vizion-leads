@@ -12,6 +12,7 @@ import { useSession } from "@/lib/session";
 import { useToast } from "@/components/ui/toast";
 import { Modal } from "@/components/ui/Modal";
 import { Badge } from "@/components/ui/Badge";
+import { getColorHex, getColorLabel } from "@/lib/colors";
 
 type QuickViewModalProps = {
   product: Product;
@@ -145,6 +146,28 @@ export function QuickViewModal({ product, open, onClose }: QuickViewModalProps) 
             </p>
           ) : null}
         </div>
+
+        {(product.colors?.length ?? 0) > 0 ? (
+          <div className="mt-4">
+            <p className="mb-2 text-xs font-bold uppercase tracking-widest text-neutral-500">
+              Cores disponíveis
+            </p>
+            <div className="flex flex-wrap items-center gap-2">
+              {product.colors!.map((slug) => (
+                <span
+                  key={slug}
+                  title={getColorLabel(slug)}
+                  className={`h-7 w-7 rounded-full border-2 ${
+                    getColorHex(slug).toLowerCase() === "#ffffff"
+                      ? "border-graphite-border"
+                      : "border-transparent"
+                  }`}
+                  style={{ backgroundColor: getColorHex(slug) }}
+                />
+              ))}
+            </div>
+          </div>
+        ) : null}
 
         {product.sizes.length > 0 ? (
           <div className="mt-4">

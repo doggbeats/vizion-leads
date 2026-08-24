@@ -11,6 +11,7 @@ import { formatCurrency } from "@/lib/format";
 import { useCart } from "@/lib/cart";
 import { useSession } from "@/lib/session";
 import { useToast } from "@/components/ui/toast";
+import { getColorHex, getColorLabel } from "@/lib/colors";
 
 type Props = { product: Product };
 
@@ -92,6 +93,23 @@ export function FeaturedProductCard({ product }: Props) {
             </span>
           ) : null}
         </div>
+
+        {(product.colors?.length ?? 0) > 0 ? (
+          <div className="mt-2 flex items-center gap-1">
+            {product.colors!.map((slug) => (
+              <span
+                key={slug}
+                title={getColorLabel(slug)}
+                className={`h-3.5 w-3.5 rounded-full border ${
+                  getColorHex(slug).toLowerCase() === "#ffffff"
+                    ? "border-graphite-border"
+                    : "border-white/20"
+                }`}
+                style={{ backgroundColor: getColorHex(slug) }}
+              />
+            ))}
+          </div>
+        ) : null}
 
         {product.sizes.length > 0 ? (
           <div className="mt-2 flex flex-wrap gap-1">

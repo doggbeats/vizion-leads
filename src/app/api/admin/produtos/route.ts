@@ -1,8 +1,10 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { requireAdmin, adminUnauthorized } from "@/lib/admin";
+import { PRODUCT_COLORS } from "@/lib/colors";
 
 const ALLOWED_SIZES = new Set(["PP", "P", "M", "G", "GG", "XG", "U", "38", "40", "42", "44", "46", "48", "50"]);
+const ALLOWED_COLORS = new Set(PRODUCT_COLORS.map((c) => c.slug));
 
 function parseImages(raw: unknown): string[] {
   if (Array.isArray(raw)) {
@@ -26,6 +28,25 @@ function parseSizes(raw: unknown): string[] {
       .split(",")
       .map((s) => s.trim().toUpperCase())
       .filter((s) => ALLOWED_SIZES.has(s));
+  }
+  return [];
+}
+
+function parseColors(raw: unknown): string[] {
+  const normalize = (s: string) =>
+    s
+      .trim()
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "");
+  if (Array.isArray(raw)) {
+    return raw.map(String).map(normalize).filter((s) => ALLOWED_COLORS.has(s));
+  }
+  if (typeof raw === "string") {
+    return raw
+      .split(",")
+      .map(normalize)
+      .filter((s) => ALLOWED_COLORS.has(s));
   }
   return [];
 }
@@ -95,6 +116,7 @@ export async function POST(request: Request) {
             : null,
         images,
         sizes: parseSizes(body?.sizes),
+        colors: parseColors(body?.colors),
         stock: Number.isFinite(stock) ? stock : 0,
         weight: parseFloatSafe(body?.weight) ?? 0.5,
         width: parseFloatSafe(body?.width) ?? 30,

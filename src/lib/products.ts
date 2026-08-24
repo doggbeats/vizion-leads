@@ -28,6 +28,7 @@ function mapProduct(row: {
   subcategory: string | null;
   images: string[];
   sizes: string[];
+  colors: string[];
   stock: number;
   featured: boolean;
   active: boolean;
@@ -44,6 +45,7 @@ function mapProduct(row: {
     subcategory: row.subcategory ?? undefined,
     images: row.images,
     sizes: row.sizes as ProductSize[],
+    colors: row.colors,
     stock: row.stock,
     featured: row.featured,
     active: row.active,

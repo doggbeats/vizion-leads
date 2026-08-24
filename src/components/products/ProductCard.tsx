@@ -11,6 +11,7 @@ import { useCart } from "@/lib/cart";
 import { useSession } from "@/lib/session";
 import { useToast } from "@/components/ui/toast";
 import { Badge } from "@/components/ui/Badge";
+import { getColorHex, getColorLabel } from "@/lib/colors";
 import { QuickViewModal } from "./QuickViewModal";
 
 type ProductCardProps = {
@@ -118,6 +119,23 @@ export function ProductCard({ product }: ProductCardProps) {
             <Tag size={12} />
             Leve {product.promoQuantity} por {formatCurrency(product.promoPrice)}
           </p>
+        ) : null}
+
+        {(product.colors?.length ?? 0) > 0 ? (
+          <div className="mt-2 flex items-center gap-1.5">
+            {product.colors!.map((slug) => (
+              <span
+                key={slug}
+                title={getColorLabel(slug)}
+                className={`h-4 w-4 rounded-full border ${
+                  getColorHex(slug).toLowerCase() === "#ffffff"
+                    ? "border-graphite-border"
+                    : "border-white/20"
+                }`}
+                style={{ backgroundColor: getColorHex(slug) }}
+              />
+            ))}
+          </div>
         ) : null}
 
         {product.sizes.length > 0 ? (

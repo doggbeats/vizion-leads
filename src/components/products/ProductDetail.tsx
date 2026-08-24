@@ -11,6 +11,7 @@ import { formatCurrency } from "@/lib/format";
 import { useCart } from "@/lib/cart";
 import { useSession } from "@/lib/session";
 import { useToast } from "@/components/ui/toast";
+import { getColorHex, getColorLabel } from "@/lib/colors";
 
 type ProductDetailProps = {
   product: Product;
@@ -155,6 +156,30 @@ export function ProductDetail({ product }: ProductDetailProps) {
             <p className="mt-6 text-sm leading-relaxed text-neutral-400">
               {product.description}
             </p>
+          ) : null}
+
+          {(product.colors?.length ?? 0) > 0 ? (
+            <div className="mt-8">
+              <p className="mb-3 text-xs font-bold uppercase tracking-widest text-neutral-500">
+                Cores disponíveis
+              </p>
+              <div className="flex flex-wrap items-center gap-2.5">
+                {product.colors!.map((slug) => (
+                  <span
+                    key={slug}
+                    title={getColorLabel(slug)}
+                    className={`flex h-9 w-9 items-center justify-center rounded-full border-2 ${
+                      getColorHex(slug).toLowerCase() === "#ffffff"
+                        ? "border-graphite-border"
+                        : "border-transparent"
+                    }`}
+                    style={{ backgroundColor: getColorHex(slug) }}
+                  >
+                    <span className="sr-only">{getColorLabel(slug)}</span>
+                  </span>
+                ))}
+              </div>
+            </div>
           ) : null}
 
           {product.sizes.length > 0 ? (

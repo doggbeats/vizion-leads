@@ -28,6 +28,7 @@ export default async function AdminProdutosPage() {
     subcategory: product.subcategory,
     images: product.images,
     sizes: product.sizes,
+    colors: product.colors,
     stock: product.stock,
     weight: product.weight,
     width: product.width,

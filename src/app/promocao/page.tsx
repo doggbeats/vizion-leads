@@ -8,12 +8,12 @@ import { ProductGrid } from "@/components/products/ProductGrid";
 export const metadata: Metadata = {
   title: "Promoções e Liquidação | VIZION Store",
   description:
-    "Aproveite as melhores ofertas da VIZION: liquidação e queima de estoque com até 70% OFF em peças streetwear premium masculinas.",
+    "Aproveite as melhores ofertas da VIZION: liquidação e queima de estoque com até 30% OFF em peças streetwear premium masculinas.",
   alternates: { canonical: "/promocao" },
   openGraph: {
     title: "Promoções e Liquidação | VIZION Store",
     description:
-      "Liquidação e queima de estoque com até 70% OFF em peças streetwear premium masculinas.",
+      "Liquidação e queima de estoque com até 30% OFF em peças streetwear premium masculinas.",
     url: `${siteConfig.url}/promocao`,
     type: "website",
     siteName: siteConfig.fullName,
@@ -58,7 +58,7 @@ export default async function PromocaoPage() {
           <p className="mt-4 max-w-2xl text-base leading-relaxed text-neutral-400">
             Aproveite a queima de estoque com preços imperdíveis. Peças
             selecionadas com descontos de até{" "}
-            <span className="font-bold text-brand">70% OFF</span>.
+            <span className="font-bold text-brand">30% OFF</span>.
           </p>
           <p className="mt-4 text-sm font-medium text-neutral-500">
             {products.length}{" "}

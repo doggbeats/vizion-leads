@@ -1,8 +1,10 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { requireAdmin, adminUnauthorized } from "@/lib/admin";
+import { PRODUCT_COLORS } from "@/lib/colors";
 
 const ALLOWED_SIZES = new Set(["PP", "P", "M", "G", "GG", "XG", "U", "38", "40", "42", "44", "46", "48", "50"]);
+const ALLOWED_COLORS = new Set(PRODUCT_COLORS.map((c) => c.slug));
 
 function parseImages(raw: unknown): string[] | null {
   if (raw === undefined) return null;
@@ -21,6 +23,21 @@ function parseSizes(raw: unknown): string[] | null {
       ? raw.split(",").map((s) => s.trim().toUpperCase()).filter((s) => ALLOWED_SIZES.has(s))
       : [];
   return parsed;
+}
+
+function parseColors(raw: unknown): string[] | null {
+  if (raw === undefined) return null;
+  const normalize = (s: string) =>
+    s
+      .trim()
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "");
+  return Array.isArray(raw)
+    ? raw.map(String).map(normalize).filter((s) => ALLOWED_COLORS.has(s))
+    : typeof raw === "string"
+      ? raw.split(",").map(normalize).filter((s) => ALLOWED_COLORS.has(s))
+      : [];
 }
 
 function parseFloatSafe(value: unknown): number | null | undefined {
@@ -88,6 +105,7 @@ export async function PATCH(request: Request, { params }: RouteProps) {
     data.images = images;
   }
   if (body.sizes !== undefined) data.sizes = parseSizes(body.sizes) ?? [];
+  if (body.colors !== undefined) data.colors = parseColors(body.colors) ?? [];
   if (body.stock !== undefined) {
     const stock = Number(body.stock);
     data.stock = Number.isFinite(stock) ? Math.max(0, Math.round(stock)) : 0;
@@ -112,7 +130,17 @@ export async function PATCH(request: Request, { params }: RouteProps) {
     return NextResponse.json({ product });
   } catch (error) {
     console.error("Erro ao atualizar produto:", JSON.stringify(error, Object.getOwnPropertyNames(error)));
-    return NextResponse.json({ error: "Produto não encontrado." }, { status: 404 });
+    if (typeof error === "object" && error !== null && "code" in error) {
+      const prismaCode = (error as { code?: string }).code;
+      if (prismaCode === "P2025") {
+        return NextResponse.json({ error: "Produto não encontrado." }, { status: 404 });
+      }
+      return NextResponse.json(
+        { error: "Erro de validação ao salvar. Reinicie o servidor e tente novamente." },
+        { status: 500 },
+      );
+    }
+    return NextResponse.json({ error: "Erro ao salvar o produto." }, { status: 500 });
   }
 }
 

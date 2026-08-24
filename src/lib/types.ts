@@ -35,6 +35,7 @@ export type Product = {
   subcategory?: string;
   images: string[];
   sizes: ProductSize[];
+  colors?: string[];
   stock: number;
   featured?: boolean;
   active: boolean;

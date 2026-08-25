@@ -1,46 +1,25 @@
 "use client";
 
-import { useSyncExternalStore } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { X } from "lucide-react";
+import { useState } from "react";
 import { useSession } from "@/lib/session";
-
-const STORAGE_KEY = "floating-sorteio-fechado";
-const EVENTO = "floating-promo-change";
-
-function inscrever(callback: () => void) {
-  window.addEventListener("storage", callback);
-  window.addEventListener(EVENTO, callback);
-  return () => {
-    window.removeEventListener("storage", callback);
-    window.removeEventListener(EVENTO, callback);
-  };
-}
-
-function estaFechado() {
-  return sessionStorage.getItem(STORAGE_KEY) === "1";
-}
 
 export function FloatingPromo() {
   const { user, loading } = useSession();
-  const fechado = useSyncExternalStore(inscrever, estaFechado, () => false);
-
-  function fechar() {
-    sessionStorage.setItem(STORAGE_KEY, "1");
-    window.dispatchEvent(new Event(EVENTO));
-  }
+  const [visible, setVisible] = useState(true);
 
   if (loading) return null;
   if (user) return null;
-  if (fechado) return null;
+  if (!visible) return null;
 
   return (
     <div className="fixed inset-x-0 bottom-0 z-50 sm:bottom-3">
       <div className="relative mx-2 mb-2 max-w-[480px] overflow-hidden rounded-xl border border-graphite-border bg-graphite shadow-xl shadow-black/50 sm:mx-auto sm:rounded-2xl sm:mb-0">
         <button
           type="button"
-          onClick={fechar}
+          onClick={() => setVisible(false)}
           aria-label="Fechar"
           className="absolute right-1.5 top-1 z-10 flex h-6 w-6 items-center justify-center rounded-full bg-black/70 text-white transition-colors hover:bg-black"
         >

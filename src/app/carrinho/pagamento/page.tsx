@@ -47,7 +47,7 @@ function buildWhatsAppUrl(payment: PaymentData, metodo: MetodoId): string {
     "",
     ...payment.items.flatMap((item) => [
       `Produto: ${item.productName}`,
-      `Tamanho: ${item.size}`,
+      `Tamanho: ${item.size}${item.color ? ` · Cor: ${item.color}` : ""}`,
       `Quantidade: ${item.quantity}x`,
       `Valor: ${formatCurrency(item.price * item.quantity)}`,
       "",
@@ -229,7 +229,7 @@ export default function PagamentoPage() {
                         {item.productName}
                       </p>
                       <p className="text-xs text-neutral-500">
-                        Tam {item.size} · {item.quantity}x{" "}
+                        Tam {item.size}{item.color ? ` · ${item.color}` : ""} · {item.quantity}x{" "}
                         {formatCurrency(item.price)}
                       </p>
                     </div>

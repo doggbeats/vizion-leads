@@ -9,6 +9,7 @@ type OrderItemInput = {
   price: number;
   quantity: number;
   size: string;
+  color?: string | null;
 };
 
 export async function POST(request: Request) {
@@ -46,6 +47,7 @@ export async function POST(request: Request) {
       const price = Number(item?.price);
       const quantity = Number(item?.quantity);
       const size = typeof item?.size === "string" ? item.size.trim() : "";
+      const color = typeof item?.color === "string" && item.color.trim() !== "" ? item.color.trim() : null;
       if (
         !productId ||
         !productName ||
@@ -56,7 +58,7 @@ export async function POST(request: Request) {
       ) {
         return null;
       }
-      return { productId, productName, price, quantity, size };
+      return { productId, productName, price, quantity, size, color };
     })
     .filter(
       (item: OrderItemInput | null): item is OrderItemInput => item !== null,
@@ -126,6 +128,7 @@ export async function POST(request: Request) {
       promoPrice: product.promoPrice ?? null,
       quantity: item.quantity,
       size: item.size,
+      color: item.color ?? null,
     };
   });
 
@@ -180,12 +183,13 @@ export async function POST(request: Request) {
           total: totalComFrete,
           items: {
             create: computedItems.map(
-              ({ productId, productName, price, quantity, size }) => ({
+              ({ productId, productName, price, quantity, size, color }) => ({
                 productId,
                 productName,
                 price,
                 quantity,
                 size,
+                color: color ?? null,
               }),
             ),
           },

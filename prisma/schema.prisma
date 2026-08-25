@@ -118,4 +118,5 @@ model OrderItem {
   price       Float
   quantity    Int
   size        String
+  color       String?
 }

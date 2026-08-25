@@ -22,6 +22,7 @@ import { useSession } from "@/lib/session";
 import { useToast } from "@/components/ui/toast";
 import { formatCurrency, formatCep } from "@/lib/format";
 import { saveCheckoutData, savePaymentData, clearCheckoutData } from "@/lib/checkout";
+import { getColorLabel } from "@/lib/colors";
 import type { ProductSize } from "@/lib/types";
 
 type FreteOption = {
@@ -146,6 +147,7 @@ export default function CartPage() {
             price: item.product.promotionalPrice ?? item.product.price,
             quantity: item.quantity,
             size: item.size,
+            color: item.color ?? null,
           })),
         }),
       });
@@ -160,11 +162,12 @@ export default function CartPage() {
           frete: 0,
           desconto: 0,
           items: data.order.items.map(
-            (item: { productName: string; price: number; quantity: number; size: string }) => ({
+            (item: { productName: string; price: number; quantity: number; size: string; color?: string | null }) => ({
               productName: item.productName,
               price: item.price,
               quantity: item.quantity,
               size: item.size,
+              color: item.color ?? null,
             }),
           ),
           customerName: nome,
@@ -234,7 +237,7 @@ export default function CartPage() {
 
                 return (
                   <article
-                    key={`${item.product.id}-${item.size}`}
+                    key={`${item.product.id}-${item.size}-${item.color ?? ""}`}
                     className="flex flex-col gap-4 rounded-2xl border border-graphite-border bg-graphite p-4 sm:flex-row sm:items-center sm:p-5"
                   >
                     <div className="relative aspect-square w-full shrink-0 overflow-hidden rounded-xl bg-graphite-light sm:w-28">
@@ -254,12 +257,12 @@ export default function CartPage() {
                             {item.product.name}
                           </h3>
                           <p className="mt-1 text-xs font-medium uppercase tracking-wider text-neutral-500">
-                            Tamanho {item.size}
+                            Tam {item.size}{item.color ? ` · ${getColorLabel(item.color)}` : ""}
                           </p>
                         </div>
                         <button
                           type="button"
-                          onClick={() => removeItem(item.product.id, item.size)}
+                          onClick={() => removeItem(item.product.id, item.size, item.color)}
                           aria-label={`Remover ${item.product.name} do carrinho`}
                           className="rounded-lg p-2 text-neutral-500 transition-colors hover:bg-graphite-light hover:text-red-400"
                         >
@@ -276,6 +279,7 @@ export default function CartPage() {
                                 item.product.id,
                                 item.size as ProductSize,
                                 item.quantity - 1,
+                                item.color,
                               )
                             }
                             disabled={item.quantity <= 1}
@@ -297,6 +301,7 @@ export default function CartPage() {
                                 item.product.id,
                                 item.size as ProductSize,
                                 item.quantity + 1,
+                                item.color,
                               )
                             }
                             disabled={item.quantity >= item.product.stock}
@@ -350,7 +355,7 @@ export default function CartPage() {
                   const price = item.product.promotionalPrice ?? item.product.price;
                   return (
                     <li
-                      key={`${item.product.id}-${item.size}`}
+                      key={`${item.product.id}-${item.size}-${item.color ?? ""}`}
                       className="flex items-start gap-3"
                     >
                       <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-lg bg-graphite-light">
@@ -367,7 +372,7 @@ export default function CartPage() {
                           {item.product.name}
                         </p>
                         <p className="text-xs text-neutral-500">
-                          Tam {item.size} · {item.quantity}x{" "}
+                          Tam {item.size}{item.color ? ` · ${getColorLabel(item.color)}` : ""} · {item.quantity}x{" "}
                           {formatCurrency(price)}
                         </p>
                       </div>

@@ -15,6 +15,7 @@ export type AdminOrderItem = {
   price: number;
   quantity: number;
   size: string;
+  color?: string | null;
 };
 
 export type AdminOrder = {
@@ -916,6 +917,7 @@ export function PedidosManager({
                     <p className="truncate font-medium text-white">
                       {item.productName}
                       {item.size ? <span className="text-neutral-500"> · {item.size}</span> : null}
+                      {item.color ? <span className="text-neutral-500"> · {item.color}</span> : null}
                     </p>
                     <p className="text-xs text-neutral-500">
                       {item.quantity} x {formatCurrency(item.price)}

@@ -54,17 +54,42 @@ export function ProductCard({ product }: ProductCardProps) {
       return;
     }
 
-    addItem(product, selectedSize);
+    addItem(product, selectedSize, 1, selectedColor || undefined);
     showToast(`${product.name} adicionado ao carrinho`);
+  };
+
+  const handleImageClick = async () => {
+    if (soldOut || product.sizes.length === 0) return;
+
+    let loggedUser = user;
+    if (!loggedUser) {
+      const response = await fetch("/api/auth/me");
+      const data = await response.json().catch(() => ({}));
+      loggedUser = data.user ?? null;
+    }
+
+    if (!loggedUser) {
+      const redirect = encodeURIComponent(
+        window.location.pathname + window.location.search,
+      );
+      showToast("Faça login ou cadastre-se para comprar");
+      router.push(`/login?redirect=${redirect}`);
+      return;
+    }
+
+    addItem(product, selectedSize, 1, selectedColor || undefined);
+    showToast(`${product.name} adicionado ao carrinho`);
+    router.push("/carrinho");
   };
 
   return (
     <article className="group flex flex-col overflow-hidden rounded-2xl border border-graphite-border bg-graphite transition-all duration-300 hover:border-brand/60 hover:shadow-xl hover:shadow-black/40">
       <button
         type="button"
-        onClick={() => setQuickViewOpen(true)}
-        className="relative block aspect-square w-full overflow-hidden bg-graphite-light"
-        aria-label={`Ampliar foto de ${product.name}`}
+        onClick={handleImageClick}
+        disabled={soldOut || product.sizes.length === 0}
+        className="relative block aspect-square w-full overflow-hidden bg-graphite-light disabled:opacity-40"
+        aria-label={`Adicionar ${product.name} ao carrinho`}
       >
         <Image
           src={product.images[0]}
@@ -83,7 +108,7 @@ export function ProductCard({ product }: ProductCardProps) {
         ) : null}
         <span className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
           <span className="rounded-full bg-brand px-4 py-2 text-xs font-bold uppercase tracking-wider text-ink">
-            Ampliar foto
+            Comprar
           </span>
         </span>
       </button>

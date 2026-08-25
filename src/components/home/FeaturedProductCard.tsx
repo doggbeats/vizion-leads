@@ -48,8 +48,31 @@ export function FeaturedProductCard({ product }: Props) {
       return;
     }
 
-    addItem(product, selectedSize);
+    addItem(product, selectedSize, 1, selectedColor || undefined);
     showToast(`${product.name} adicionado ao carrinho`);
+  };
+
+  const handleImageClick = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (soldOut || product.sizes.length === 0) return;
+
+    let loggedUser = user;
+    if (!loggedUser) {
+      const response = await fetch("/api/auth/me");
+      const data = await response.json().catch(() => ({}));
+      loggedUser = data.user ?? null;
+    }
+
+    if (!loggedUser) {
+      showToast("Faça login ou cadastre-se para comprar");
+      router.push("/login?redirect=/");
+      return;
+    }
+
+    addItem(product, selectedSize, 1, selectedColor || undefined);
+    showToast(`${product.name} adicionado ao carrinho`);
+    router.push("/carrinho");
   };
 
   return (
@@ -59,13 +82,26 @@ export function FeaturedProductCard({ product }: Props) {
     >
       <div className="relative aspect-[2/3] overflow-hidden">
         {product.images[0] ? (
-          <Image
-            src={product.images[0]}
-            alt={product.name}
-            fill
-            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 25vw, 25vw"
-            className="object-cover transition-transform duration-500 group-hover:scale-105"
-          />
+          <button
+            type="button"
+            onClick={handleImageClick}
+            disabled={soldOut || product.sizes.length === 0}
+            className="relative block h-full w-full disabled:opacity-40"
+            aria-label={`Adicionar ${product.name} ao carrinho`}
+          >
+            <Image
+              src={product.images[0]}
+              alt={product.name}
+              fill
+              sizes="(max-width: 640px) 50vw, (max-width: 1024px) 25vw, 25vw"
+              className="object-cover transition-transform duration-500 group-hover:scale-105"
+            />
+            <span className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+              <span className="rounded-full bg-brand px-4 py-2 text-xs font-bold uppercase tracking-wider text-ink">
+                Comprar
+              </span>
+            </span>
+          </button>
         ) : null}
         {hasPromotion ? (
           <span className="absolute left-3 top-3 z-10 rounded-full bg-brand px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-ink">

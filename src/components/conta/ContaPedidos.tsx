@@ -10,6 +10,7 @@ type OrderItem = {
   price: number;
   quantity: number;
   size: string;
+  color?: string | null;
 };
 
 type Order = {
@@ -222,6 +223,9 @@ export function ContaPedidos() {
                           {item.productName}
                           {item.size ? (
                             <span className="text-zinc-500"> · {item.size}</span>
+                          ) : null}
+                          {item.color ? (
+                            <span className="text-zinc-500"> · {item.color}</span>
                           ) : null}
                           <span className="text-zinc-500">
                             {" "}

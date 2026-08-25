@@ -45,4 +45,5 @@ export type CartItem = {
   product: Product;
   size: ProductSize;
   quantity: number;
+  color?: string;
 };

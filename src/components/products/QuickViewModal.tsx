@@ -56,7 +56,7 @@ export function QuickViewModal({ product, open, onClose }: QuickViewModalProps) 
       return;
     }
 
-    addItem(product, selectedSize);
+    addItem(product, selectedSize, 1, selectedColor || undefined);
     showToast(`${product.name} adicionado ao carrinho`);
     onClose();
   };

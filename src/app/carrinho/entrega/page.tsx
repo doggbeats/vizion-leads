@@ -18,6 +18,7 @@ import { useCart } from "@/lib/cart";
 import { useSession } from "@/lib/session";
 import { useToast } from "@/components/ui/toast";
 import { formatCurrency, formatCep } from "@/lib/format";
+import { getColorLabel } from "@/lib/colors";
 import {
   clearCheckoutData,
   loadCheckoutData,
@@ -173,6 +174,7 @@ export default function EntregaPage() {
             price: item.product.promotionalPrice ?? item.product.price,
             quantity: item.quantity,
             size: item.size,
+            color: item.color ?? null,
           })),
         }),
       });
@@ -188,11 +190,12 @@ export default function EntregaPage() {
           frete: data.order.frete ?? 0,
           desconto: 0,
           items: data.order.items.map(
-            (item: { productName: string; price: number; quantity: number; size: string }) => ({
+            (item: { productName: string; price: number; quantity: number; size: string; color?: string | null }) => ({
               productName: item.productName,
               price: item.price,
               quantity: item.quantity,
               size: item.size,
+              color: item.color ?? null,
             }),
           ),
           customerName: checkout.customerName,
@@ -422,7 +425,7 @@ export default function EntregaPage() {
                   const price = item.product.promotionalPrice ?? item.product.price;
                   return (
                     <li
-                      key={`${item.product.id}-${item.size}`}
+                      key={`${item.product.id}-${item.size}-${item.color ?? ""}`}
                       className="flex items-start gap-3"
                     >
                       <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-lg bg-graphite-light">
@@ -439,7 +442,7 @@ export default function EntregaPage() {
                           {item.product.name}
                         </p>
                         <p className="text-xs text-neutral-500">
-                          Tam {item.size} · {item.quantity}x {formatCurrency(price)}
+                          Tam {item.size}{item.color ? ` · ${getColorLabel(item.color)}` : ""} · {item.quantity}x {formatCurrency(price)}
                         </p>
                       </div>
                       <span className="shrink-0 text-sm font-semibold text-neutral-300">

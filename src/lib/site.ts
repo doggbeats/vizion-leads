@@ -10,6 +10,7 @@ export const siteConfig = {
   instagramUrl: "https://instagram.com/vizionstore61",
   cnpj: "62.823.573/0001-72",
   email: "viziononstore@gmail.com",
-  address: "VIZIONSTORE61",
-  mapsUrl: "https://www.google.com/maps/place/VIZIONSTORE61/@-15.8072998,-48.1484108,14z/data=!4m10!1m2!2m1!1sLOJA+VIZION!3m6!1s0x935bcd58d4777b2d:0x17ecf04a7e4dc647!8m2!3d-15.8067287!4d-48.1303421!15sCgtMT0pBIFZJWklPTpIBDmNsb3RoaW5nX3N0b3Jl4AEA!16s%2Fg%2F11z5b620hb?entry=ttu&g_ep=EgoyMDI2MDgwOS4wIKXMDSoASAFQAw%3D%3D",
+  address: "Ceilândia-DF - Qnp 19, Conjunto C, Casa 2",
+  cep: "72319-192",
+  mapsUrl: "https://www.google.com/maps/place/Qnp+19,+Conjunto+C+-+Ceilândia+Norte,+Ceilândia+-+DF",
 };

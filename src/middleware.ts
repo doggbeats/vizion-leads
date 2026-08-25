@@ -8,6 +8,8 @@ const RATE_LIMITS: Record<string, { max: number; windowMs: number }> = {
   "/api/cadastro": { max: 5, windowMs: 60 * 60 * 1000 },
   "/api/esqueci-senha": { max: 3, windowMs: 15 * 60 * 1000 },
   "/api/redefinir-senha": { max: 5, windowMs: 15 * 60 * 1000 },
+  "/api/admin/alterar-senha": { max: 5, windowMs: 15 * 60 * 1000 },
+  "/api/conta/alterar-senha": { max: 5, windowMs: 15 * 60 * 1000 },
   "/api/checkout": { max: 10, windowMs: 15 * 60 * 1000 },
   "/api/orders": { max: 10, windowMs: 15 * 60 * 1000 },
 };
@@ -89,7 +91,7 @@ export function middleware(request: NextRequest) {
     return response;
   }
 
-  if (pathname.startsWith("/admin")) {
+  if (pathname.startsWith("/admin") || pathname.startsWith("/conta")) {
     const sessionCookie = request.cookies.get("vizion_session");
     if (!sessionCookie) {
       return NextResponse.redirect(new URL("/login", request.url));
@@ -103,5 +105,6 @@ export const config = {
   matcher: [
     "/api/:path*",
     "/admin/:path*",
+    "/conta/:path*",
   ],
 };

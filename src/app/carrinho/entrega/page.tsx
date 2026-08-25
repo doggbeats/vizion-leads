@@ -56,7 +56,7 @@ const ESTADOS = [
 ];
 
 export default function EntregaPage() {
-  const { items, count, subtotal, clear, loaded } = useCart();
+  const { items, count, subtotal, promoResult, clear, loaded } = useCart();
   const { user } = useSession();
   const { showToast } = useToast();
   const router = useRouter();
@@ -120,7 +120,8 @@ export default function EntregaPage() {
   }
 
   const retirada = checkout?.retirada === true;
-  const freteGratis = !!user && subtotal >= 200;
+  const temFreteGratis = checkout?.frete?.valor === 0;
+  const freteGratis = temFreteGratis || (!!user && subtotal >= 200);
   const freteValor = retirada || freteGratis ? 0 : (checkout?.frete?.valor ?? 0);
   const totalComFrete = subtotal + freteValor;
 
@@ -182,6 +183,7 @@ export default function EntregaPage() {
         pedidoFinalizado.current = true;
         savePaymentData({
           orderId: data.order.id,
+          orderNumber: data.order.orderNumber,
           total: data.order.total,
           frete: data.order.frete ?? 0,
           desconto: 0,
@@ -282,9 +284,9 @@ export default function EntregaPage() {
                       Endereço da loja
                     </p>
                     <p className="mt-2 font-medium text-white">
-                      Av. Exemplo, 000 - Bairro
+                      Qnp 19, Conjunto C, Casa 2
                     </p>
-                    <p className="text-neutral-400">Cidade/UF</p>
+                    <p className="text-neutral-400">Ceilândia Norte - DF</p>
                   </div>
                   {erro ? (
                     <p role="alert" className="text-sm text-red-400">
@@ -455,6 +457,14 @@ export default function EntregaPage() {
                   </dt>
                   <dd className="text-neutral-300">{formatCurrency(subtotal)}</dd>
                 </div>
+                {promoResult.hasPromo && (
+                  <div className="flex items-center justify-between">
+                    <dt className="text-green-400">Economia promo</dt>
+                    <dd className="font-semibold text-green-400">
+                      -{formatCurrency(promoResult.totalSaved)}
+                    </dd>
+                  </div>
+                )}
                 <div className="flex items-center justify-between">
                   <dt className="text-neutral-400">Frete</dt>
                   {retirada ? (

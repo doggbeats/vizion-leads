@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { getSession } from "@/lib/auth";
+import { isWithinFreeDeliveryRadius } from "@/lib/distance";
 
 type OrderItemInput = {
   productId: string;
@@ -26,13 +27,13 @@ export async function POST(request: Request) {
     typeof body?.customerPhone === "string" ? body.customerPhone.trim() : "";
   const customerEmail =
     typeof body?.customerEmail === "string" ? body.customerEmail.trim() : "";
-  const cep = typeof body?.cep === "string" ? body.cep.trim() : "";
-  const endereco = typeof body?.endereco === "string" ? body.endereco.trim() : "";
-  const numero = typeof body?.numero === "string" ? body.numero.trim() : "";
-  const complemento = typeof body?.complemento === "string" ? body.complemento.trim() : "";
-  const bairro = typeof body?.bairro === "string" ? body.bairro.trim() : "";
-  const cidade = typeof body?.cidade === "string" ? body.cidade.trim() : "";
-  const estado = typeof body?.estado === "string" ? body.estado.trim() : "";
+  const cep = typeof body?.cep === "string" && body.cep.trim() !== "" ? body.cep.trim() : null;
+  const endereco = typeof body?.endereco === "string" && body.endereco.trim() !== "" ? body.endereco.trim() : null;
+  const numero = typeof body?.numero === "string" && body.numero.trim() !== "" ? body.numero.trim() : null;
+  const complemento = typeof body?.complemento === "string" && body.complemento.trim() !== "" ? body.complemento.trim() : null;
+  const bairro = typeof body?.bairro === "string" && body.bairro.trim() !== "" ? body.bairro.trim() : null;
+  const cidade = typeof body?.cidade === "string" && body.cidade.trim() !== "" ? body.cidade.trim() : null;
+  const estado = typeof body?.estado === "string" && body.estado.trim() !== "" ? body.estado.trim() : null;
   const retirada = body?.retirada === true;
 
   const rawItems = Array.isArray(body?.items) ? body.items : [];
@@ -69,7 +70,7 @@ export async function POST(request: Request) {
   }
 
   if (!retirada) {
-    if (cep.replace(/\D/g, "").length !== 8) {
+    if (!cep || cep.replace(/\D/g, "").length !== 8) {
       return NextResponse.json(
         { error: "Informe um CEP válido." },
         { status: 400 },
@@ -121,17 +122,28 @@ export async function POST(request: Request) {
       productId: product.id,
       productName: product.name,
       price: product.promotionalPrice ?? product.price,
+      promoQuantity: product.promoQuantity ?? null,
+      promoPrice: product.promoPrice ?? null,
       quantity: item.quantity,
       size: item.size,
     };
   });
 
-  const subtotal = computedItems.reduce(
-    (sum, item) => sum + item.price * item.quantity,
-    0,
-  );
+  let subtotal = 0;
 
-  const freteGratis = subtotal >= 200;
+  for (const item of computedItems) {
+    if (item.promoQuantity && item.promoQuantity > 1 && item.promoPrice && item.promoPrice > 0) {
+      const groups = Math.floor(item.quantity / item.promoQuantity);
+      const remaining = item.quantity % item.promoQuantity;
+      subtotal += groups * item.promoPrice + remaining * item.price;
+    } else {
+      subtotal += item.price * item.quantity;
+    }
+  }
+
+  const cepDigits = cep ? cep.replace(/\D/g, "") : "";
+  const dentroRaio = cepDigits.length === 8 ? await isWithinFreeDeliveryRadius(cepDigits) : false;
+  const freteGratis = dentroRaio || subtotal >= 200;
 
   const frete = retirada || freteGratis
     ? 0
@@ -142,9 +154,16 @@ export async function POST(request: Request) {
 
   try {
     const order = await db.$transaction(async (tx) => {
+      const lastOrder = await tx.order.findFirst({
+        orderBy: { orderNumber: "desc" },
+        select: { orderNumber: true },
+      });
+      const nextOrderNumber = (lastOrder?.orderNumber ?? 0) + 1;
+
       const created = await tx.order.create({
         data: {
           user: { connect: { id: session.userId } },
+          orderNumber: nextOrderNumber,
           customerName,
           customerPhone,
           customerEmail: customerEmail || null,
@@ -187,8 +206,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ order }, { status: 201 });
   } catch (error) {
     console.error("Erro ao criar pedido:", error);
+    const msg = error instanceof Error ? error.message : "Erro desconhecido";
     return NextResponse.json(
-      { error: "Erro ao finalizar o pedido. Tente novamente." },
+      { error: "Erro ao finalizar o pedido. Tente novamente.", details: msg },
       { status: 500 },
     );
   }

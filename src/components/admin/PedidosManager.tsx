@@ -19,6 +19,7 @@ export type AdminOrderItem = {
 
 export type AdminOrder = {
   id: string;
+  orderNumber: number;
   customerName: string;
   customerPhone: string;
   customerEmail: string | null;
@@ -90,7 +91,7 @@ export function PedidosManager({
   const [items, setItems] = useState<ItemForm[]>([]);
 
   const { showToast } = useToast();
-  const knownPagoIds = useRef(new Set<string>(initial.filter((o) => o.status === "PAGO").map((o) => o.id)));
+  const knownPagoIds = useRef(new Set<string>(initial.filter((o) => o.status === "PAGO" || o.status === "EM_PRODUCAO").map((o) => o.id)));
 
   const refreshOrders = useCallback(async () => {
     try {
@@ -109,12 +110,12 @@ export function PedidosManager({
       });
 
       for (const order of novos) {
-        if (order.status === "PAGO" && !knownPagoIds.current.has(order.id)) {
+        if ((order.status === "PAGO" || order.status === "EM_PRODUCAO") && !knownPagoIds.current.has(order.id)) {
           knownPagoIds.current.add(order.id);
           showToast(
             order.retirada
-              ? `Pagamento confirmado! Separe os itens do pedido #${order.id.slice(-6).toUpperCase()} para retirada.`
-              : `Pagamento confirmado! Separe os itens e poste o pedido #${order.id.slice(-6).toUpperCase()}.`,
+              ? `Pagamento confirmado! Separe os itens do pedido #${order.orderNumber} para retirada.`
+              : `Pagamento confirmado! Separe os itens e poste o pedido #${order.orderNumber}.`,
             "info",
           );
         }
@@ -129,7 +130,7 @@ export function PedidosManager({
     return () => window.clearInterval(interval);
   }, [refreshOrders]);
 
-  const aguardandoPostagem = orders.filter((o) => o.status === "PAGO");
+  const aguardandoPostagem = orders.filter((o) => o.status === "PAGO" || o.status === "EM_PRODUCAO");
 
   const inputClass =
     "w-full rounded-lg border border-graphite-border bg-graphite px-4 py-3 text-sm text-white placeholder:text-neutral-500 outline-none transition-colors focus:border-brand";
@@ -331,7 +332,7 @@ export function PedidosManager({
               >
                 <div className="min-w-0">
                   <p className="font-mono text-xs text-neutral-400">
-                    #{order.id.slice(-6).toUpperCase()} ·{" "}
+                    #{order.orderNumber} ·{" "}
                     {formatDate(order.createdAt)}
                   </p>
                   <p className="truncate font-semibold text-white">
@@ -400,7 +401,7 @@ export function PedidosManager({
               <div
                 key={order.id}
                 className={`rounded-2xl border bg-graphite p-4 ${
-                  order.status === "PAGO"
+                  order.status === "PAGO" || order.status === "EM_PRODUCAO"
                     ? "border-sky-500/50 ring-1 ring-inset ring-sky-500/20"
                     : "border-graphite-border"
                 }`}
@@ -408,7 +409,7 @@ export function PedidosManager({
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
                     <p className="font-mono text-xs text-neutral-400">
-                      #{order.id.slice(-6).toUpperCase()}
+                      #{order.orderNumber}
                     </p>
                     <p className="mt-1 truncate font-semibold text-white">
                       {order.customerName}
@@ -494,14 +495,14 @@ export function PedidosManager({
                   <tr
                     key={order.id}
                     className={`text-neutral-300 ${
-                      order.status === "PAGO"
+                      order.status === "PAGO" || order.status === "EM_PRODUCAO"
                         ? "bg-sky-500/5"
                         : "even:bg-graphite/60"
                     }`}
                   >
                     <td className="px-5 py-4">
                       <p className="font-mono text-xs text-neutral-400">
-                        #{order.id.slice(-6).toUpperCase()}
+                        #{order.orderNumber}
                       </p>
                       <p className="text-xs text-neutral-500">
                         {formatDate(order.createdAt)}

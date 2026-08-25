@@ -34,6 +34,7 @@ export default async function AdminPedidosPage() {
 
   const pedidos: AdminOrder[] = orders.map((order) => ({
     id: order.id,
+    orderNumber: order.orderNumber,
     customerName: order.customerName,
     customerPhone: order.customerPhone,
     customerEmail: order.customerEmail,

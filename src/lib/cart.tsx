@@ -10,11 +10,13 @@ import {
   type ReactNode,
 } from "react";
 import type { CartItem, Product, ProductSize } from "./types";
+import { calculateCartTotal } from "./promo";
 
 type CartContextValue = {
   items: CartItem[];
   count: number;
   subtotal: number;
+  promoResult: import("./promo").PromoResult;
   loaded: boolean;
   addItem: (product: Product, size: ProductSize, quantity?: number) => void;
   removeItem: (productId: string, size: ProductSize) => void;
@@ -103,30 +105,23 @@ export function CartProvider({ children }: { children: ReactNode }) {
     [items],
   );
 
-  const subtotal = useMemo(
-    () =>
-      items.reduce(
-        (total, item) =>
-          total +
-          item.quantity *
-            (item.product.promotionalPrice ?? item.product.price),
-        0,
-      ),
-    [items],
-  );
+  const promoResult = useMemo(() => calculateCartTotal(items), [items]);
+
+  const subtotal = useMemo(() => promoResult.total, [promoResult]);
 
   const value = useMemo(
     () => ({
       items,
       count,
       subtotal,
+      promoResult,
       loaded,
       addItem,
       removeItem,
       updateQuantity,
       clear,
     }),
-    [items, count, subtotal, loaded, addItem, removeItem, updateQuantity, clear],
+    [items, count, subtotal, promoResult, loaded, addItem, removeItem, updateQuantity, clear],
   );
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;

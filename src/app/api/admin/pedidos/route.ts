@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { requireAdmin, adminUnauthorized } from "@/lib/admin";
 
-const STATUSES = ["PENDENTE", "PAGO", "ENVIADO", "ENTREGUE", "CANCELADO"];
+const STATUSES = ["PENDENTE", "PAGO", "EM_PRODUCAO", "ENVIADO", "ENTREGUE", "CANCELADO"];
 
 export async function GET() {
   if (!(await requireAdmin())) return adminUnauthorized();
@@ -83,9 +83,16 @@ export async function POST(request: Request) {
     typeof body?.userId === "string" && body.userId.trim() !== "" ? body.userId : null;
 
   try {
+    const lastOrder = await db.order.findFirst({
+      orderBy: { orderNumber: "desc" },
+      select: { orderNumber: true },
+    });
+    const nextOrderNumber = (lastOrder?.orderNumber ?? 0) + 1;
+
     const order = await db.order.create({
       data: {
         userId,
+        orderNumber: nextOrderNumber,
         customerName,
         customerPhone,
         customerEmail: customerEmail || null,

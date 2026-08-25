@@ -10,6 +10,7 @@ import {
   Minus,
   Plus,
   ShoppingBag,
+  Store,
   Trash2,
   Truck,
 } from "lucide-react";
@@ -32,7 +33,7 @@ type FreteOption = {
 };
 
 export default function CartPage() {
-  const { items, count, subtotal, updateQuantity, removeItem, clear } = useCart();
+  const { items, count, subtotal, promoResult, updateQuantity, removeItem, clear } = useCart();
   const { user, loading } = useSession();
   const { showToast } = useToast();
   const router = useRouter();
@@ -75,6 +76,7 @@ export default function CartPage() {
       if (response.ok && data.options?.length) {
         setFreteOptions(data.options);
         setFreteSelecionado(data.options[0]);
+        setRetirada(data.options[0].id === -1);
         setFreteCepConsultado(cep);
       } else {
         setFreteErro(data.error ?? "Não foi possível calcular o frete.");
@@ -153,6 +155,7 @@ export default function CartPage() {
       if (response.ok) {
         savePaymentData({
           orderId: data.order.id,
+          orderNumber: data.order.orderNumber,
           total: data.order.total,
           frete: 0,
           desconto: 0,
@@ -189,7 +192,8 @@ export default function CartPage() {
     }
   }
 
-  const freteGratis = !!user && subtotal >= 200;
+  const temFreteGratis = freteOptions.some((o) => o.price === 0);
+  const freteGratis = temFreteGratis || (!!user && subtotal >= 200);
   const totalComFrete = subtotal + (retirada || freteGratis ? 0 : freteSelecionado?.price ?? 0);
 
   return (
@@ -382,6 +386,22 @@ export default function CartPage() {
                   </dt>
                   <dd className="text-neutral-300">{formatCurrency(subtotal)}</dd>
                 </div>
+                {promoResult.hasPromo && (
+                  <div className="flex items-center justify-between">
+                    <dt className="text-green-400">
+                      Economia promo
+                      {promoResult.groups.map((g) => (
+                        <span key={`${g.promoQuantity}-${g.promoPrice}`}>
+                          {" "}
+                          ({g.groups}x {g.promoQuantity} por {formatCurrency(g.promoPrice)})
+                        </span>
+                      ))}
+                    </dt>
+                    <dd className="font-semibold text-green-400">
+                      -{formatCurrency(promoResult.totalSaved)}
+                    </dd>
+                  </div>
+                )}
                 <div className="flex items-center justify-between">
                   <dt className="text-neutral-400">Frete</dt>
                   {freteGratis ? (
@@ -409,36 +429,40 @@ export default function CartPage() {
                     Calcular frete
                   </h3>
                 </div>
-                <div className="mt-3 flex gap-2">
-                  <Input
-                    label="CEP para entrega"
-                    inputMode="numeric"
-                    value={freteCep}
-                    onChange={(e) => setFreteCep(formatCep(e.target.value))}
-                    placeholder="00000-000"
-                    maxLength={9}
-                    className="py-2.5"
-                  />
-                  <div className="flex items-end">
-                    <button
-                      type="button"
-                      onClick={calcularFrete}
-                      disabled={calculandoFrete}
-                      className="flex h-11 items-center justify-center gap-2 rounded-lg bg-brand px-4 text-xs font-bold uppercase tracking-wider text-ink transition-colors hover:bg-brand-dark disabled:cursor-not-allowed disabled:opacity-50"
-                    >
-                      {calculandoFrete ? (
-                        <Loader2 size={16} className="animate-spin" />
-                      ) : (
-                        "Calcular"
-                      )}
-                    </button>
-                  </div>
-                </div>
+                {!retirada ? (
+                  <>
+                    <div className="mt-3 flex gap-2">
+                      <Input
+                        label="CEP para entrega"
+                        inputMode="numeric"
+                        value={freteCep}
+                        onChange={(e) => setFreteCep(formatCep(e.target.value))}
+                        placeholder="00000-000"
+                        maxLength={9}
+                        className="py-2.5"
+                      />
+                      <div className="flex items-end">
+                        <button
+                          type="button"
+                          onClick={calcularFrete}
+                          disabled={calculandoFrete}
+                          className="flex h-11 items-center justify-center gap-2 rounded-lg bg-brand px-4 text-xs font-bold uppercase tracking-wider text-ink transition-colors hover:bg-brand-dark disabled:cursor-not-allowed disabled:opacity-50"
+                        >
+                          {calculandoFrete ? (
+                            <Loader2 size={16} className="animate-spin" />
+                          ) : (
+                            "Calcular"
+                          )}
+                        </button>
+                      </div>
+                    </div>
 
-                {freteErro ? (
-                  <p role="alert" className="mt-2 text-xs text-red-400">
-                    {freteErro}
-                  </p>
+                    {freteErro ? (
+                      <p role="alert" className="mt-2 text-xs text-red-400">
+                        {freteErro}
+                      </p>
+                    ) : null}
+                  </>
                 ) : null}
 
                 {freteOptions.length > 0 ? (
@@ -451,6 +475,7 @@ export default function CartPage() {
                           type="button"
                           onClick={() => {
                             setFreteSelecionado(option);
+                            setRetirada(option.id === -1);
                           }}
                           aria-pressed={ativo}
                           className={`flex w-full items-center justify-between gap-3 rounded-lg border p-3 text-left transition-colors ${
@@ -476,6 +501,41 @@ export default function CartPage() {
                         </button>
                       );
                     })}
+                  </div>
+
+                ) : null}
+
+                {!retirada && freteOptions.length === 0 ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setRetirada(true);
+                      setFreteSelecionado(null);
+                      setFreteOptions([]);
+                    }}
+                    className="mt-3 flex w-full items-center justify-center gap-2 rounded-lg border border-dashed border-graphite-border bg-graphite p-3 text-sm font-semibold text-neutral-300 transition-colors hover:border-brand/60 hover:text-white"
+                  >
+                    <Store size={16} />
+                    Retirar no local — Grátis
+                  </button>
+                ) : null}
+
+                {retirada ? (
+                  <div className="mt-3 flex items-center justify-between rounded-lg border border-brand bg-brand/10 p-3">
+                    <span className="flex items-center gap-2 text-sm font-semibold text-white">
+                      <Store size={16} className="text-brand" />
+                      Retirada no local
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setRetirada(false);
+                        setFreteSelecionado(null);
+                      }}
+                      className="text-xs font-medium text-neutral-400 underline transition-colors hover:text-white"
+                    >
+                      Trocar
+                    </button>
                   </div>
                 ) : null}
               </div>

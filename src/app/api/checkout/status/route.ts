@@ -64,7 +64,7 @@ export async function POST(request: Request) {
       );
     }
 
-    if (data?.paid === true && order.status !== "PAGO") {
+    if (data?.paid === true && order.status !== "PAGO" && order.status !== "EM_PRODUCAO") {
       const paymentMethod =
         data.capture_method === "pix"
           ? "PIX"
@@ -77,7 +77,7 @@ export async function POST(request: Request) {
       await db.order.update({
         where: { id: order.id },
         data: {
-          status: "PAGO",
+          status: "EM_PRODUCAO",
           notes: `Pagamento confirmado via InfinitPay (${paymentMethod}). Transação: ${data.transaction_nsu ?? transactionNsu ?? "-"}`,
         },
       });

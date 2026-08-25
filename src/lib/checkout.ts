@@ -61,6 +61,7 @@ export type PaymentAddress = {
 
 export type PaymentData = {
   orderId: string;
+  orderNumber: number;
   total: number;
   frete: number;
   desconto: number;

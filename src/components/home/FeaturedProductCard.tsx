@@ -21,6 +21,7 @@ export function FeaturedProductCard({ product }: Props) {
   const { showToast } = useToast();
   const router = useRouter();
   const [selectedSize, setSelectedSize] = useState(product.sizes[0] ?? "");
+  const [selectedColor, setSelectedColor] = useState(product.colors?.[0] ?? "");
 
   const category = getCategoryBySlug(product.category);
   const hasPromotion =
@@ -84,53 +85,74 @@ export function FeaturedProductCard({ product }: Props) {
         </p>
 
         <div className="mt-1 flex items-baseline gap-2">
-          <span className="text-base font-bold text-brand">
+          <span className="text-base font-bold text-brand" aria-label={`Preço: ${formatCurrency(price)}`}>
             {formatCurrency(price)}
           </span>
           {hasPromotion ? (
-            <span className="text-xs text-neutral-500 line-through">
+            <span className="text-xs text-neutral-500 line-through" aria-label={`Preço original: ${formatCurrency(product.price)}`}>
               {formatCurrency(product.price)}
             </span>
           ) : null}
         </div>
 
         {(product.colors?.length ?? 0) > 0 ? (
-          <div className="mt-2 flex items-center gap-1">
-            {product.colors!.map((slug) => (
-              <span
-                key={slug}
-                title={getColorLabel(slug)}
-                className={`h-3.5 w-3.5 rounded-full border ${
-                  getColorHex(slug).toLowerCase() === "#ffffff"
-                    ? "border-graphite-border"
-                    : "border-white/20"
-                }`}
-                style={{ backgroundColor: getColorHex(slug) }}
-              />
-            ))}
+          <div className="mt-2 flex items-center gap-1" role="radiogroup" aria-label="Cores disponíveis">
+            {product.colors!.map((slug) => {
+              const isSelected = selectedColor === slug;
+              return (
+                <button
+                  key={slug}
+                  type="button"
+                  role="radio"
+                  aria-checked={isSelected}
+                  aria-label={`Cor: ${getColorLabel(slug)}${isSelected ? " (selecionada)" : ""}`}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setSelectedColor(slug);
+                  }}
+                  className={`h-3.5 w-3.5 rounded-full border-2 transition-all ${
+                    isSelected
+                      ? "ring-2 ring-brand ring-offset-1 ring-offset-graphite-light scale-110"
+                      : "hover:scale-110"
+                  } ${
+                    getColorHex(slug).toLowerCase() === "#ffffff"
+                      ? "border-graphite-border"
+                      : "border-white/20"
+                  }`}
+                  style={{ backgroundColor: getColorHex(slug) }}
+                />
+              );
+            })}
           </div>
         ) : null}
 
         {product.sizes.length > 0 ? (
-          <div className="mt-2 flex flex-wrap gap-1">
-            {product.sizes.map((size) => (
-              <button
-                key={size}
-                type="button"
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  setSelectedSize(size);
-                }}
-                className={`min-w-[1.75rem] rounded px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider transition-colors ${
-                  selectedSize === size
-                    ? "bg-brand text-ink"
-                    : "border border-graphite-border text-neutral-400 hover:border-neutral-500 hover:text-white"
-                }`}
-              >
-                {size}
-              </button>
-            ))}
+          <div className="mt-2 flex flex-wrap gap-1" role="radiogroup" aria-label="Tamanhos disponíveis">
+            {product.sizes.map((size) => {
+              const isSelected = selectedSize === size;
+              return (
+                <button
+                  key={size}
+                  type="button"
+                  role="radio"
+                  aria-checked={isSelected}
+                  aria-label={`Tamanho ${size}${isSelected ? " (selecionado)" : ""}`}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setSelectedSize(size);
+                  }}
+                  className={`min-w-[1.75rem] rounded px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider transition-colors ${
+                    isSelected
+                      ? "bg-brand text-ink"
+                      : "border border-graphite-border text-neutral-400 hover:border-neutral-500 hover:text-white"
+                  }`}
+                >
+                  {size}
+                </button>
+              );
+            })}
           </div>
         ) : null}
 
@@ -138,10 +160,10 @@ export function FeaturedProductCard({ product }: Props) {
           type="button"
           onClick={handleAddToCart}
           disabled={soldOut || product.sizes.length === 0}
-          aria-label={`Adicionar ${product.name} ao carrinho`}
+          aria-label={`Adicionar ${product.name}${selectedColor ? ` na cor ${getColorLabel(selectedColor)}` : ""} tamanho ${selectedSize} ao carrinho`}
           className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-lg bg-brand py-2 text-[11px] font-bold uppercase tracking-wider text-ink transition-all duration-300 hover:bg-brand-dark disabled:cursor-not-allowed disabled:opacity-40"
         >
-          <ShoppingCart size={14} />
+          <ShoppingCart size={14} aria-hidden="true" />
           {soldOut ? "Esgotado" : "Comprar"}
         </button>
       </div>

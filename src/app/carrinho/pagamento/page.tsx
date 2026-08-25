@@ -218,7 +218,7 @@ export default function PagamentoPage() {
 
               <p className="mt-2 text-xs text-neutral-500">
                 Pedido{" "}
-                <span className="font-semibold text-brand">#{payment.orderId}</span>
+                <span className="font-semibold text-brand">#{payment.orderNumber ?? payment.orderId.slice(0, 8).toUpperCase()}</span>
               </p>
 
               <ul className="mt-5 space-y-3">

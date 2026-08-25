@@ -25,6 +25,7 @@ export function ProductCard({ product }: ProductCardProps) {
   const router = useRouter();
   const [quickViewOpen, setQuickViewOpen] = useState(false);
   const [selectedSize, setSelectedSize] = useState(product.sizes[0] ?? "");
+  const [selectedColor, setSelectedColor] = useState(product.colors?.[0] ?? "");
 
   const category = getCategoryBySlug(product.category);
   const hasPromotion =
@@ -98,9 +99,15 @@ export function ProductCard({ product }: ProductCardProps) {
         </h3>
 
         <div className="mt-1 flex items-baseline gap-2">
-          <span className="text-lg font-bold text-brand">{formatCurrency(price)}</span>
+          <span
+            className="text-lg font-bold text-brand"
+            aria-label={`Preço: ${formatCurrency(price)}`}
+          >
+            {formatCurrency(price)}
+            <span className="sr-only">{formatCurrency(price)}</span>
+          </span>
           {hasPromotion ? (
-            <span className="text-sm text-neutral-500 line-through">
+            <span className="text-sm text-neutral-500 line-through" aria-label={`Preço original: ${formatCurrency(product.price)}`}>
               {formatCurrency(product.price)}
             </span>
           ) : null}
@@ -110,50 +117,70 @@ export function ProductCard({ product }: ProductCardProps) {
           className={`mt-1 text-xs font-medium ${
             soldOut ? "text-red-400" : lowStock ? "text-amber-400" : "text-neutral-500"
           }`}
+          aria-label={soldOut ? "Sem estoque" : lowStock ? `Últimas unidades: ${product.stock} em estoque` : `${product.stock} unidades em estoque`}
         >
           {soldOut ? "Sem estoque" : lowStock ? `Últimas unidades (${product.stock})` : "Em estoque"}
         </p>
 
         {hasPromotion && product.promoQuantity && product.promoPrice ? (
           <p className="mt-1 inline-flex w-fit items-center gap-1 rounded-md bg-brand/10 px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide text-brand">
-            <Tag size={12} />
-            Leve {product.promoQuantity} por {formatCurrency(product.promoPrice)}
+            <Tag size={12} aria-hidden="true" />
+            <span aria-label={`Promoção: leve ${product.promoQuantity} por ${formatCurrency(product.promoPrice)}`}>
+              Leve {product.promoQuantity} por {formatCurrency(product.promoPrice)}
+            </span>
           </p>
         ) : null}
 
         {(product.colors?.length ?? 0) > 0 ? (
-          <div className="mt-2 flex items-center gap-1.5">
-            {product.colors!.map((slug) => (
-              <span
-                key={slug}
-                title={getColorLabel(slug)}
-                className={`h-4 w-4 rounded-full border ${
-                  getColorHex(slug).toLowerCase() === "#ffffff"
-                    ? "border-graphite-border"
-                    : "border-white/20"
-                }`}
-                style={{ backgroundColor: getColorHex(slug) }}
-              />
-            ))}
+          <div className="mt-2 flex items-center gap-1.5" role="radiogroup" aria-label="Cores disponíveis">
+            {product.colors!.map((slug) => {
+              const isSelected = selectedColor === slug;
+              return (
+                <button
+                  key={slug}
+                  type="button"
+                  role="radio"
+                  aria-checked={isSelected}
+                  aria-label={`Cor: ${getColorLabel(slug)}${isSelected ? " (selecionada)" : ""}`}
+                  onClick={() => setSelectedColor(slug)}
+                  className={`h-4 w-4 rounded-full border-2 transition-all ${
+                    isSelected
+                      ? "ring-2 ring-brand ring-offset-1 ring-offset-graphite scale-110"
+                      : "hover:scale-110"
+                  } ${
+                    getColorHex(slug).toLowerCase() === "#ffffff"
+                      ? "border-graphite-border"
+                      : "border-white/20"
+                  }`}
+                  style={{ backgroundColor: getColorHex(slug) }}
+                />
+              );
+            })}
           </div>
         ) : null}
 
         {product.sizes.length > 0 ? (
-          <div className="mt-2 flex flex-wrap gap-1.5">
-            {product.sizes.map((size) => (
-              <button
-                key={size}
-                type="button"
-                onClick={() => setSelectedSize(size)}
-                className={`min-w-[2rem] rounded-md px-2 py-1 text-[11px] font-bold uppercase tracking-wider transition-colors ${
-                  selectedSize === size
-                    ? "bg-brand text-ink"
-                    : "border border-graphite-border text-neutral-400 hover:border-neutral-500 hover:text-white"
-                }`}
-              >
-                {size}
-              </button>
-            ))}
+          <div className="mt-2 flex flex-wrap gap-1.5" role="radiogroup" aria-label="Tamanhos disponíveis">
+            {product.sizes.map((size) => {
+              const isSelected = selectedSize === size;
+              return (
+                <button
+                  key={size}
+                  type="button"
+                  role="radio"
+                  aria-checked={isSelected}
+                  aria-label={`Tamanho ${size}${isSelected ? " (selecionado)" : ""}`}
+                  onClick={() => setSelectedSize(size)}
+                  className={`min-w-[2rem] rounded-md px-2 py-1 text-[11px] font-bold uppercase tracking-wider transition-colors ${
+                    isSelected
+                      ? "bg-brand text-ink"
+                      : "border border-graphite-border text-neutral-400 hover:border-neutral-500 hover:text-white"
+                  }`}
+                >
+                  {size}
+                </button>
+              );
+            })}
           </div>
         ) : null}
 
@@ -162,10 +189,10 @@ export function ProductCard({ product }: ProductCardProps) {
             type="button"
             onClick={handleAddToCart}
             disabled={soldOut || product.sizes.length === 0}
-            aria-label={`Adicionar ${product.name} ao carrinho`}
+            aria-label={`Adicionar ${product.name}${selectedColor ? ` na cor ${getColorLabel(selectedColor)}` : ""} tamanho ${selectedSize} ao carrinho`}
             className="flex h-10 flex-1 items-center justify-center gap-1.5 rounded-lg bg-graphite-light text-xs font-semibold uppercase tracking-wider text-white transition-all duration-300 hover:bg-brand hover:text-ink disabled:cursor-not-allowed disabled:opacity-40"
           >
-            <ShoppingCart size={15} />
+            <ShoppingCart size={15} aria-hidden="true" />
             Adicionar
           </button>
           <button

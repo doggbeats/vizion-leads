@@ -15,22 +15,23 @@ enum UserRole {
 enum OrderStatus {
   PENDENTE
   PAGO
+  EM_PRODUCAO
   ENVIADO
   ENTREGUE
   CANCELADO
 }
 
 model User {
-  id           String              @id @default(cuid())
-  nome         String
-  email        String              @unique
-  telefone     String?
-  senha        String
-  role         UserRole            @default(CLIENT)
-  createdAt    DateTime            @default(now())
-  updatedAt    DateTime            @updatedAt
-  orders       Order[]
-  resetTokens  PasswordResetToken[]
+  id          String               @id @default(cuid())
+  nome        String
+  email       String               @unique
+  telefone    String?
+  senha       String
+  role        UserRole             @default(CLIENT)
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @updatedAt
+  orders      Order[]
+  resetTokens PasswordResetToken[]
 }
 
 model PasswordResetToken {
@@ -81,6 +82,7 @@ model Product {
 
 model Order {
   id            String      @id @default(cuid())
+  orderNumber   Int         @unique
   user          User?       @relation(fields: [userId], references: [id])
   userId        String?
   customerName  String

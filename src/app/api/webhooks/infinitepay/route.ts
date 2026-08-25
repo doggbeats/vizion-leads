@@ -125,14 +125,14 @@ export async function POST(request: Request) {
         ? ` Comprovante: ${data.receipt_url}`
         : "";
 
-    if (order.status === "PAGO") {
+    if (order.status === "PAGO" || order.status === "EM_PRODUCAO") {
       return NextResponse.json({ ok: true, already: true });
     }
 
     await db.order.update({
       where: { id: order.id },
       data: {
-        status: "PAGO",
+        status: "EM_PRODUCAO",
         notes: `Pagamento confirmado via InfinitPay (${paymentMethod}). Transação: ${transaction}.${receiptUrl}`,
       },
     });

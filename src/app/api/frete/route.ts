@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { isWithinFreeDeliveryRadius } from "@/lib/distance";
 
 const SERVICES = "1,2,3,4,17";
 
@@ -22,6 +23,31 @@ export async function POST(request: Request) {
 
   if (cep.length !== 8) {
     return NextResponse.json({ error: "Informe um CEP válido." }, { status: 400 });
+  }
+
+  const dentroRaio = await isWithinFreeDeliveryRadius(cep);
+
+  const retiradaOption = {
+    id: -1,
+    name: "Retirada no local",
+    price: 0,
+    deliveryTime: 0,
+    company: "Ceilândia-DF - Qnp 19, Conjunto C, Casa 2",
+  };
+
+  if (dentroRaio) {
+    return NextResponse.json({
+      options: [
+        {
+          id: 0,
+          name: "Entrega local (raio 15km)",
+          price: 0,
+          deliveryTime: 1,
+          company: "Entrega própria",
+        },
+        retiradaOption,
+      ],
+    });
   }
 
   const rawItems = Array.isArray(body?.items) ? body.items : [];
@@ -114,7 +140,7 @@ export async function POST(request: Request) {
       );
     }
 
-    return NextResponse.json({ options });
+    return NextResponse.json({ options: [...options, retiradaOption] });
   } catch (error) {
     console.error("Erro ao calcular frete:", error);
     return NextResponse.json(

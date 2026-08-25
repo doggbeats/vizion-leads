@@ -20,6 +20,7 @@ type ProductDetailProps = {
 export function ProductDetail({ product }: ProductDetailProps) {
   const [activeIndex, setActiveIndex] = useState(0);
   const [selectedSize, setSelectedSize] = useState(product.sizes[0] ?? "");
+  const [selectedColor, setSelectedColor] = useState(product.colors?.[0] ?? "");
   const { addItem } = useCart();
   const { user } = useSession();
   const { showToast } = useToast();
@@ -126,11 +127,11 @@ export function ProductDetail({ product }: ProductDetailProps) {
           </h1>
 
           <div className="mt-4 flex items-baseline gap-3">
-            <span className="text-3xl font-bold text-brand">
+            <span className="text-3xl font-bold text-brand" aria-label={`Preço: ${formatCurrency(price)}`}>
               {formatCurrency(price)}
             </span>
             {hasPromotion ? (
-              <span className="text-lg text-neutral-500 line-through">
+              <span className="text-lg text-neutral-500 line-through" aria-label={`Preço original: ${formatCurrency(product.price)}`}>
                 {formatCurrency(product.price)}
               </span>
             ) : null}
@@ -144,6 +145,7 @@ export function ProductDetail({ product }: ProductDetailProps) {
                   ? "text-amber-400"
                   : "text-neutral-500"
             }`}
+            aria-label={soldOut ? "Sem estoque" : lowStock ? `Últimas unidades: ${product.stock} em estoque` : `${product.stock} unidades em estoque`}
           >
             {soldOut
               ? "Sem estoque"
@@ -163,21 +165,32 @@ export function ProductDetail({ product }: ProductDetailProps) {
               <p className="mb-3 text-xs font-bold uppercase tracking-widest text-neutral-500">
                 Cores disponíveis
               </p>
-              <div className="flex flex-wrap items-center gap-2.5">
-                {product.colors!.map((slug) => (
-                  <span
-                    key={slug}
-                    title={getColorLabel(slug)}
-                    className={`flex h-9 w-9 items-center justify-center rounded-full border-2 ${
-                      getColorHex(slug).toLowerCase() === "#ffffff"
-                        ? "border-graphite-border"
-                        : "border-transparent"
-                    }`}
-                    style={{ backgroundColor: getColorHex(slug) }}
-                  >
-                    <span className="sr-only">{getColorLabel(slug)}</span>
-                  </span>
-                ))}
+              <div className="flex flex-wrap items-center gap-2.5" role="radiogroup" aria-label="Cores disponíveis">
+                {product.colors!.map((slug) => {
+                  const isSelected = selectedColor === slug;
+                  return (
+                    <button
+                      key={slug}
+                      type="button"
+                      role="radio"
+                      aria-checked={isSelected}
+                      aria-label={`Cor: ${getColorLabel(slug)}${isSelected ? " (selecionada)" : ""}`}
+                      onClick={() => setSelectedColor(slug)}
+                      className={`flex h-9 w-9 items-center justify-center rounded-full border-2 transition-all ${
+                        isSelected
+                          ? "ring-2 ring-brand ring-offset-2 ring-offset-graphite scale-110"
+                          : "hover:scale-110"
+                      } ${
+                        getColorHex(slug).toLowerCase() === "#ffffff"
+                          ? "border-graphite-border"
+                          : "border-transparent"
+                      }`}
+                      style={{ backgroundColor: getColorHex(slug) }}
+                    >
+                      <span className="sr-only">{getColorLabel(slug)}</span>
+                    </button>
+                  );
+                })}
               </div>
             </div>
           ) : null}
@@ -187,21 +200,27 @@ export function ProductDetail({ product }: ProductDetailProps) {
               <p className="mb-3 text-xs font-bold uppercase tracking-widest text-neutral-500">
                 Tamanho
               </p>
-              <div className="flex flex-wrap gap-2">
-                {product.sizes.map((size) => (
-                  <button
-                    key={size}
-                    type="button"
-                    onClick={() => setSelectedSize(size)}
-                    className={`min-w-[3rem] rounded-lg px-3 py-2 text-sm font-bold uppercase tracking-wider transition-colors ${
-                      selectedSize === size
-                        ? "bg-brand text-ink"
-                        : "border border-graphite-border text-neutral-400 hover:border-neutral-500 hover:text-white"
-                    }`}
-                  >
-                    {size}
-                  </button>
-                ))}
+              <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="Tamanhos disponíveis">
+                {product.sizes.map((size) => {
+                  const isSelected = selectedSize === size;
+                  return (
+                    <button
+                      key={size}
+                      type="button"
+                      role="radio"
+                      aria-checked={isSelected}
+                      aria-label={`Tamanho ${size}${isSelected ? " (selecionado)" : ""}`}
+                      onClick={() => setSelectedSize(size)}
+                      className={`min-w-[3rem] rounded-lg px-3 py-2 text-sm font-bold uppercase tracking-wider transition-colors ${
+                        isSelected
+                          ? "bg-brand text-ink"
+                          : "border border-graphite-border text-neutral-400 hover:border-neutral-500 hover:text-white"
+                      }`}
+                    >
+                      {size}
+                    </button>
+                  );
+                })}
               </div>
             </div>
           ) : null}
@@ -210,9 +229,10 @@ export function ProductDetail({ product }: ProductDetailProps) {
             type="button"
             onClick={handleAddToCart}
             disabled={soldOut || product.sizes.length === 0}
+            aria-label={`Adicionar ${product.name}${selectedColor ? ` na cor ${getColorLabel(selectedColor)}` : ""} tamanho ${selectedSize} ao carrinho`}
             className="mt-8 flex w-full max-w-md items-center justify-center gap-2 rounded-xl bg-brand py-4 text-sm font-bold uppercase tracking-wider text-ink transition-colors hover:bg-brand-dark disabled:cursor-not-allowed disabled:opacity-40"
           >
-            <ShoppingCart size={18} />
+            <ShoppingCart size={18} aria-hidden="true" />
             Adicionar ao carrinho
           </button>
         </div>

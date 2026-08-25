@@ -31,7 +31,7 @@ export default async function AdminDashboard() {
         take: 6,
       }),
       db.order.findMany({
-        where: { status: "PAGO" },
+        where: { status: { in: ["PAGO", "EM_PRODUCAO"] } },
         orderBy: { createdAt: "desc" },
         include: { items: true },
       }),

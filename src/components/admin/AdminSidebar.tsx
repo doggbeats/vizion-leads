@@ -11,6 +11,7 @@ import {
   LayoutGrid,
   LogOut,
   ExternalLink,
+  Key,
 } from "lucide-react";
 
 const links = [
@@ -20,6 +21,7 @@ const links = [
   { href: "/admin/produtos", label: "Produtos", icon: Package },
   { href: "/admin/destaques", label: "Destaques", icon: Star },
   { href: "/admin/categorias", label: "Categorias", icon: LayoutGrid },
+  { href: "/admin/alterar-senha", label: "Alterar Senha", icon: Key },
 ];
 
 export function AdminSidebar({ adminName }: { adminName: string }) {

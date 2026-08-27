@@ -22,6 +22,7 @@ import { useSession } from "@/lib/session";
 import { useToast } from "@/components/ui/toast";
 import { formatCurrency, formatCep } from "@/lib/format";
 import { saveCheckoutData, savePaymentData, clearCheckoutData } from "@/lib/checkout";
+import { trackInitiateCheckout } from "@/lib/meta-pixel";
 import { getColorLabel } from "@/lib/colors";
 import type { ProductSize } from "@/lib/types";
 
@@ -111,6 +112,11 @@ export default function CartPage() {
       retirada,
     };
     saveCheckoutData(checkoutData);
+
+    trackInitiateCheckout({
+      value: totalComFrete,
+      num_items: count,
+    });
 
     if (loading) {
       setErro("Aguarde a validação da sessão...");

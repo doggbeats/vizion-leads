@@ -12,6 +12,7 @@ import { useSession } from "@/lib/session";
 import { useToast } from "@/components/ui/toast";
 import { Badge } from "@/components/ui/Badge";
 import { getColorHex, getColorLabel } from "@/lib/colors";
+import { trackAddToCart } from "@/lib/meta-pixel";
 import { QuickViewModal } from "./QuickViewModal";
 
 type ProductCardProps = {
@@ -55,6 +56,12 @@ export function ProductCard({ product }: ProductCardProps) {
     }
 
     addItem(product, selectedSize, 1, selectedColor || undefined);
+    trackAddToCart({
+      id: product.id,
+      name: product.name,
+      price,
+      category: category?.name,
+    });
     showToast(`${product.name} adicionado ao carrinho`);
   };
 

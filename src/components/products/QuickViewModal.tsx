@@ -13,6 +13,7 @@ import { useToast } from "@/components/ui/toast";
 import { Modal } from "@/components/ui/Modal";
 import { Badge } from "@/components/ui/Badge";
 import { getColorHex, getColorLabel } from "@/lib/colors";
+import { trackAddToCart } from "@/lib/meta-pixel";
 
 type QuickViewModalProps = {
   product: Product;
@@ -57,6 +58,12 @@ export function QuickViewModal({ product, open, onClose }: QuickViewModalProps) 
     }
 
     addItem(product, selectedSize, 1, selectedColor || undefined);
+    trackAddToCart({
+      id: product.id,
+      name: product.name,
+      price,
+      category: category?.name,
+    });
     showToast(`${product.name} adicionado ao carrinho`);
     onClose();
   };

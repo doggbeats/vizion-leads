@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -12,6 +12,7 @@ import { useCart } from "@/lib/cart";
 import { useSession } from "@/lib/session";
 import { useToast } from "@/components/ui/toast";
 import { getColorHex, getColorLabel } from "@/lib/colors";
+import { trackAddToCart, trackViewContent } from "@/lib/meta-pixel";
 
 type ProductDetailProps = {
   product: Product;
@@ -34,6 +35,15 @@ export function ProductDetail({ product }: ProductDetailProps) {
   const soldOut = product.stock <= 0;
   const lowStock = product.stock > 0 && product.stock <= 5;
 
+  useEffect(() => {
+    trackViewContent({
+      id: product.id,
+      name: product.name,
+      price,
+      category: category?.name,
+    });
+  }, [product.id, product.name, price, category?.name]);
+
   const handleAddToCart = async () => {
     if (soldOut || product.sizes.length === 0) return;
 
@@ -54,6 +64,12 @@ export function ProductDetail({ product }: ProductDetailProps) {
     }
 
     addItem(product, selectedSize);
+    trackAddToCart({
+      id: product.id,
+      name: product.name,
+      price,
+      category: category?.name,
+    });
     showToast(`${product.name} adicionado ao carrinho`);
   };
 

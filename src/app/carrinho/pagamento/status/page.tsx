@@ -13,6 +13,7 @@ import {
 import { Container } from "@/components/ui/Container";
 import { formatCurrency } from "@/lib/format";
 import { loadPaymentData } from "@/lib/checkout";
+import { trackPurchase } from "@/lib/meta-pixel";
 
 function StatusContent() {
   const searchParams = useSearchParams();
@@ -49,6 +50,12 @@ function StatusContent() {
 
         if (response.ok && data.paid) {
           setStatus("pago");
+          if (total > 0) {
+            trackPurchase({
+              value: total,
+              content_ids: data.items?.map((i: { productId: string }) => i.productId) ?? [],
+            });
+          }
         } else {
           setStatus("aguardando");
         }

@@ -33,11 +33,11 @@ const securityHeaders = [
 
 const cspHeader = [
   "default-src 'self'",
-  "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net",
+  "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://connect.facebook.net",
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-  "img-src 'self' blob: data: https://*.public.blob.vercel-storage.com https://*.blob.core.windows.net",
+  "img-src 'self' blob: data: https://*.public.blob.vercel-storage.com https://*.blob.core.windows.net https://www.facebook.com https://*.facebook.com",
   "font-src 'self' https://fonts.gstatic.com",
-  "connect-src 'self' https://api.checkout.infinitepay.io https://melhorenvio.com.br",
+  "connect-src 'self' https://api.checkout.infinitepay.io https://melhorenvio.com.br https://www.facebook.com https://*.facebook.com",
   "frame-src 'self' https://checkout.infinitepay.io",
   "object-src 'none'",
   "base-uri 'self'",

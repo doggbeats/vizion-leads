@@ -123,7 +123,7 @@ export function Footer() {
             © {new Date().getFullYear()} {siteConfig.fullName}. Todos os direitos
             reservados.
           </p>
-          <p>Criado por Paulo Henrique, vulgo DoggD_Code</p>
+          <p>Criado por CODE_PH - SOLUÇÕES DIGITAIS</p>
         </Container>
       </div>
     </footer>

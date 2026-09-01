@@ -190,12 +190,13 @@ export default function EntregaPage() {
           frete: data.order.frete ?? 0,
           desconto: 0,
           items: data.order.items.map(
-            (item: { productName: string; price: number; quantity: number; size: string; color?: string | null }) => ({
+            (item: { productName: string; price: number; quantity: number; size: string; color?: string | null; onPromotion?: boolean }) => ({
               productName: item.productName,
               price: item.price,
               quantity: item.quantity,
               size: item.size,
               color: item.color ?? null,
+              onPromotion: item.onPromotion ?? false,
             }),
           ),
           customerName: checkout.customerName,

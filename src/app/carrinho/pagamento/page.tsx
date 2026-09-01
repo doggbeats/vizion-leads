@@ -35,12 +35,17 @@ const METODOS = [
 
 type MetodoId = (typeof METODOS)[number]["id"];
 
+function calcularDescontoPix(payment: PaymentData): number {
+  const base = payment.items
+    .filter((item) => !item.onPromotion)
+    .reduce((soma, item) => soma + item.price * item.quantity, 0);
+  return Math.round(base * 0.05 * 100) / 100;
+}
+
 function buildWhatsAppUrl(payment: PaymentData, metodo: MetodoId): string {
   const metodoLabel = METODOS.find((m) => m.id === metodo)?.label ?? "";
-  const totalFinal = metodo === "pix"
-    ? payment.total - Math.round((payment.total - (payment.frete ?? 0)) * 0.05 * 100) / 100
-    : payment.total;
-  const descontoPix = metodo === "pix" ? Math.round((payment.total - (payment.frete ?? 0)) * 0.05 * 100) / 100 : 0;
+  const descontoPix = metodo === "pix" ? calcularDescontoPix(payment) : 0;
+  const totalFinal = payment.total - descontoPix;
   const linhas = [
     "Olá! Seja bem-vindo à VIZION STORE.",
     "",
@@ -119,8 +124,7 @@ export default function PagamentoPage() {
 
   const totalFinal =
     payment && metodo === "pix"
-      ? payment.total -
-        Math.round((payment.total - (payment.frete ?? 0)) * 0.05 * 100) / 100
+      ? payment.total - calcularDescontoPix(payment)
       : (payment?.total ?? 0);
 
   return (
@@ -271,7 +275,7 @@ export default function PagamentoPage() {
                   </dd>
                 </div>
                 {metodo === "pix" ? (() => {
-                  const descontoPix = Math.round((payment.total - (payment.frete ?? 0)) * 0.05 * 100) / 100;
+                  const descontoPix = calcularDescontoPix(payment);
                   return descontoPix > 0 ? (
                     <div className="flex items-center justify-between">
                       <dt className="text-green-400">Desconto (5% PIX)</dt>
@@ -296,7 +300,7 @@ export default function PagamentoPage() {
                   <dd className="text-xl font-bold text-brand">
                     {formatCurrency(
                       metodo === "pix"
-                        ? payment.total - Math.round((payment.total - (payment.frete ?? 0)) * 0.05 * 100) / 100
+                        ? payment.total - calcularDescontoPix(payment)
                         : payment.total
                     )}
                   </dd>
@@ -384,7 +388,7 @@ export default function PagamentoPage() {
               <span className="font-semibold text-white">
                 {METODOS.find((m) => m.id === metodo)?.label}
               </span>
-              {metodo === "pix" ? " · 5% de desconto aplicado" : ""} ·{" "}
+              {metodo === "pix" && calcularDescontoPix(payment) > 0 ? " · 5% de desconto aplicado" : ""} ·{" "}
               {payment.retirada
                 ? "Retirada na loja"
                 : "Entrega no endereço informado"}

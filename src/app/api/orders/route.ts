@@ -124,6 +124,9 @@ export async function POST(request: Request) {
       productId: product.id,
       productName: product.name,
       price: product.promotionalPrice ?? product.price,
+      onPromotion:
+        product.promotionalPrice !== null &&
+        product.promotionalPrice < product.price,
       promoQuantity: product.promoQuantity ?? null,
       promoPrice: product.promoPrice ?? null,
       quantity: item.quantity,
@@ -207,7 +210,22 @@ export async function POST(request: Request) {
       return created;
     });
 
-    return NextResponse.json({ order }, { status: 201 });
+    const onPromotionMap = new Map(
+      computedItems.map((item) => [item.productId, item.onPromotion]),
+    );
+
+    return NextResponse.json(
+      {
+        order: {
+          ...order,
+          items: order.items.map((item) => ({
+            ...item,
+            onPromotion: item.productId ? (onPromotionMap.get(item.productId) ?? false) : false,
+          })),
+        },
+      },
+      { status: 201 },
+    );
   } catch (error) {
     console.error("Erro ao criar pedido:", error);
     const msg = error instanceof Error ? error.message : "Erro desconhecido";

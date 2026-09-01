@@ -48,6 +48,7 @@ export type PaymentItem = {
   quantity: number;
   size: string;
   color?: string | null;
+  onPromotion?: boolean;
 };
 
 export type PaymentAddress = {

@@ -1,7 +1,18 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Package, ChevronDown, ChevronUp } from "lucide-react";
+import Link from "next/link";
+import {
+  Package,
+  ChevronDown,
+  ChevronUp,
+  ClipboardCheck,
+  PackageSearch,
+  Truck,
+  CheckCircle2,
+  Store,
+  XCircle,
+} from "lucide-react";
 import { formatCurrency, formatDate } from "@/lib/format";
 
 type OrderItem = {
@@ -44,21 +55,17 @@ const STATUS_LABELS: Record<string, string> = {
   CANCELADO: "Cancelado",
 };
 
-const STATUS_COLORS: Record<string, string> = {
-  PENDENTE: "text-amber-400",
-  PAGO: "text-sky-400",
-  EM_PRODUCAO: "text-orange-400",
-  ENVIADO: "text-purple-400",
-  ENTREGUE: "text-emerald-400",
-  CANCELADO: "text-red-400",
-};
-
-function OrderTracking({ status }: { status: string }) {
+function OrderTracking({ status, retirada }: { status: string; retirada: boolean }) {
   if (status === "CANCELADO") {
     return (
-      <div className="flex items-center gap-2 rounded-lg border border-red-500/30 bg-red-500/5 px-4 py-3">
-        <div className="h-2 w-2 rounded-full bg-red-400" />
-        <span className="text-sm font-semibold text-red-400">Pedido Cancelado</span>
+      <div className="flex items-center gap-3 rounded-xl border border-red-500/30 bg-red-500/5 px-5 py-4">
+        <XCircle size={22} className="shrink-0 text-red-400" />
+        <div>
+          <p className="text-sm font-bold text-red-400">Pedido Cancelado</p>
+          <p className="text-xs text-zinc-500">
+            Não foi possível concluir este pedido.
+          </p>
+        </div>
       </div>
     );
   }
@@ -66,51 +73,95 @@ function OrderTracking({ status }: { status: string }) {
   const currentStep = STATUS_STEPS.indexOf(status);
   if (currentStep === -1) return null;
 
+  const stepMeta = [
+    {
+      icon: ClipboardCheck,
+      short: "Recebido",
+      label: "Pedido recebido",
+      desc: "Pedido registrado com sucesso.",
+    },
+    {
+      icon: CheckCircle2,
+      short: "Pago",
+      label: "Pagamento confirmado",
+      desc: "Pagamento aprovado.",
+    },
+    {
+      icon: PackageSearch,
+      short: "Preparação",
+      label: "Em preparação",
+      desc: "Separando seus itens.",
+    },
+    {
+      icon: retirada ? Store : Truck,
+      short: retirada ? "Retirada" : "Enviado",
+      label: retirada ? "Disponível para retirada" : "Enviado",
+      desc: retirada ? "Pronto para retirar na loja." : "A caminho do seu endereço.",
+    },
+    {
+      icon: CheckCircle2,
+      short: "Entregue",
+      label: "Entregue",
+      desc: "Pedido entregue com sucesso.",
+    },
+  ];
+
   return (
-    <div className="space-y-3">
-      {STATUS_STEPS.map((step, i) => {
-        const active = i <= currentStep;
-        const current = i === currentStep;
-        return (
-          <div key={step} className="flex items-center gap-3">
-            <div className="flex flex-col items-center">
-              <div
-                className={`h-3 w-3 rounded-full border-2 transition-colors ${
-                  current
-                    ? "border-[#B6FF00] bg-[#B6FF00] shadow-[0_0_8px_rgba(182,255,0,0.5)]"
-                    : active
-                      ? "border-[#B6FF00] bg-[#B6FF00]/40"
-                      : "border-zinc-700 bg-zinc-800"
-                }`}
-              />
-              {i < STATUS_STEPS.length - 1 && (
-                <div
-                  className={`h-6 w-0.5 ${
-                    i < currentStep ? "bg-[#B6FF00]/40" : "bg-zinc-800"
+    <div>
+      <ol className="relative flex items-start justify-between">
+        {STATUS_STEPS.map((step, i) => {
+          const active = i <= currentStep;
+          const current = i === currentStep;
+          const meta = stepMeta[i];
+          const Icon = meta.icon;
+          const isLast = i === STATUS_STEPS.length - 1;
+          return (
+            <li key={step} className="relative flex flex-1 flex-col items-center text-center">
+              {!isLast ? (
+                <span
+                  className={`absolute left-1/2 top-5 block h-0.5 w-full ${
+                    i < currentStep ? "bg-[#B6FF00]/50" : "bg-zinc-800"
                   }`}
                 />
-              )}
-            </div>
-            <span
-              className={`text-sm font-medium ${
-                current
-                  ? "text-[#B6FF00]"
-                  : active
-                    ? "text-zinc-300"
-                    : "text-zinc-600"
-              }`}
-            >
-              {STATUS_LABELS[step]}
-              {current && status !== "ENTREGUE" && (
-                <span className="ml-2 text-xs text-zinc-500">(atual)</span>
-              )}
-              {step === "ENTREGUE" && active && (
-                <span className="ml-2 text-xs text-emerald-400">✓</span>
-              )}
-            </span>
-          </div>
-        );
-      })}
+              ) : null}
+              <div
+                className={`relative z-10 flex h-10 w-10 items-center justify-center rounded-full border-2 transition-all ${
+                  current
+                    ? "border-[#B6FF00] bg-[#B6FF00] text-black shadow-[0_0_16px_rgba(182,255,0,0.5)]"
+                    : active
+                      ? "border-[#B6FF00] bg-[#B6FF00]/15 text-[#B6FF00]"
+                      : "border-zinc-700 bg-zinc-900 text-zinc-600"
+                }`}
+              >
+                <Icon size={18} />
+              </div>
+              <p
+                className={`mt-2 hidden text-[11px] font-bold uppercase tracking-wider sm:block ${
+                  current ? "text-[#B6FF00]" : active ? "text-zinc-200" : "text-zinc-600"
+                }`}
+              >
+                {meta.label}
+              </p>
+              <p
+                className={`mt-2 text-[10px] font-semibold uppercase tracking-wider sm:hidden ${
+                  current ? "text-[#B6FF00]" : active ? "text-zinc-300" : "text-zinc-600"
+                }`}
+              >
+                {meta.short}
+              </p>
+            </li>
+          );
+        })}
+      </ol>
+
+      <div className="mt-4 rounded-xl border border-[#B6FF00]/20 bg-[#B6FF00]/5 px-5 py-4">
+        <p className="text-sm font-bold text-[#B6FF00]">
+          {stepMeta[currentStep].label}
+        </p>
+        <p className="mt-0.5 text-xs text-zinc-400">
+          {stepMeta[currentStep].desc}
+        </p>
+      </div>
     </div>
   );
 }
@@ -140,12 +191,12 @@ export function ContaPedidos() {
         <Package size={48} className="mx-auto text-zinc-700" />
         <h2 className="text-xl font-bold text-white">Meus Pedidos</h2>
         <p className="text-zinc-400">Você ainda não fez nenhum pedido.</p>
-        <a
+        <Link
           href="/produtos"
           className="inline-block rounded-lg bg-[#B6FF00] px-6 py-3 font-bold text-black transition hover:opacity-90"
         >
           VER PRODUTOS
-        </a>
+        </Link>
       </div>
     );
   }
@@ -208,7 +259,7 @@ export function ContaPedidos() {
 
               {isOpen && (
                 <div className="border-t border-zinc-800 px-4 pb-4 pt-4 space-y-4">
-                  <OrderTracking status={order.status} />
+                  <OrderTracking status={order.status} retirada={order.retirada} />
 
                   <div className="space-y-2 rounded-xl bg-zinc-800/50 p-4">
                     <p className="text-xs font-bold uppercase tracking-wider text-zinc-500">

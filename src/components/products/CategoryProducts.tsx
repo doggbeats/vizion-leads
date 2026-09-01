@@ -6,7 +6,7 @@ import {
   getSubcategories,
   getSubcategoryLabel,
 } from "@/lib/catalog";
-import { ProductGrid } from "./ProductGrid";
+import { CatalogProducts } from "./CatalogProducts";
 
 type CategoryProductsProps = {
   products: Product[];
@@ -59,7 +59,7 @@ export function CategoryProducts({
         </div>
       ) : null}
 
-      <ProductGrid products={filteredProducts} />
+      <CatalogProducts products={filteredProducts} />
     </div>
   );
 }

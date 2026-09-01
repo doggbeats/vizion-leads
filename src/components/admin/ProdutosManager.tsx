@@ -2,7 +2,7 @@
 
 import { useState, type FormEvent } from "react";
 import Image from "next/image";
-import { Plus, Pencil, Trash2, Star, ImagePlus } from "lucide-react";
+import { Plus, Pencil, Trash2, Star, ImagePlus, Search } from "lucide-react";
 import { Modal } from "@/components/ui/Modal";
 import { formatCurrency } from "@/lib/format";
 import { getSubcategories, getSubcategoryLabel } from "@/lib/catalog";
@@ -91,6 +91,24 @@ export function ProdutosManager({
   const [busyId, setBusyId] = useState<string | null>(null);
   const [enviandoImagem, setEnviandoImagem] = useState(false);
   const [erroImagem, setErroImagem] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("all");
+  const [stockFilter, setStockFilter] = useState<"all" | "low" | "out">("all");
+
+  const filteredProducts = produtos.filter((p) => {
+    if (categoryFilter !== "all" && p.categorySlug !== categoryFilter) return false;
+    if (stockFilter === "low" && (p.stock <= 0 || p.stock > 5)) return false;
+    if (stockFilter === "out" && p.stock > 0) return false;
+    if (searchQuery.trim()) {
+      const q = searchQuery.trim().toLowerCase();
+      const matches =
+        p.name.toLowerCase().includes(q) ||
+        p.description.toLowerCase().includes(q) ||
+        p.categorySlug.toLowerCase().includes(q);
+      if (!matches) return false;
+    }
+    return true;
+  });
 
   function openNew() {
     setForm({ ...emptyForm, categorySlug: categories[0]?.slug ?? "" });
@@ -284,25 +302,69 @@ export function ProdutosManager({
 
   return (
     <div>
-      <div className="mb-6 flex justify-end">
-        <button
-          type="button"
-          onClick={openNew}
-          className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-brand px-4 py-2.5 text-sm font-bold uppercase tracking-wider text-ink transition-colors hover:bg-brand-dark sm:w-auto"
-        >
-          <Plus size={16} />
-          Novo produto
-        </button>
+      <div className="mb-6">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-1 flex-col gap-3 sm:flex-row">
+            <div className="relative flex-1 sm:max-w-xs">
+              <Search
+                className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500"
+                size={16}
+              />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Buscar por nome, descrição..."
+                className={`${inputClass} pl-9`}
+              />
+            </div>
+            <select
+              value={categoryFilter}
+              onChange={(e) => setCategoryFilter(e.target.value)}
+              className={`${inputClass} sm:w-44`}
+            >
+              <option value="all">Todas categorias</option>
+              {categories.map((c) => (
+                <option key={c.slug} value={c.slug}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
+            <select
+              value={stockFilter}
+              onChange={(e) =>
+                setStockFilter(e.target.value as "all" | "low" | "out")
+              }
+              className={`${inputClass} sm:w-44`}
+            >
+              <option value="all">Todo estoque</option>
+              <option value="low">Estoque baixo</option>
+              <option value="out">Esgotado</option>
+            </select>
+          </div>
+          <button
+            type="button"
+            onClick={openNew}
+            className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-brand px-4 py-2.5 text-sm font-bold uppercase tracking-wider text-ink transition-colors hover:bg-brand-dark sm:w-auto"
+          >
+            <Plus size={16} />
+            Novo produto
+          </button>
+        </div>
       </div>
 
       {produtos.length === 0 ? (
         <p className="rounded-2xl border border-graphite-border bg-graphite p-8 text-sm text-neutral-500">
           Nenhum produto cadastrado ainda.
         </p>
+      ) : filteredProducts.length === 0 ? (
+        <div className="rounded-2xl border border-dashed border-graphite-border bg-graphite p-8 text-center text-sm text-neutral-500">
+          Nenhum produto encontrado para os filtros aplicados.
+        </div>
       ) : (
         <>
           <div className="space-y-4 lg:hidden">
-            {produtos.map((product) => (
+            {filteredProducts.map((product) => (
               <div
                 key={product.id}
                 className="rounded-2xl border border-graphite-border bg-graphite p-4"
@@ -411,7 +473,7 @@ export function ProdutosManager({
               </tr>
             </thead>
             <tbody className="divide-y divide-graphite-border">
-              {produtos.map((product) => (
+              {filteredProducts.map((product) => (
                 <tr key={product.id} className="text-neutral-300">
                   <td className="px-5 py-4">
                     <div className="flex items-center gap-3">

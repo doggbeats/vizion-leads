@@ -6,14 +6,16 @@ import { useSession } from "@/lib/session";
 import { ContaPerfil } from "@/components/conta/ContaPerfil";
 import { ContaSenha } from "@/components/conta/ContaSenha";
 import { ContaPedidos } from "@/components/conta/ContaPedidos";
+import { ContaFavoritos } from "@/components/conta/ContaFavoritos";
 import {
   User,
   Lock,
   ShoppingBag,
   LogOut,
+  Heart,
 } from "lucide-react";
 
-type Tab = "perfil" | "senha" | "pedidos";
+type Tab = "perfil" | "senha" | "pedidos" | "favoritos";
 
 export default function ContaPage() {
   const router = useRouter();
@@ -46,6 +48,7 @@ export default function ContaPage() {
     { key: "perfil", label: "Meus Dados", icon: User },
     { key: "senha", label: "Alterar Senha", icon: Lock },
     { key: "pedidos", label: "Meus Pedidos", icon: ShoppingBag },
+    { key: "favoritos", label: "Favoritos", icon: Heart },
   ];
 
   return (
@@ -88,6 +91,7 @@ export default function ContaPage() {
           {tab === "perfil" && <ContaPerfil />}
           {tab === "senha" && <ContaSenha />}
           {tab === "pedidos" && <ContaPedidos />}
+          {tab === "favoritos" && <ContaFavoritos />}
         </div>
       </div>
     </main>

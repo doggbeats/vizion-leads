@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
-import { Plus, Trash2, Eye, X, Loader2, PackageCheck } from "lucide-react";
+import { Plus, Trash2, Eye, X, Loader2, PackageCheck, Search } from "lucide-react";
 import { Modal } from "@/components/ui/Modal";
 import { StatusBadge, ORDER_STATUSES, type OrderStatus } from "./StatusBadge";
 import { formatCurrency, formatDate } from "@/lib/format";
@@ -91,6 +91,9 @@ export function PedidosManager({
   const [notes, setNotes] = useState("");
   const [items, setItems] = useState<ItemForm[]>([]);
 
+  const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState<"all" | OrderStatus>("all");
+
   const { showToast } = useToast();
   const knownPagoIds = useRef(new Set<string>(initial.filter((o) => o.status === "PAGO" || o.status === "EM_PRODUCAO").map((o) => o.id)));
 
@@ -132,6 +135,20 @@ export function PedidosManager({
   }, [refreshOrders]);
 
   const aguardandoPostagem = orders.filter((o) => o.status === "PAGO" || o.status === "EM_PRODUCAO");
+
+  const filteredOrders = orders.filter((o) => {
+    if (statusFilter !== "all" && o.status !== statusFilter) return false;
+    if (searchQuery.trim()) {
+      const q = searchQuery.trim().toLowerCase();
+      const matches =
+        o.customerName.toLowerCase().includes(q) ||
+        (o.customerPhone ?? "").toLowerCase().includes(q) ||
+        String(o.orderNumber).includes(q) ||
+        (o.customerEmail ?? "").toLowerCase().includes(q);
+      if (!matches) return false;
+    }
+    return true;
+  });
 
   const inputClass =
     "w-full rounded-lg border border-graphite-border bg-graphite px-4 py-3 text-sm text-white placeholder:text-neutral-500 outline-none transition-colors focus:border-brand";
@@ -380,25 +397,58 @@ export function PedidosManager({
         </div>
       ) : null}
 
-      <div className="mb-6 flex justify-end">
-        <button
-          type="button"
-          onClick={openNew}
-          className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-brand px-4 py-2.5 text-sm font-bold uppercase tracking-wider text-ink transition-colors hover:bg-brand-dark sm:w-auto"
-        >
-          <Plus size={16} />
-          Novo pedido
-        </button>
+      <div className="mb-6">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-1 flex-col gap-3 sm:flex-row">
+            <div className="relative flex-1 sm:max-w-xs">
+              <Search
+                className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500"
+                size={16}
+              />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Buscar por cliente, telefone ou nº..."
+                className={`${inputClass} pl-9`}
+              />
+            </div>
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value as "all" | OrderStatus)}
+              className={`${inputClass} sm:w-48`}
+            >
+              <option value="all">Todos os status</option>
+              {ORDER_STATUSES.map((s) => (
+                <option key={s} value={s}>
+                  {s}
+                </option>
+              ))}
+            </select>
+          </div>
+          <button
+            type="button"
+            onClick={openNew}
+            className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-brand px-4 py-2.5 text-sm font-bold uppercase tracking-wider text-ink transition-colors hover:bg-brand-dark sm:w-auto"
+          >
+            <Plus size={16} />
+            Novo pedido
+          </button>
+        </div>
       </div>
 
       {orders.length === 0 ? (
         <p className="rounded-2xl border border-graphite-border bg-graphite p-8 text-sm text-neutral-500">
           Nenhum pedido cadastrado ainda.
         </p>
+      ) : filteredOrders.length === 0 ? (
+        <div className="rounded-2xl border border-dashed border-graphite-border bg-graphite p-8 text-center text-sm text-neutral-500">
+          Nenhum pedido encontrado para os filtros aplicados.
+        </div>
       ) : (
         <>
           <div className="space-y-4 lg:hidden">
-            {orders.map((order) => (
+            {filteredOrders.map((order) => (
               <div
                 key={order.id}
                 className={`rounded-2xl border bg-graphite p-4 ${
@@ -492,7 +542,7 @@ export function PedidosManager({
                 </tr>
               </thead>
               <tbody className="divide-y divide-graphite-border">
-                {orders.map((order) => (
+                {filteredOrders.map((order) => (
                   <tr
                     key={order.id}
                     className={`text-neutral-300 ${

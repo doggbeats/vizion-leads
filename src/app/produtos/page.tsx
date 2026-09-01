@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { getProducts } from "@/lib/products";
 import { siteConfig } from "@/lib/site";
 import { Container } from "@/components/ui/Container";
-import { ProductGrid } from "@/components/products/ProductGrid";
+import { CatalogProducts } from "@/components/products/CatalogProducts";
 
 export const metadata: Metadata = {
   title: "Todos os produtos | Moda Masculina Streetwear",
@@ -37,20 +37,25 @@ export const metadata: Metadata = {
 
 export const dynamic = "force-dynamic";
 
-export default async function ProductsPage() {
+export default async function ProductsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string }>;
+}) {
+  const { q } = await searchParams;
+  const initialQuery = q?.trim() ?? "";
   const activeProducts = await getProducts();
 
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
     name: "Todos os produtos VIZION",
-    description: metadata.description,
     url: `${siteConfig.url}/produtos`,
     inLanguage: "pt-BR",
     mainEntity: {
       "@type": "ItemList",
       name: "Produtos VIZION",
-      itemListElement: activeProducts.map((product, index) => ({
+      itemListElement: activeProducts.slice(0, 50).map((product, index) => ({
         "@type": "ListItem",
         position: index + 1,
         name: product.name,
@@ -72,19 +77,15 @@ export default async function ProductsPage() {
             Produtos
           </p>
           <h1 className="font-display text-5xl tracking-wide text-white sm:text-6xl">
-            Todos os produtos
+            {initialQuery ? `Busca: "${initialQuery}"` : "Todos os produtos"}
           </h1>
           <p className="mt-4 max-w-2xl text-base leading-relaxed text-neutral-400">
             Camisetas oversize, bermudas, calças jeans e acessórios com estilo
             streetwear premium, qualidade e bom preço.
           </p>
-          <p className="mt-4 text-sm font-medium text-neutral-500">
-            {activeProducts.length}{" "}
-            {activeProducts.length === 1 ? "produto" : "produtos"}
-          </p>
         </div>
 
-        <ProductGrid products={activeProducts} />
+        <CatalogProducts products={activeProducts} initialQuery={initialQuery} />
       </Container>
     </section>
   );

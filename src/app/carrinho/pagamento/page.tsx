@@ -8,9 +8,12 @@ import {
   QrCode,
   ShoppingBag,
   MessageCircle,
+  CheckCircle2,
 } from "lucide-react";
 import { Container } from "@/components/ui/Container";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { Modal } from "@/components/ui/Modal";
+import { useToast } from "@/components/ui/toast";
 import { formatCurrency } from "@/lib/format";
 import { siteConfig } from "@/lib/site";
 import { loadPaymentData, type PaymentData } from "@/lib/checkout";
@@ -90,6 +93,9 @@ export default function PagamentoPage() {
   const [payment, setPayment] = useState<PaymentData | null>(null);
   const [ready, setReady] = useState(false);
   const [metodo, setMetodo] = useState<MetodoId>("pix");
+  const [confirmOpen, setConfirmOpen] = useState(false);
+
+  const { showToast } = useToast();
 
   useEffect(() => {
     const data = loadPaymentData();
@@ -98,6 +104,24 @@ export default function PagamentoPage() {
       setReady(true);
     }, 0);
   }, []);
+
+  function openWhatsApp() {
+    if (!payment) return;
+    setConfirmOpen(true);
+  }
+
+  function confirmWhatsApp() {
+    if (!payment) return;
+    window.open(buildWhatsAppUrl(payment, metodo), "_blank", "noopener,noreferrer");
+    setConfirmOpen(false);
+    showToast("Redirecionando para o WhatsApp...", "info");
+  }
+
+  const totalFinal =
+    payment && metodo === "pix"
+      ? payment.total -
+        Math.round((payment.total - (payment.frete ?? 0)) * 0.05 * 100) / 100
+      : (payment?.total ?? 0);
 
   return (
     <section className="bg-ink py-16 sm:py-20">
@@ -188,15 +212,14 @@ export default function PagamentoPage() {
                   })}
                 </div>
 
-                <a
-                  href={buildWhatsAppUrl(payment, metodo)}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                <button
+                  type="button"
+                  onClick={openWhatsApp}
                   className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#25D366] text-sm font-bold uppercase tracking-wider text-ink transition-colors hover:bg-[#1ebe57]"
                 >
                   <MessageCircle size={18} />
                   Finalizar pelo WhatsApp
-                </a>
+                </button>
 
                 <p className="text-center text-xs leading-relaxed text-neutral-400">
                   Você será direcionado ao WhatsApp com o resumo do pedido.{" "}
@@ -310,6 +333,83 @@ export default function PagamentoPage() {
           </div>
         )}
       </Container>
+
+      <Modal
+        open={confirmOpen}
+        onClose={() => setConfirmOpen(false)}
+        title="Confirmar envio para o WhatsApp"
+        className="max-w-md"
+      >
+        {payment ? (
+          <div>
+            <div className="flex items-start gap-3 rounded-xl bg-brand/10 p-4">
+              <CheckCircle2 size={20} className="mt-0.5 shrink-0 text-brand" />
+              <p className="text-sm text-neutral-200">
+                Você será direcionado ao WhatsApp com o resumo do seu pedido{" "}
+                <span className="font-bold text-white">
+                  #{payment.orderNumber}
+                </span>{" "}
+                para confirmar com nossa equipe.
+              </p>
+            </div>
+
+            <dl className="mt-5 space-y-2 text-sm">
+              {payment.items.map((item, index) => (
+                <div
+                  key={index}
+                  className="flex items-center justify-between gap-3"
+                >
+                  <dt className="min-w-0">
+                    <span className="truncate text-neutral-300">
+                      {item.quantity}x {item.productName}
+                    </span>
+                    {item.size ? (
+                      <span className="text-neutral-500"> · {item.size}</span>
+                    ) : null}
+                  </dt>
+                  <dd className="shrink-0 text-neutral-300">
+                    {formatCurrency(item.price * item.quantity)}
+                  </dd>
+                </div>
+              ))}
+              <div className="flex items-center justify-between border-t border-graphite-border pt-2 text-sm">
+                <dt className="text-neutral-400">Total</dt>
+                <dd className="text-lg font-bold text-brand">
+                  {formatCurrency(totalFinal)}
+                </dd>
+              </div>
+            </dl>
+
+            <div className="mt-3 rounded-lg border border-graphite-border bg-graphite-light px-4 py-3 text-xs text-neutral-400">
+              <span className="font-semibold text-white">
+                {METODOS.find((m) => m.id === metodo)?.label}
+              </span>
+              {metodo === "pix" ? " · 5% de desconto aplicado" : ""} ·{" "}
+              {payment.retirada
+                ? "Retirada na loja"
+                : "Entrega no endereço informado"}
+            </div>
+
+            <div className="mt-6 flex flex-col gap-3">
+              <button
+                type="button"
+                onClick={confirmWhatsApp}
+                className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#25D366] text-sm font-bold uppercase tracking-wider text-ink transition-colors hover:bg-[#1ebe57]"
+              >
+                <MessageCircle size={18} />
+                Abrir WhatsApp e enviar
+              </button>
+              <button
+                type="button"
+                onClick={() => setConfirmOpen(false)}
+                className="flex h-11 w-full items-center justify-center rounded-xl border border-graphite-border text-sm font-semibold text-neutral-300 transition-colors hover:text-white"
+              >
+                Voltar
+              </button>
+            </div>
+          </div>
+        ) : null}
+      </Modal>
     </section>
   );
 }

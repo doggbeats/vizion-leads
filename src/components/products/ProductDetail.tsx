@@ -4,12 +4,14 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, ShoppingCart } from "lucide-react";
+import { ArrowLeft, ShoppingCart, Heart } from "lucide-react";
 import type { Product } from "@/lib/types";
 import { getCategoryBySlug } from "@/lib/catalog";
 import { formatCurrency } from "@/lib/format";
 import { useCart } from "@/lib/cart";
 import { useSession } from "@/lib/session";
+import { useFavorites } from "@/lib/favorites";
+import { useRecentlyViewed } from "@/lib/recently-viewed";
 import { useToast } from "@/components/ui/toast";
 import { getColorHex, getColorLabel } from "@/lib/colors";
 import { trackAddToCart, trackViewContent } from "@/lib/meta-pixel";
@@ -24,8 +26,11 @@ export function ProductDetail({ product }: ProductDetailProps) {
   const [selectedColor, setSelectedColor] = useState(product.colors?.[0] ?? "");
   const { addItem } = useCart();
   const { user } = useSession();
+  const { isFavorite, toggle } = useFavorites();
+  const { add: addRecentlyViewed } = useRecentlyViewed();
   const { showToast } = useToast();
   const router = useRouter();
+  const favorite = isFavorite(product.id);
 
   const category = getCategoryBySlug(product.category);
   const hasPromotion =
@@ -42,7 +47,31 @@ export function ProductDetail({ product }: ProductDetailProps) {
       price,
       category: category?.name,
     });
-  }, [product.id, product.name, price, category?.name]);
+    addRecentlyViewed({
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      promotionalPrice: product.promotionalPrice,
+      images: product.images,
+      category: product.category,
+      stock: product.stock,
+      sizes: product.sizes,
+      colors: product.colors,
+    });
+  }, [
+    product.id,
+    product.name,
+    product.price,
+    product.promotionalPrice,
+    product.images,
+    product.category,
+    product.stock,
+    product.sizes,
+    product.colors,
+    category?.name,
+    price,
+    addRecentlyViewed,
+  ]);
 
   const handleAddToCart = async () => {
     if (soldOut || product.sizes.length === 0) return;
@@ -250,6 +279,23 @@ export function ProductDetail({ product }: ProductDetailProps) {
           >
             <ShoppingCart size={18} aria-hidden="true" />
             Adicionar ao carrinho
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              toggle(product.id);
+              showToast(favorite ? "Removido dos favoritos" : "Adicionado aos favoritos");
+            }}
+            aria-pressed={favorite}
+            className={`mt-3 flex w-full max-w-md items-center justify-center gap-2 rounded-xl border py-3.5 text-sm font-bold uppercase tracking-wider transition-colors ${
+              favorite
+                ? "border-brand bg-brand/10 text-brand"
+                : "border-graphite-border text-neutral-300 hover:border-brand hover:text-brand"
+            }`}
+          >
+            <Heart size={18} className={favorite ? "fill-brand" : ""} />
+            {favorite ? "Salvo nos favoritos" : "Adicionar aos favoritos"}
           </button>
         </div>
       </div>

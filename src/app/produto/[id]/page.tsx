@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { getProductById } from "@/lib/products";
+import { getProductById, getRelatedProducts } from "@/lib/products";
 import { siteConfig } from "@/lib/site";
 import { Container } from "@/components/ui/Container";
 import { ProductDetail } from "@/components/products/ProductDetail";
+import { RelatedProducts } from "@/components/products/RelatedProducts";
+import { RecentlyViewedProducts } from "@/components/products/RecentlyViewedProducts";
 
 type ProductPageProps = {
   params: Promise<{ id: string }>;
@@ -52,11 +54,17 @@ export default async function ProductPage({ params }: ProductPageProps) {
     notFound();
   }
 
+  const related = await getRelatedProducts(product);
+
   return (
-    <section className="bg-ink py-12 sm:py-16">
-      <Container>
-        <ProductDetail product={product} />
-      </Container>
-    </section>
+    <>
+      <section className="bg-ink py-12 sm:py-16">
+        <Container>
+          <ProductDetail product={product} />
+        </Container>
+      </section>
+      <RelatedProducts products={related} />
+      <RecentlyViewedProducts />
+    </>
   );
 }

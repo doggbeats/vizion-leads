@@ -3,6 +3,8 @@ import { Bebas_Neue, Inter } from "next/font/google";
 import { siteConfig } from "@/lib/site";
 import { CartProvider } from "@/lib/cart";
 import { SessionProvider } from "@/lib/session";
+import { FavoritesProvider } from "@/lib/favorites";
+import { RecentlyViewedProvider } from "@/lib/recently-viewed";
 import { ToastProvider } from "@/components/ui/toast";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
@@ -13,7 +15,7 @@ import { FloatingWhatsApp } from "@/components/layout/FloatingWhatsApp";
 import { MetaPageView } from "@/components/analytics/MetaPixel";
 import "./globals.css";
 
-const META_PIXEL_ID = "941509875374620";
+const META_PIXEL_ID = "1370326161424627";
 
 const metaPixelScript = `
 !function(f,b,e,v,n,t,s)
@@ -165,15 +167,19 @@ export default function RootLayout({
         <CartProvider>
           <ToastProvider>
             <SessionProvider>
-              <PromoBar />
-              <Navbar />
-              <main id="main-content" className="flex-1">
-                {children}
-              </main>
-              <Footer />
-              <FloatingWhatsApp />
-              <AccessibilityWidget />
-              <VLibras />
+              <FavoritesProvider>
+                <RecentlyViewedProvider>
+                  <PromoBar />
+                  <Navbar />
+                  <main id="main-content" className="flex-1">
+                    {children}
+                  </main>
+                  <Footer />
+                  <FloatingWhatsApp />
+                  <AccessibilityWidget />
+                  <VLibras />
+                </RecentlyViewedProvider>
+              </FavoritesProvider>
             </SessionProvider>
           </ToastProvider>
         </CartProvider>

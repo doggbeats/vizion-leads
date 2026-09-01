@@ -17,7 +17,9 @@ import {
   UserRound,
   X,
 } from "lucide-react";
-import { categories } from "@/lib/catalog";
+import { categories, getCategoryBySlug } from "@/lib/catalog";
+import { formatCurrency } from "@/lib/format";
+import type { Product } from "@/lib/types";
 import { useCart } from "@/lib/cart";
 import { useSession } from "@/lib/session";
 
@@ -64,6 +66,8 @@ export function Navbar() {
   const [productsOpen, setProductsOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<Product[]>([]);
+  const [searching, setSearching] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const { user, refresh } = useSession();
@@ -96,6 +100,34 @@ export function Navbar() {
     window.addEventListener("keydown", handleKey);
     return () => window.removeEventListener("keydown", handleKey);
   }, []);
+
+  useEffect(() => {
+    const trimmed = searchQuery.trim();
+    if (!searchOpen || trimmed.length < 2) {
+      return;
+    }
+
+    let active = true;
+    const timeout = window.setTimeout(async () => {
+      setSearching(true);
+      try {
+        const response = await fetch(`/api/search?q=${encodeURIComponent(trimmed)}`);
+        const data = await response.json().catch(() => ({}));
+        if (active && searchQuery.trim() === trimmed) {
+          setSearchResults(data.products ?? []);
+        }
+      } catch {
+        if (active) setSearchResults([]);
+      } finally {
+        if (active) setSearching(false);
+      }
+    }, 250);
+
+    return () => {
+      active = false;
+      window.clearTimeout(timeout);
+    };
+  }, [searchQuery, searchOpen]);
 
   async function handleLogout() {
     await fetch("/api/logout", { method: "POST" });
@@ -362,10 +394,10 @@ export function Navbar() {
       {/* Search Bar Overlay */}
       <div
         className={`overflow-hidden transition-all duration-300 ease-in-out ${
-          searchOpen ? "max-h-20 opacity-100" : "max-h-0 opacity-0"
+          searchOpen ? "max-h-[28rem] opacity-100" : "max-h-0 opacity-0"
         }`}
       >
-        <div className="border-t border-white/[0.05] bg-black/60 backdrop-blur-2xl">
+        <div className="border-t border-white/[0.05] bg-black/90 backdrop-blur-2xl">
           <form
             onSubmit={handleSearch}
             className="mx-auto flex max-w-7xl items-center gap-3 px-5 py-3 sm:px-8 lg:px-10"
@@ -375,14 +407,93 @@ export function Navbar() {
               ref={searchInputRef}
               type="text"
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => {
+                const val = e.target.value;
+                setSearchQuery(val);
+                if (val.trim().length < 2) {
+                  setSearchResults([]);
+                  setSearching(false);
+                }
+              }}
               placeholder="Buscar produtos..."
               className="flex-1 bg-transparent text-[13px] tracking-wide text-white placeholder-[#555] outline-none"
             />
+            {searching ? (
+              <span className="h-3 w-3 animate-spin rounded-full border-2 border-brand border-t-transparent" />
+            ) : null}
             <kbd className="hidden rounded-md border border-white/10 bg-white/[0.04] px-2 py-0.5 text-[10px] text-[#555] sm:inline">
               ESC
             </kbd>
           </form>
+
+          <div className="mx-auto max-w-7xl border-t border-white/[0.04] px-5 pb-4 sm:px-8 lg:px-10">
+            <p className="py-3 text-[10px] font-bold uppercase tracking-[0.25em] text-[#555]">
+              Resultados da busca
+            </p>
+            <ul className="-mx-2 max-h-64 space-y-1 overflow-y-auto px-2">
+              {searchResults.map((result) => {
+                const hasPromo =
+                  result.promotionalPrice !== undefined &&
+                  result.promotionalPrice < result.price;
+                const p = hasPromo ? result.promotionalPrice! : result.price;
+                return (
+                  <li key={result.id}>
+                    <Link
+                      href={`/produto/${result.id}`}
+                      onClick={() => {
+                        setSearchOpen(false);
+                        setSearchQuery("");
+                        setSearchResults([]);
+                      }}
+                      className="flex items-center gap-3 rounded-xl px-2 py-2 transition-colors hover:bg-white/[0.04]"
+                    >
+                      <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-lg bg-graphite-light">
+                        <Image
+                          src={result.images[0]}
+                          alt=""
+                          fill
+                          sizes="40px"
+                          className="object-cover"
+                        />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm text-white">
+                          {result.name}
+                        </p>
+                        <p className="text-[11px] uppercase tracking-wider text-[#666]">
+                          {getCategoryBySlug(result.category)?.name ??
+                            result.category}
+                        </p>
+                      </div>
+                      <span className="shrink-0 text-sm font-semibold text-brand">
+                        {formatCurrency(p)}
+                      </span>
+                    </Link>
+                  </li>
+                );
+              })}
+              {searchQuery.trim().length >= 2 && searchResults.length === 0 && !searching ? (
+                <li className="px-2 py-4 text-sm text-neutral-500">
+                  Nenhum produto encontrado para{" "}
+                  <span className="text-neutral-300">&ldquo;{searchQuery.trim()}&rdquo;</span>
+                </li>
+              ) : null}
+              {searchQuery.trim().length < 2 ? (
+                <li className="px-2 py-4 text-sm text-neutral-500">
+                  Digite ao menos 2 caracteres para buscar.
+                </li>
+              ) : null}
+            </ul>
+            {searchResults.length > 0 ? (
+              <button
+                type="button"
+                onClick={handleSearch}
+                className="mt-1 w-full rounded-xl border border-brand/20 bg-brand/[0.07] px-4 py-2.5 text-[11px] font-bold uppercase tracking-[0.15em] text-brand transition-colors hover:bg-brand/[0.12]"
+              >
+                Ver todos os resultados para &ldquo;{searchQuery.trim()}&rdquo;
+              </button>
+            ) : null}
+          </div>
         </div>
       </div>
     </header>

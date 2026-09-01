@@ -3,12 +3,13 @@
 import { useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { ShoppingCart, Eye, Tag } from "lucide-react";
+import { ShoppingCart, Eye, Tag, Heart } from "lucide-react";
 import type { Product } from "@/lib/types";
 import { getCategoryBySlug } from "@/lib/catalog";
 import { formatCurrency } from "@/lib/format";
 import { useCart } from "@/lib/cart";
 import { useSession } from "@/lib/session";
+import { useFavorites } from "@/lib/favorites";
 import { useToast } from "@/components/ui/toast";
 import { Badge } from "@/components/ui/Badge";
 import { getColorHex, getColorLabel } from "@/lib/colors";
@@ -22,11 +23,13 @@ type ProductCardProps = {
 export function ProductCard({ product }: ProductCardProps) {
   const { addItem } = useCart();
   const { user } = useSession();
+  const { isFavorite, toggle } = useFavorites();
   const { showToast } = useToast();
   const router = useRouter();
   const [quickViewOpen, setQuickViewOpen] = useState(false);
   const [selectedSize, setSelectedSize] = useState(product.sizes[0] ?? "");
   const [selectedColor, setSelectedColor] = useState(product.colors?.[0] ?? "");
+  const favorite = isFavorite(product.id);
 
   const category = getCategoryBySlug(product.category);
   const hasPromotion =
@@ -113,6 +116,30 @@ export function ProductCard({ product }: ProductCardProps) {
             Esgotado
           </span>
         ) : null}
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            toggle(product.id);
+            showToast(favorite ? "Removido dos favoritos" : "Adicionado aos favoritos");
+          }}
+          aria-label={
+            favorite
+              ? `Remover ${product.name} dos favoritos`
+              : `Adicionar ${product.name} aos favoritos`
+          }
+          aria-pressed={favorite}
+          className={`absolute left-3 top-3 z-10 flex h-9 w-9 items-center justify-center rounded-full border backdrop-blur transition-all duration-300 ${
+            favorite
+              ? "border-brand bg-brand text-ink"
+              : "border-white/10 bg-black/40 text-white hover:border-brand hover:text-brand"
+          }`}
+        >
+          <Heart
+            size={16}
+            className={favorite ? "fill-ink" : ""}
+          />
+        </button>
         <span className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
           <span className="rounded-full bg-brand px-4 py-2 text-xs font-bold uppercase tracking-wider text-ink">
             Comprar

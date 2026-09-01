@@ -16,7 +16,7 @@ export function FloatingPromo() {
 
   return (
     <div className="fixed inset-x-0 bottom-0 z-50 sm:bottom-3">
-      <div className="relative mx-2 mb-2 max-w-[480px] overflow-hidden rounded-xl border border-graphite-border bg-graphite shadow-xl shadow-black/50 sm:mx-auto sm:rounded-2xl sm:mb-0">
+      <div className="relative mx-2 mb-2 max-w-[560px] overflow-hidden rounded-xl border border-graphite-border bg-graphite shadow-xl shadow-black/50 sm:mx-auto sm:rounded-2xl sm:mb-0">
         <button
           type="button"
           onClick={() => setVisible(false)}
@@ -28,10 +28,10 @@ export function FloatingPromo() {
 
         <Link href="/cadastro" className="block">
           <Image
-            src="/images/banner_sorteio.jpg"
-            alt="Sorteio VIZION STORE"
-            width={1024}
-            height={968}
+            src="/images/5%off.png"
+            alt="5% OFF VIZION STORE"
+            width={1693}
+            height={929}
             className="w-full h-auto"
             priority
           />

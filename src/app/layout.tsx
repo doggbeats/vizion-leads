@@ -12,6 +12,7 @@ import { VLibras } from "@/components/accessibility/VLibras";
 import { AccessibilityWidget } from "@/components/accessibility/AccessibilityWidget";
 import { PromoBar } from "@/components/layout/PromoBar";
 import { FloatingWhatsApp } from "@/components/layout/FloatingWhatsApp";
+import { FloatingPromo } from "@/components/home/FloatingPromo";
 import { MetaPageView } from "@/components/analytics/MetaPixel";
 import "./globals.css";
 
@@ -176,6 +177,7 @@ export default function RootLayout({
                   </main>
                   <Footer />
                   <FloatingWhatsApp />
+                  <FloatingPromo />
                   <AccessibilityWidget />
                   <VLibras />
                 </RecentlyViewedProvider>
